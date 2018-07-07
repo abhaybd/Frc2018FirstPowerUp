@@ -79,9 +79,9 @@ public class TrcPidDrive
 
     private final String instanceName;
     private final TrcDriveBase driveBase;
-    private final TrcPidController xPidCtrl;
-    private final TrcPidController yPidCtrl;
-    private final TrcPidController turnPidCtrl;
+    private final TrcController xPidCtrl;
+    private final TrcController yPidCtrl;
+    private final TrcController turnPidCtrl;
     private final TrcTaskMgr.TaskObject pidDriveTaskObj;
     private TrcWarpSpace warpSpace = null;
     private StuckWheelHandler stuckWheelHandler = null;
@@ -185,7 +185,7 @@ public class TrcPidDrive
      *
      * @return X PID controller.
      */
-    public TrcPidController getXPidCtrl()
+    public TrcController getXPidCtrl()
     {
         final String funcName = "getXPidCtrl";
 
@@ -204,7 +204,7 @@ public class TrcPidDrive
      *
      * @return Y PID controller.
      */
-    public TrcPidController getYPidCtrl()
+    public TrcController getYPidCtrl()
     {
         final String funcName = "getYPidCtrl";
 
@@ -223,7 +223,7 @@ public class TrcPidDrive
      *
      * @return Turn PID controller.
      */
-    public TrcPidController getTurnPidCtrl()
+    public TrcController getTurnPidCtrl()
     {
         final String funcName = "getTurnPidCtrl";
 
@@ -411,7 +411,13 @@ public class TrcPidDrive
 
         if (turnPidCtrl != null)
         {
-            turnPidCtrl.setTarget(turnTarget, warpSpace);
+            if(turnPidCtrl instanceof TrcPidController)
+            {
+                ((TrcPidController)turnPidCtrl).setTarget(turnTarget, warpSpace);
+            } else
+            {
+                turnPidCtrl.setTarget(turnTarget);
+            }
         }
 
         if (event != null)

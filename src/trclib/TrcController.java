@@ -10,6 +10,8 @@ public interface TrcController
 
     double getTarget();
 
+    double getOutput();
+
     double getError();
 
     void printInfo(TrcDbgTrace tracer, double timestamp, TrcRobotBattery battery);
