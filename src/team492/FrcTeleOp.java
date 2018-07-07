@@ -167,7 +167,7 @@ public class FrcTeleOp implements TrcRobot.RobotMode
 
         if (robot.elevator.elevator.isActive())
         {
-            robot.elevator.elevatorPidCtrl.printPidInfo(robot.globalTracer, elapsedTime, robot.battery);
+            robot.elevator.elevatorPidCtrl.printInfo(robot.globalTracer, elapsedTime, robot.battery);
             robot.globalTracer.traceInfo(
                 funcName, "elevatorLimitSwitches=%b/%b, talonCurrent=%.3f, pdpElevatorCurrent=%.3f",
                 robot.elevator.elevatorMotor.isLowerLimitSwitchActive(),

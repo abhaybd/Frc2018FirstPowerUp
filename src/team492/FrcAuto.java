@@ -254,14 +254,14 @@ public class FrcAuto implements TrcRobot.RobotMode
 
             if (robot.pidDrive.isActive())
             {
-                robot.encoderXPidCtrl.printPidInfo(robot.globalTracer, elapsedTime, robot.battery);
-                robot.encoderYPidCtrl.printPidInfo(robot.globalTracer, elapsedTime, robot.battery);
-                robot.gyroTurnPidCtrl.printPidInfo(robot.globalTracer, elapsedTime, robot.battery);
+                robot.encoderXPidCtrl.printInfo(robot.globalTracer, elapsedTime, robot.battery);
+                robot.encoderYPidCtrl.printInfo(robot.globalTracer, elapsedTime, robot.battery);
+                robot.gyroTurnPidCtrl.printInfo(robot.globalTracer, elapsedTime, robot.battery);
             }
 
             if (robot.elevator.elevator.isActive())
             {
-                robot.elevator.elevatorPidCtrl.printPidInfo(robot.globalTracer, elapsedTime, robot.battery);
+                robot.elevator.elevatorPidCtrl.printInfo(robot.globalTracer, elapsedTime, robot.battery);
                 robot.globalTracer.traceInfo(funcName, "Elevator limit switch: %b/%b",
                     robot.elevator.elevatorMotor.isLowerLimitSwitchActive(),
                     robot.elevator.elevatorMotor.isUpperLimitSwitchActive());

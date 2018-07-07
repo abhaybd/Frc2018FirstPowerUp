@@ -32,7 +32,7 @@ import hallib.HalDashboard;
  * This class implements a PID controller. A PID controller takes a target set point and an input from a feedback
  * device to calculate the output power of an effector usually a motor or a set of motors.
  */
-public class TrcPidController
+public class TrcPidController implements TrcController
 {
     protected static final String moduleName = "TrcPidController";
     protected static final boolean debugEnabled = false;
@@ -220,9 +220,9 @@ public class TrcPidController
      * @param timestamp specifies the timestamp to be printed.
      * @param battery specifies the battery object to get battery info, can be null if not provided.
      */
-    public void printPidInfo(TrcDbgTrace tracer, double timestamp, TrcRobotBattery battery)
+    public void printInfo(TrcDbgTrace tracer, double timestamp, TrcRobotBattery battery)
     {
-        final String funcName = "printPidInfo";
+        final String funcName = "printInfo";
 
         if (tracer == null)
         {
@@ -246,38 +246,7 @@ public class TrcPidController
 
             tracer.traceInfo(funcName, msg);
         }
-    }   //printPidInfo
-
-    /**
-     * This method prints the PID information to the tracer console. If no tracer is provided, it will attempt to
-     * use the debug tracer in this module but if the debug tracer is not enabled, no output will be produced.
-     *
-     * @param tracer specifies the tracer object to print the PID info to.
-     * @param timestamp specifies the timestamp to be printed.
-     */
-    public void printPidInfo(TrcDbgTrace tracer, double timestamp)
-    {
-        printPidInfo(tracer, timestamp, null);
-    }   //printPidInfo
-
-    /**
-     * This method prints the PID information to the tracer console. If no tracer is provided, it will attempt to
-     * use the debug tracer in this module but if the debug tracer is not enabled, no output will be produced.
-     *
-     * @param tracer specifies the tracer object to print the PID info to.
-     */
-    public void printPidInfo(TrcDbgTrace tracer)
-    {
-        printPidInfo(tracer, 0.0, null);
-    }   //printPidInfo
-
-    /**
-     * This method prints the PID information to the default debug tracer.
-     */
-    public void printPidInfo()
-    {
-        printPidInfo(null, 0.0, null);
-    }   //printPidInfo
+    }   //printInfo
 
     /**
      * This method allows the caller to dynamically enable/disable debug tracing of the output calculation. It is
@@ -819,7 +788,7 @@ public class TrcPidController
 
         if (debugTracer != null)
         {
-            printPidInfo(debugTracer);
+            printInfo(debugTracer);
         }
 
         if (debugEnabled)

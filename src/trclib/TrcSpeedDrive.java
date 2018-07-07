@@ -1,28 +1,28 @@
 package trclib;
 
-public class TrcSpeedController
+public class TrcSpeedDrive
 {
     private String instanceName;
     private TrcDriveBase driveBase;
     private TrcTaskMgr.TaskObject speedTaskObj;
     private TrcPidController xSpeedController, ySpeedController, turnSpeedController;
     private boolean enabled, cancelled;
-    public TrcSpeedController(String instanceName, TrcDriveBase driveBase, TrcPidController ySpeedController)
+    public TrcSpeedDrive(String instanceName, TrcDriveBase driveBase, TrcPidController ySpeedController)
     {
         this(instanceName, driveBase, null, ySpeedController, null);
     }
 
-    public TrcSpeedController(String instanceName, TrcDriveBase driveBase,
-                              TrcPidController ySpeedController,
-                              TrcPidController turnSpeedController)
+    public TrcSpeedDrive(String instanceName, TrcDriveBase driveBase,
+                         TrcPidController ySpeedController,
+                         TrcPidController turnSpeedController)
     {
         this(instanceName, driveBase, null, ySpeedController, turnSpeedController);
     }
 
-    public TrcSpeedController(String instanceName, TrcDriveBase driveBase,
-                              TrcPidController xSpeedController,
-                              TrcPidController ySpeedController,
-                              TrcPidController turnSpeedController)
+    public TrcSpeedDrive(String instanceName, TrcDriveBase driveBase,
+                         TrcPidController xSpeedController,
+                         TrcPidController ySpeedController,
+                         TrcPidController turnSpeedController)
     {
         this.instanceName = instanceName;
         this.driveBase = driveBase;

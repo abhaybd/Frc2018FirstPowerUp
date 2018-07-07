@@ -1026,7 +1026,7 @@ public class TrcPidMotor
     
                     if (msgTracer != null && tracePidInfo)
                     {
-                        pidCtrl.printPidInfo(msgTracer, TrcUtil.getCurrentTime(), battery);
+                        pidCtrl.printInfo(msgTracer, TrcUtil.getCurrentTime(), battery);
                     }
                 }
             }

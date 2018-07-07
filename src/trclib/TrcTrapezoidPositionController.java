@@ -2,7 +2,7 @@ package trclib;
 
 import java.util.function.Supplier;
 
-public class TrcTrapezoidPositionController
+public class TrcTrapezoidPositionController implements TrcController
 {
     private enum Phase
     {
@@ -44,6 +44,18 @@ public class TrcTrapezoidPositionController
     {
         this.startTime = TrcUtil.getCurrentTimeMillis();
         currentPhase = Phase.RAMP_UP;
+    }
+
+    public double getTarget() {
+        return target;
+    }
+
+    public double getError() {
+        return target - positionSupplier.get();
+    }
+
+    public void printInfo(TrcDbgTrace tracer, double timestamp, TrcRobotBattery battery) {
+        // TODO: Add some logging code
     }
 
     public boolean isOnTarget()

@@ -793,9 +793,9 @@ public class TrcPidDrive
             if (msgTracer != null && tracePidInfo)
             {
                 double currTime = TrcUtil.getCurrentTime();
-                if (xPidCtrl != null) xPidCtrl.printPidInfo(msgTracer, currTime, battery);
-                if (yPidCtrl != null) yPidCtrl.printPidInfo(msgTracer, currTime, battery);
-                if (turnPidCtrl != null) turnPidCtrl.printPidInfo(msgTracer, currTime, battery);
+                if (xPidCtrl != null) xPidCtrl.printInfo(msgTracer, currTime, battery);
+                if (yPidCtrl != null) yPidCtrl.printInfo(msgTracer, currTime, battery);
+                if (turnPidCtrl != null) turnPidCtrl.printInfo(msgTracer, currTime, battery);
             }
         }
         else if (taskType == TaskType.STOP_TASK)
