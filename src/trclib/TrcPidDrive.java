@@ -661,7 +661,7 @@ public class TrcPidDrive
      * @param taskType specifies the type of task being run.
      * @param runMode specifies the competition mode that is about to end (e.g. Autonomous, TeleOp, Test).
      */
-    public void pidDriveTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
+    private void pidDriveTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
     {
         final String funcName = "pidDriveTask";
 
