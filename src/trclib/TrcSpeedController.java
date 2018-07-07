@@ -78,6 +78,9 @@ public class TrcSpeedController
     private void stop()
     {
         setTaskEnabled(false);
+        if(xSpeedController != null) xSpeedController.reset();
+        if(ySpeedController != null) ySpeedController.reset();
+        if(turnSpeedController != null) turnSpeedController.reset();
         driveBase.stop();
     }
 

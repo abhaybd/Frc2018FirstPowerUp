@@ -37,8 +37,18 @@ public class TrcTrapezoidPositionController
     public void setTarget(double target)
     {
         this.target = target;
+        reset();
+    }
+
+    public void reset()
+    {
         this.startTime = TrcUtil.getCurrentTimeMillis();
         currentPhase = Phase.RAMP_UP;
+    }
+
+    public boolean isOnTarget()
+    {
+        return currentPhase == Phase.DONE;
     }
 
     public double getOutput()
