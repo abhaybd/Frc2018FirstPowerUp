@@ -81,7 +81,7 @@ public class TrcPidDrive
     private final TrcDriveBase driveBase;
     private final TrcController xPidCtrl;
     private final TrcController yPidCtrl;
-    private final TrcController turnPidCtrl;
+    private final TrcPidController turnPidCtrl;
     private final TrcTaskMgr.TaskObject pidDriveTaskObj;
     private TrcWarpSpace warpSpace = null;
     private StuckWheelHandler stuckWheelHandler = null;
@@ -411,13 +411,7 @@ public class TrcPidDrive
 
         if (turnPidCtrl != null)
         {
-            if(turnPidCtrl instanceof TrcPidController)
-            {
-                ((TrcPidController)turnPidCtrl).setTarget(turnTarget, warpSpace);
-            } else
-            {
-                turnPidCtrl.setTarget(turnTarget);
-            }
+            turnPidCtrl.setTarget(turnTarget, warpSpace);
         }
 
         if (event != null)
