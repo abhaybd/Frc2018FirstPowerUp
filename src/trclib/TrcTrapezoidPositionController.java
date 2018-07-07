@@ -6,6 +6,7 @@ public class TrcTrapezoidPositionController implements TrcController
 {
     private enum Phase
     {
+        START,
         RAMP_UP,
         MAINTAIN_SPEED,
         RAMP_DOWN,
@@ -42,8 +43,8 @@ public class TrcTrapezoidPositionController implements TrcController
 
     public void reset()
     {
-        this.startTime = TrcUtil.getCurrentTimeMillis();
-        currentPhase = Phase.RAMP_UP;
+        currentPhase = Phase.START;
+        target = 0.0;
     }
 
     public double getTarget() {
@@ -77,12 +78,14 @@ public class TrcTrapezoidPositionController implements TrcController
             currentPhase = Phase.RAMP_DOWN;
         }
 
-        long currentTime = TrcUtil.getCurrentTimeMillis();
-        long timeDifference = currentTime - startTime;
+        long timeDifference;
 
         switch(currentPhase)
         {
+            case START:
+                startTime = TrcUtil.getCurrentTimeMillis();
             case RAMP_UP:
+                timeDifference = TrcUtil.getCurrentTimeMillis() - startTime;
                 speedController.setTarget(((double)timeDifference/1000.0) * maxAcceleration);
                 if(speed >= maxSpeed)
                 {
@@ -93,6 +96,7 @@ public class TrcTrapezoidPositionController implements TrcController
                 speedController.setTarget(maxSpeed);
                 return speedController.getOutput();
             case RAMP_DOWN:
+                timeDifference = TrcUtil.getCurrentTimeMillis() - startTime;
                 speedController.setTarget(maxSpeed + ((double)timeDifference/1000.0 * -maxAcceleration));
                 if(speed <= speedTolerance)
                 {
