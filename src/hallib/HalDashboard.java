@@ -47,6 +47,7 @@ public class HalDashboard extends SmartDashboard
 
     private static HalDashboard instance = null;
     private static String[] display = new String[MAX_NUM_TEXTLINES];
+    private static HalDashboardKey[] keys = new HalDashboardKey[display.length];
 
     /**
      * Constructor: Creates an instance of the object.
@@ -77,19 +78,62 @@ public class HalDashboard extends SmartDashboard
 
     /**
      * This method displays a formatted message to the display on the Driver Station.
+     * This will temporarily reserve the key and then release it.
      *
-     * @param lineNum specifies the line number on the display.
+     * @param line specifies the line number on the display.
      * @param format specifies the format string.
      * @param args specifies variable number of substitution arguments.
      */
-    public void displayPrintf(int lineNum, String format, Object... args)
+    public void displayPrintf(int line, String format, Object... args)
     {
-        if (lineNum >= 0 && lineNum < display.length)
+        try
+        {
+            HalDashboardKey key = requestKey(line);
+            displayPrintf(key, format, args);
+            key.release();
+        } catch(IllegalArgumentException e)
+        {
+            if(debugEnabled)
+            {
+                dbgTrace.traceInfo(moduleName + ".displayPrintf", "Key: " + line + " already reserved!");
+            }
+        }
+    }
+
+    /**
+     * This method displays a formatted message to the display on the Driver Station.
+     *
+     * @param key key for line to display message on
+     * @param format specifies the format string
+     * @param args specifies variable number of substitution arguments
+     */
+    public void displayPrintf(HalDashboardKey key, String format, Object... args)
+    {
+        int lineNum = key.getLine();
+        if(keys[lineNum] != key || !key.isReserved()) throw new IllegalArgumentException("Invalid key!");
+        if (lineNum < display.length)
         {
             display[lineNum] = String.format(format, args);
             SmartDashboard.putString(String.format(displayKeyFormat, lineNum), display[lineNum]);
         }
     }   //displayPrintf
+
+    public HalDashboardKey requestKey()
+    {
+        for(HalDashboardKey key:keys)
+        {
+            if(!key.isReserved()) return requestKey(key.getLine());
+        }
+        throw new IllegalArgumentException("No keys available!");
+    }
+
+    public HalDashboardKey requestKey(int lineNum)
+    {
+        HalDashboardKey key = keys[lineNum];
+        if(key.isReserved()) throw new IllegalArgumentException("lineNum: " + lineNum + " is already reserved!");
+        key.reserve();
+        return key;
+    }
 
     /**
      * This method clears all the display lines.
@@ -107,6 +151,7 @@ public class HalDashboard extends SmartDashboard
         for (int i = 0; i < display.length; i++)
         {
             display[i] = "";
+            keys[i] = new HalDashboardKey(i);
         }
         refreshDisplay();
     }   //clearDisplay
