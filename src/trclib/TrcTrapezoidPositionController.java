@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2018 Titan Robotics Club (http://www.titanrobotics.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 package trclib;
 
 import java.util.function.Supplier;
@@ -21,6 +43,7 @@ public class TrcTrapezoidPositionController implements TrcController
     private TrcPidController speedController;
     private Phase currentPhase;
     private double speedTolerance;
+    private double coastSpeed; // Actual speed achieved at end of MAINTAIN_SPEED
 
     public TrcTrapezoidPositionController(String instanceName, double maxAcceleration, double maxSpeed,
                                           Supplier<Double> positionSupplier, Supplier<Double> speedSupplier,
@@ -37,8 +60,8 @@ public class TrcTrapezoidPositionController implements TrcController
 
     public void setTarget(double target)
     {
-        this.target = target;
         reset();
+        this.target = target;
     }
 
     public void reset()
@@ -64,6 +87,10 @@ public class TrcTrapezoidPositionController implements TrcController
         return currentPhase == Phase.DONE;
     }
 
+    /**
+     * Calculate power output. This should be called frequently, as the power output will change as the profile is followed.
+     * @return power output
+     */
     public double getOutput()
     {
         double speed = speedSupplier.get();
@@ -72,10 +99,11 @@ public class TrcTrapezoidPositionController implements TrcController
         if(position >= target)
         {
             currentPhase = Phase.DONE;
-        } else if(target - position <= stoppingDistance(speed))
+        } else if(currentPhase != Phase.RAMP_DOWN && currentPhase != Phase.DONE && target - position <= stoppingDistance(speed))
         {
             startTime = TrcUtil.getCurrentTimeMillis();
             currentPhase = Phase.RAMP_DOWN;
+            coastSpeed = speed;
         }
 
         long timeDifference;
@@ -84,10 +112,12 @@ public class TrcTrapezoidPositionController implements TrcController
         {
             case START:
                 startTime = TrcUtil.getCurrentTimeMillis();
+                currentPhase = Phase.RAMP_UP;
             case RAMP_UP:
                 timeDifference = TrcUtil.getCurrentTimeMillis() - startTime;
-                speedController.setTarget(((double)timeDifference/1000.0) * maxAcceleration);
-                if(speed >= maxSpeed)
+                double targetSpeed = ((double)timeDifference/1000.0) * maxAcceleration;
+                speedController.setTarget(targetSpeed);
+                if(targetSpeed >= maxSpeed)
                 {
                     currentPhase = Phase.MAINTAIN_SPEED;
                 }
@@ -97,7 +127,7 @@ public class TrcTrapezoidPositionController implements TrcController
                 return speedController.getOutput();
             case RAMP_DOWN:
                 timeDifference = TrcUtil.getCurrentTimeMillis() - startTime;
-                speedController.setTarget(maxSpeed + ((double)timeDifference/1000.0 * -maxAcceleration));
+                speedController.setTarget(coastSpeed + ((double)timeDifference/1000.0 * -maxAcceleration));
                 if(speed <= speedTolerance)
                 {
                     currentPhase = Phase.DONE;
@@ -105,7 +135,8 @@ public class TrcTrapezoidPositionController implements TrcController
                 return speedController.getOutput();
             default:
             case DONE:
-                return 0.0;
+                speedController.setTarget(0.0);
+                return speedController.getOutput();
         }
     }
 
