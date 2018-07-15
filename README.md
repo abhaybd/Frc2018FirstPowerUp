@@ -1,1 +1,3 @@
 # Frc2018FirstPowerUp
+
+This branch implements trapezoidal velocity control for position control. There's gotta be a better name for it. Anyway, it makes velocity follow a trapezoidal profile, where the integration of that profile is the target displacement. That way, it has constrained and controlled motion which is pretty good, ya feel? Also, it creates a standardized TrcController interface, so that way trapezoidal control can be swapped in and out with PidControl, since they have some overlap where trapezoidal control would work better.
