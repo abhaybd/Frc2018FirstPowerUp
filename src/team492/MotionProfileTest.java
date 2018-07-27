@@ -19,7 +19,7 @@ public class MotionProfileTest implements TrcRobot.RobotCommand
     private static final double kP = 1.194; //1.275;
     private static final double kI = 0.0;
     private static final double kD = 0.0899; //0.0956;
-    private static final double kF = 0.8525; // TODO: Calculate this according to Phoenix docs
+    private static final double kF = 1.12111; // TODO: Calculate this according to Phoenix docs
 
     private static final boolean WRITE_CSV = true;
 
@@ -73,7 +73,7 @@ public class MotionProfileTest implements TrcRobot.RobotCommand
                 {
                     fileOut = new PrintStream(new FileOutputStream(new File(dir, timeStamp + "_profilelog.csv")));
                     fileOut.println("Time," + "TargetPosLeft,ActualPosLeft,TargetVelLeft,ActualVelLeft,"
-                        + "TargetPosRight,ActualPosRight,TargetVelRight,ActualVelRight");
+                        + "TargetPosRight,ActualPosRight,TargetVelRight,ActualVelRight,VoltageLeft,VoltageRight");
                 }
             }
             catch (IOException e)
@@ -125,9 +125,11 @@ public class MotionProfileTest implements TrcRobot.RobotCommand
         if (fileOut != null && isActive)
         {
             String line = String
-                .format("%.2f," + "%.2f,%.2f,%.2f,%.2f," + "%.2f,%.2f,%.2f,%.2f", TrcUtil.getCurrentTime() - startTime,
+                .format("%.2f," + "%.2f,%.2f,%.2f,%.2f," + "%.2f,%.2f,%.2f,%.2f," + "%.2f,%.2f", TrcUtil.getCurrentTime() - startTime,
                     targetPosLeft, actualPosLeft, targetVelLeft, actualVelLeft, targetPosRight, actualPosRight,
-                    targetVelRight, actualVelRight);
+                    targetVelRight, actualVelRight, 
+                    robot.leftFrontWheel.motor.getMotorOutputPercent(),
+                    robot.rightFrontWheel.motor.getMotorOutputPercent());
             fileOut.println(line);
         }
 
