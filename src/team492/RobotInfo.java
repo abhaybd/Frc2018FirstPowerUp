@@ -194,7 +194,8 @@ public class RobotInfo
     // 3-28-2018: 0.01557713764963807531380753138075, 0.02, 0.0, 0.0015   -- competition robot
     // 0.01557713764963807531380753138075
     // 0.0168605528551718
-    public static final double ENCODER_Y_INCHES_PER_COUNT       = 0.0156900035659099; //0.0172358143438125;
+    // don't worry this is for tank drive im not crazy i swear
+    public static final double ENCODER_Y_INCHES_PER_COUNT       = 0.0167539267; //0.0156900035659099; //0.0172358143438125;
     public static final double ENCODER_Y_KP                     = 0.02;
     public static final double ENCODER_Y_KI                     = 0.0;
     public static final double ENCODER_Y_KD                     = 0.0015;

@@ -1,5 +1,5 @@
 {
-  "dividerPosition": 0.14143007360672977,
+  "dividerPosition": 0.14157894736842105,
   "tabPane": [
     {
       "title": "FMSInfo",
@@ -506,6 +506,118 @@
               "colorWhenTrue": "#7CFC00FF",
               "colorWhenFalse": "#8B0000FF"
             }
+          },
+          "16,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/TargetPosLeft",
+              "_title": "TargetPosLeft"
+            }
+          },
+          "18,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/ActualPosRight",
+              "_title": "ActualPosRight"
+            }
+          },
+          "20,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/TargetVelRight",
+              "_title": "TargetVelRight"
+            }
+          },
+          "22,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/ActualVelRight",
+              "_title": "ActualVelRight"
+            }
+          },
+          "24,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/ActualVelLeft",
+              "_title": "ActualVelLeft"
+            }
+          },
+          "26,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/ActualPosLeft",
+              "_title": "ActualPosLeft"
+            }
+          },
+          "28,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/TargetPosRight",
+              "_title": "TargetPosRight"
+            }
+          },
+          "30,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/TargetVelLeft",
+              "_title": "TargetVelLeft"
+            }
+          },
+          "32,0": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Test/PNEUMATICS",
+              "_title": "PNEUMATICS",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "36,0": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Test/EffectiveDriveBaseWidth",
+              "_title": "EffectiveDriveBaseWidth"
+            }
           }
         }
       }
@@ -619,14 +731,7 @@
             "content": {
               "_type": "Camera Stream",
               "_source0": "camera_server://cam0",
-              "_title": "cam0",
-              "showControls": true,
-              "showCrosshair": true,
-              "crosshairColor": "#FFFFFFFF",
-              "compression": 0.0,
-              "fps": -1,
-              "imageWidth": -1,
-              "imageHeight": -1
+              "_title": "cam0"
             }
           }
         }
@@ -937,6 +1042,305 @@
               "_type": "Boolean Box",
               "_source0": "network_table:///SmartDashboard/Diagnostics/Pneumatics charged",
               "_title": "Pneumatics charged",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "24,0": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/lfEncoder",
+              "_title": "lfEncoder",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "28,0": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/rfEncoder",
+              "_title": "rfEncoder",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "32,0": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/lrEncoder",
+              "_title": "lrEncoder",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "36,0": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/rrEncoder",
+              "_title": "rrEncoder",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "40,0": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/lfMotorErrors",
+              "_title": "lfMotorErrors",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "44,0": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/rfMotorErrors",
+              "_title": "rfMotorErrors",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "20,2": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/lrMotorErrors",
+              "_title": "lrMotorErrors",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "24,4": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/rrMotorErrors",
+              "_title": "rrMotorErrors",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "28,4": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/Elevator.PositionUnchanged",
+              "_title": "Elevator.PositionUnchanged",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "32,4": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/Elevator.MotorErrors",
+              "_title": "Elevator.MotorErrors",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "36,4": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/Elevator.LowerLimitSwitch",
+              "_title": "Elevator.LowerLimitSwitch",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "40,4": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/team492.OnBoardDiagnostics$$Lambda$43/13545893@16d8735.StuckTest",
+              "_title": "team492.OnBoardDiagnostics$$Lambda$43/13545893@16d8735.StuckTest",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "44,4": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/Elevator.UpperLimitSwitch",
+              "_title": "Elevator.UpperLimitSwitch",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "24,8": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/team492.OnBoardDiagnostics$$Lambda$45/12347508@1e0a01f.StuckTest",
+              "_title": "team492.OnBoardDiagnostics$$Lambda$45/12347508@1e0a01f.StuckTest",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "28,8": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/cubeProximitySensor",
+              "_title": "cubeProximitySensor",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "32,8": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/Pneumatics.RegulatedPressure",
+              "_title": "Pneumatics.RegulatedPressure",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "36,8": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/Pneumatics.TankPressure",
+              "_title": "Pneumatics.TankPressure",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "40,8": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/leftGrabber",
+              "_title": "leftGrabber",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "44,8": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/rightGrabber",
+              "_title": "rightGrabber",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "0,11": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/team492.OnBoardDiagnostics$$Lambda$45/117930@1c7db30.StuckTest",
+              "_title": "team492.OnBoardDiagnostics$$Lambda$45/117930@1c7db30.StuckTest",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "4,11": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/team492.OnBoardDiagnostics$$Lambda$47/23325099@1531931.StuckTest",
+              "_title": "team492.OnBoardDiagnostics$$Lambda$47/23325099@1531931.StuckTest",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "8,11": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/leftSonar",
+              "_title": "leftSonar",
+              "colorWhenTrue": "#7CFC00FF",
+              "colorWhenFalse": "#8B0000FF"
+            }
+          },
+          "12,11": {
+            "size": [
+              4,
+              4
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Diagnostics/rightSonar",
+              "_title": "rightSonar",
               "colorWhenTrue": "#7CFC00FF",
               "colorWhenFalse": "#8B0000FF"
             }
