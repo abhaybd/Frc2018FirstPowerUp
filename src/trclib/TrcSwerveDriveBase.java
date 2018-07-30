@@ -17,6 +17,8 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     private TrcGyro gyro;
     private MotorPowerMapper motorPowerMapper;
     private double lfStallStartTime, rfStallStartTime, lrStallStartTime, rrStallStartTime;
+    private double maxOutput;
+
     public TrcSwerveDriveBase(String instanceName, double wheelBaseWidth, double wheelBaseLength, TrcGyro gyro,
         TrcSwerveModule lfModule, TrcSwerveModule rfModule, TrcSwerveModule lrModule, TrcSwerveModule rrModule)
     {
@@ -117,6 +119,12 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         rrModule.setAngle(0.0);
 
         resetPosition();
+    }
+
+    @Override
+    public void setMaxOutput(double maxOutput)
+    {
+        this.maxOutput = maxOutput;
     }
 
     @Override
@@ -238,10 +246,10 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         double rrPower = magnitude(a, c);
 
         double[] normalizedPowers = normalize(lfPower, rfPower, lrPower, rrPower);
-        lfPower = normalizedPowers[0];
-        rfPower = normalizedPowers[1];
-        lrPower = normalizedPowers[2];
-        rrPower = normalizedPowers[3];
+        lfPower = TrcUtil.clipRange(normalizedPowers[0], -maxOutput, maxOutput);
+        rfPower = TrcUtil.clipRange(normalizedPowers[1], -maxOutput, maxOutput);
+        lrPower = TrcUtil.clipRange(normalizedPowers[2], -maxOutput, maxOutput);
+        rrPower = TrcUtil.clipRange(normalizedPowers[3], -maxOutput, maxOutput);
 
         lfModule.setAngle(lfAngle);
         rfModule.setAngle(rfAngle);

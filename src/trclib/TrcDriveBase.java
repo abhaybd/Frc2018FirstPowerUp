@@ -55,6 +55,8 @@ public interface TrcDriveBase
 
     void setMotorPowerMapper(MotorPowerMapper mapper);
 
+    void setMaxOutput(double maxOutput);
+
     void stop();
 
     void resetPosition(boolean hardware);
@@ -85,6 +87,11 @@ public interface TrcDriveBase
     {
         return isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) &&
             isStalled(MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
+    }
+
+    default boolean supportsDriveMode(DriveMode driveMode)
+    {
+        return getSupportedDriveModes().contains(driveMode);
     }
 
     default void resetPosition()
