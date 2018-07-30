@@ -25,15 +25,11 @@ package team492;
 import frclib.FrcJoystick;
 import trclib.TrcRobot;
 import trclib.TrcRobot.RunMode;
+import trclib.TrcDriveBase.DriveMode;
 
 public class FrcTeleOp implements TrcRobot.RobotMode
 {
     private static final String moduleName = "FrcTeleOp";
-
-    private enum DriveMode
-    {
-        MECANUM_MODE, ARCADE_MODE, TANK_MODE
-    } // enum DriveMode
 
     protected Robot robot;
 

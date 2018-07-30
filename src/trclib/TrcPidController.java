@@ -423,6 +423,16 @@ public class TrcPidController
     }   //setTargetTolerance
 
     /**
+     * Get the current target tolerance
+     *
+     * @return Returns the current target tolerance
+     */
+    public double getTargetTolerance()
+    {
+        return this.tolerance;
+    }   //getTargetTolerance
+
+    /**
      * This method sets a range limit on the target set point.
      *
      * @param minTarget specifies the target set point lower range limit.
@@ -829,5 +839,24 @@ public class TrcPidController
 
         return output;
     }   //getOutput
+
+    /**
+     * Create a new instance of TrcPidController with the same settings as this instance
+     *
+     * @param instanceName Instance name for the new copy
+     * @param supplier Input for the new controller
+     * @return New instance of pid controller
+     */
+    public TrcPidController copy(String instanceName, Supplier<Double> supplier)
+    {
+        TrcPidController controller = new TrcPidController(instanceName, pidCoefficients, tolerance, settlingTime, supplier);
+        controller.setInverted(inverted);
+        controller.setAbsoluteSetPoint(absSetPoint);
+        controller.setNoOscillation(noOscillation);
+        controller.setTargetRange(minTarget, maxTarget);
+        controller.setOutputRange(minOutput, maxOutput);
+        controller.setOutputLimit(outputLimit);
+        return controller;
+    }
 
 }   //class TrcPidController
