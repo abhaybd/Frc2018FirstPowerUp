@@ -271,6 +271,16 @@ public class TrcCommonDriveBase implements TrcDriveBase
     }   //setSensitivity
 
     /**
+     * This method gets the sensitivity for the drive() method.
+     *
+     * @return sensitivity value.
+     */
+    public double getSensitivity()
+    {
+        return sensitivity;
+    }
+
+    /**
      * This method sets the maximum output value of the motor.
      *
      * @param maxOutput specifies the maximum output value.

@@ -53,22 +53,67 @@ public interface TrcDriveBase
 
     // TODO: Add more methods to make this useful (comparable to TrcCommonDriveBase)
 
+    /**
+     * This method returns the number of motors in the drive train.
+     *
+     * @return number of motors.
+     */
     int getNumMotors();
 
+    /**
+     * This method sets the maximum output value of the motor.
+     *
+     * @param maxOutput specifies the maximum output value.
+     */
     void setMaxOutput(double maxOutput);
 
+    /**
+     * This methods stops the drive base.
+     */
     void stop();
 
+    /**
+     * This method resets the drive base position odometry. This includes the motor encoders, the gyro heading and
+     * all the cached values.
+     *
+     * @param hardware specifies true for resetting hardware position, false for resetting software position.
+     */
     void resetPosition(boolean hardware);
 
+    /**
+     * This method returns the gyro heading of the drive base in degrees.
+     *
+     * @return gyro heading.
+     */
     double getHeading();
 
+    /**
+     * This method returns the drive base turn speed.
+     *
+     * @return turn speed.
+     */
     double getTurnSpeed();
 
+    /**
+     * This method returns the Y position in scaled unit.
+     *
+     * @return Y position.
+     */
     double getYPosition();
 
+    /**
+     * This method returns the drive base speed in the Y direction.
+     *
+     * @return Y speed.
+     */
     double getYSpeed();
 
+    /**
+     * This method sets the Y position scale. The raw position from the encoder is in encoder counts. By setting the
+     * scale factor, one could make getPosition to return unit in inches, for example.
+     *
+     * @param scale specifies the Y position scale.
+     */
     void setYPositionScale(double scale);
 
     void setBrakeMode(boolean enabled);
@@ -89,51 +134,100 @@ public interface TrcDriveBase
             isStalled(MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
     }
 
+    /**
+     * Get a list of all the supported drive modes.
+     *
+     * @return A list containing all the drive modes that this drive base supports.
+     */
     default List<DriveMode> getSupportedDriveModes()
     {
         return Arrays.asList(DriveMode.CURVE_MODE, DriveMode.ARCADE_MODE, DriveMode.TANK_MODE);
     }
 
+    /**
+     * Does this drive base instance support this drive mode?
+     *
+     * @param driveMode DriveMode object to check.
+     * @return Whether the drive mode is supported.
+     */
     default boolean supportsDriveMode(DriveMode driveMode)
     {
         return getSupportedDriveModes().contains(driveMode);
     }
 
-    default void setMotorPowerMapper(MotorPowerMapper mapper)
+    /**
+     * This method sets a motor power mapper. If null, it unsets the previously set mapper.
+     *
+     * @param motorPowerMapper specifies the motor power mapper. If null, clears the mapper.
+     */
+    default void setMotorPowerMapper(MotorPowerMapper motorPowerMapper)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
 
+    /**
+     * This method sets the sensitivity for the drive() method.
+     *
+     * @param sensitivity specifies the sensitivity value.
+     */
     default void setSensitivity(double sensitivity)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
 
+    /**
+     * This method gets the sensitivity for the drive() method.
+     *
+     * @return sensitivity value.
+     */
     default double getSensitivity()
     {
         throw new UnsupportedOperationException("Not supported!");
     }
 
+    /**
+     * This method resets the drive base position odometry. This includes the motor encoders, the gyro heading and
+     * all the cached values.
+     */
     default void resetPosition()
     {
         resetPosition(false);
     }
 
+    /**
+     * This method returns the X position in scaled unit.
+     *
+     * @return X position.
+     */
     default double getXPosition()
     {
         throw new UnsupportedOperationException("Not supported!");
     }
 
+    /**
+     * This method returns the drive base speed in the X direction.
+     *
+     * @return X speed.
+     */
     default double getXSpeed()
     {
         throw new UnsupportedOperationException("Not supported!");
     }
 
+    /**
+     * This method sets the X position scale. The raw position from the encoder is in encoder counts. By setting the
+     * scale factor, one could make getPosition to return unit in inches, for example.
+     *
+     * @param scale specifies the X position scale.
+     */
     default void setXPositionScale(double scale)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
 
+    /**
+     * Stop the drivebase and reset position and cached values.
+     */
     default void reset()
     {
         stop();
