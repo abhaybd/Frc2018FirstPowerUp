@@ -32,7 +32,7 @@ import java.util.List;
  * consist of 2 to 6 motors. It supports tank drive, arcade drive and mecanum drive with motor stalled detection and
  * inverted drive mode. It also supports gyro assisted drive to keep robot driving straight.
  */
-public class TrcCommonDriveBase implements TrcDriveBase
+public class TrcCommonDriveBase extends TrcDriveBase
 {
     private static final String moduleName = "TrcCommonDriveBase";
     private static final boolean debugEnabled = false;

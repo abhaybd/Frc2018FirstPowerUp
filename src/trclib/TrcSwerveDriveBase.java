@@ -3,7 +3,7 @@ package trclib;
 import java.util.Arrays;
 import java.util.List;
 
-public class TrcSwerveDriveBase implements TrcDriveBase
+public class TrcSwerveDriveBase extends TrcDriveBase
 {
     /**
      *  Programmed according to the this whitepaper: http://www.chiefdelphi.com/media/papers/download/3028
@@ -17,8 +17,6 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     private TrcGyro gyro;
     private MotorPowerMapper motorPowerMapper;
     private double lfStallStartTime, rfStallStartTime, lrStallStartTime, rrStallStartTime;
-    private double maxOutput;
-    private double sensitivity;
 
     public TrcSwerveDriveBase(String instanceName, double wheelBaseWidth, double wheelBaseLength, TrcGyro gyro,
         TrcSwerveModule lfModule, TrcSwerveModule rfModule, TrcSwerveModule lrModule, TrcSwerveModule rrModule)
@@ -36,7 +34,7 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         this.lrModule = lrModule;
         this.rrModule = rrModule;
 
-        this.positionScale = 1;
+        this.positionScale = 1; // Init it to something
 
         motorPowerMapper = this::defaultMotorPowerMapper;
 
@@ -59,26 +57,9 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     }
 
     @Override
-    public void setSensitivity(double sensitivity)
-    {
-        this.sensitivity = sensitivity;
-    }
-
-    @Override
-    public double getSensitivity()
-    {
-        return sensitivity;
-    }
-
-    @Override
     public void setMotorPowerMapper(MotorPowerMapper mapper)
     {
         motorPowerMapper = (mapper != null ? mapper : this::defaultMotorPowerMapper);
-    }
-
-    private double defaultMotorPowerMapper(double power, double speed)
-    {
-        return power;
     }
 
     @Override
@@ -138,12 +119,6 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         rrModule.setAngle(0.0);
 
         resetPosition();
-    }
-
-    @Override
-    public void setMaxOutput(double maxOutput)
-    {
-        this.maxOutput = maxOutput;
     }
 
     @Override

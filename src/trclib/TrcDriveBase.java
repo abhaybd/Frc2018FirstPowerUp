@@ -3,9 +3,8 @@ package trclib;
 import java.util.Arrays;
 import java.util.List;
 
-public interface TrcDriveBase
+public abstract class TrcDriveBase
 {
-    // TODO: Convert this to an abstract class so it can hold variables like sensitivity and implement basic driving
     enum DriveMode
     {
         CURVE_MODE,
@@ -51,26 +50,20 @@ public interface TrcDriveBase
         double translateMotorPower(double power, double speed);
     }   //interface MotorPowerMapper
 
-    // TODO: Add more methods to make this useful (comparable to TrcCommonDriveBase)
+    protected double sensitivity;
+    protected double maxOutput;
 
     /**
      * This method returns the number of motors in the drive train.
      *
      * @return number of motors.
      */
-    int getNumMotors();
-
-    /**
-     * This method sets the maximum output value of the motor.
-     *
-     * @param maxOutput specifies the maximum output value.
-     */
-    void setMaxOutput(double maxOutput);
+    abstract int getNumMotors();
 
     /**
      * This methods stops the drive base.
      */
-    void stop();
+    abstract void stop();
 
     /**
      * This method resets the drive base position odometry. This includes the motor encoders, the gyro heading and
@@ -78,35 +71,35 @@ public interface TrcDriveBase
      *
      * @param hardware specifies true for resetting hardware position, false for resetting software position.
      */
-    void resetPosition(boolean hardware);
+    abstract void resetPosition(boolean hardware);
 
     /**
      * This method returns the gyro heading of the drive base in degrees.
      *
      * @return gyro heading.
      */
-    double getHeading();
+    abstract double getHeading();
 
     /**
      * This method returns the drive base turn speed.
      *
      * @return turn speed.
      */
-    double getTurnSpeed();
+    abstract double getTurnSpeed();
 
     /**
      * This method returns the Y position in scaled unit.
      *
      * @return Y position.
      */
-    double getYPosition();
+    abstract double getYPosition();
 
     /**
      * This method returns the drive base speed in the Y direction.
      *
      * @return Y speed.
      */
-    double getYSpeed();
+    abstract double getYSpeed();
 
     /**
      * This method sets the Y position scale. The raw position from the encoder is in encoder counts. By setting the
@@ -114,13 +107,25 @@ public interface TrcDriveBase
      *
      * @param scale specifies the Y position scale.
      */
-    void setYPositionScale(double scale);
+    abstract void setYPositionScale(double scale);
 
-    void setBrakeMode(boolean enabled);
+    /**
+     * This method enables/disables brake mode of the drive base.
+     *
+     * @param enabled specifies true to enable brake mode, false to disable it.
+     */
+    abstract void setBrakeMode(boolean enabled);
 
-    boolean isStalled(MotorType motorType, double stallTime);
+    /**
+     * This method checks whether this specific motor is stalled.
+     *
+     * @param motorType The motor to check.
+     * @param stallTime How many seconds of stalling to count as stalling?
+     * @return Whether this motor has stalled for <parameter>stallTime</parameter> seconds
+     */
+    abstract boolean isStalled(MotorType motorType, double stallTime);
 
-    void resetStallTimer();
+    abstract void resetStallTimer();
 
     /**
      * This method checks if all motors on the drive base have been stalled for at least the specified stallTime.
@@ -128,10 +133,42 @@ public interface TrcDriveBase
      * @param stallTime specifies the stall time.
      * @return true if the drive base is stalled, false otherwise.
      */
-    default boolean isStalled(double stallTime)
+    public boolean isStalled(double stallTime)
     {
         return isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) &&
             isStalled(MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
+    }
+
+    /**
+     * This method sets the maximum output value of the motor.
+     *
+     * @param maxOutput specifies the maximum output value.
+     */
+    public void setMaxOutput(double maxOutput)
+    {
+        this.maxOutput = maxOutput;
+    }
+
+    /**
+     * This method returns the maximum output value of the motor.
+     *
+     * @return maximum output value.
+     */
+    public double getMaxOutput()
+    {
+        return maxOutput;
+    }
+
+    /**
+     * Default motor power mapper. Doesn't take speed into account at all.
+     *
+     * @param power Desired power. This will be returned.
+     * @param speed Current speed. Ignored.
+     * @return equal to <parameter>power</parameter>.
+     */
+    protected double defaultMotorPowerMapper(double power, double speed)
+    {
+        return power;
     }
 
     /**
@@ -139,7 +176,7 @@ public interface TrcDriveBase
      *
      * @return A list containing all the drive modes that this drive base supports.
      */
-    default List<DriveMode> getSupportedDriveModes()
+    public List<DriveMode> getSupportedDriveModes()
     {
         return Arrays.asList(DriveMode.CURVE_MODE, DriveMode.ARCADE_MODE, DriveMode.TANK_MODE);
     }
@@ -150,7 +187,7 @@ public interface TrcDriveBase
      * @param driveMode DriveMode object to check.
      * @return Whether the drive mode is supported.
      */
-    default boolean supportsDriveMode(DriveMode driveMode)
+    public boolean supportsDriveMode(DriveMode driveMode)
     {
         return getSupportedDriveModes().contains(driveMode);
     }
@@ -160,7 +197,7 @@ public interface TrcDriveBase
      *
      * @param motorPowerMapper specifies the motor power mapper. If null, clears the mapper.
      */
-    default void setMotorPowerMapper(MotorPowerMapper motorPowerMapper)
+    public void setMotorPowerMapper(MotorPowerMapper motorPowerMapper)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
@@ -170,9 +207,9 @@ public interface TrcDriveBase
      *
      * @param sensitivity specifies the sensitivity value.
      */
-    default void setSensitivity(double sensitivity)
+    public void setSensitivity(double sensitivity)
     {
-        throw new UnsupportedOperationException("Not supported!");
+        this.sensitivity = sensitivity;
     }
 
     /**
@@ -180,16 +217,16 @@ public interface TrcDriveBase
      *
      * @return sensitivity value.
      */
-    default double getSensitivity()
+    public double getSensitivity()
     {
-        throw new UnsupportedOperationException("Not supported!");
+        return sensitivity;
     }
 
     /**
      * This method resets the drive base position odometry. This includes the motor encoders, the gyro heading and
      * all the cached values.
      */
-    default void resetPosition()
+    public void resetPosition()
     {
         resetPosition(false);
     }
@@ -199,7 +236,7 @@ public interface TrcDriveBase
      *
      * @return X position.
      */
-    default double getXPosition()
+    public double getXPosition()
     {
         throw new UnsupportedOperationException("Not supported!");
     }
@@ -209,7 +246,7 @@ public interface TrcDriveBase
      *
      * @return X speed.
      */
-    default double getXSpeed()
+    public double getXSpeed()
     {
         throw new UnsupportedOperationException("Not supported!");
     }
@@ -220,7 +257,7 @@ public interface TrcDriveBase
      *
      * @param scale specifies the X position scale.
      */
-    default void setXPositionScale(double scale)
+    public void setXPositionScale(double scale)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
@@ -228,7 +265,7 @@ public interface TrcDriveBase
     /**
      * Stop the drivebase and reset position and cached values.
      */
-    default void reset()
+    public void reset()
     {
         stop();
         resetPosition();
@@ -247,7 +284,7 @@ public interface TrcDriveBase
      *              and wheel base w.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    default void drive(double magnitude, double curve, boolean inverted)
+    public void drive(double magnitude, double curve, boolean inverted)
     {
         double leftOutput;
         double rightOutput;
@@ -290,7 +327,7 @@ public interface TrcDriveBase
      * @param magnitude specifies the magnitude value.
      * @param curve specifies the curve value.
      */
-    default void drive(double magnitude, double curve)
+    public void drive(double magnitude, double curve)
     {
         drive(magnitude, curve, false);
     }   //drive
@@ -303,7 +340,7 @@ public interface TrcDriveBase
      * @param rightPower specifies right power value.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    void tankDrive(double leftPower, double rightPower, boolean inverted);
+    abstract void tankDrive(double leftPower, double rightPower, boolean inverted);
 
     /**
      * This method implements tank drive where leftPower controls the left motors and right power controls the right
@@ -312,7 +349,7 @@ public interface TrcDriveBase
      * @param leftPower specifies left power value.
      * @param rightPower specifies right power value.
      */
-    default void tankDrive(double leftPower, double rightPower)
+    public void tankDrive(double leftPower, double rightPower)
     {
         tankDrive(leftPower, rightPower, false);
     }   //tankDrive
@@ -325,7 +362,7 @@ public interface TrcDriveBase
      * @param turnPower specifies the turn power value.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    default void arcadeDrive(double drivePower, double turnPower, boolean inverted)
+    public void arcadeDrive(double drivePower, double turnPower, boolean inverted)
     {
         double leftPower;
         double rightPower;
@@ -352,7 +389,7 @@ public interface TrcDriveBase
      * @param drivePower specifies the drive power value.
      * @param turnPower specifies the turn power value.
      */
-    default void arcadeDrive(double drivePower, double turnPower)
+    public void arcadeDrive(double drivePower, double turnPower)
     {
         arcadeDrive(drivePower, turnPower, false);
     }   //arcadeDrive
@@ -368,7 +405,7 @@ public interface TrcDriveBase
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      * @param gyroAngle specifies the gyro angle to maintain.
      */
-    default void mecanumDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
+    public void mecanumDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
@@ -383,7 +420,7 @@ public interface TrcDriveBase
      * @param rotation specifies the rotating power.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    default void mecanumDrive_Cartesian(double x, double y, double rotation, boolean inverted)
+    public void mecanumDrive_Cartesian(double x, double y, double rotation, boolean inverted)
     {
         mecanumDrive_Cartesian(x, y, rotation, inverted, 0.0);
     }   //mecanumDrive_Cartesian
@@ -396,7 +433,7 @@ public interface TrcDriveBase
      * @param y specifies the y power.
      * @param rotation specifies the rotating power.
      */
-    default void mecanumDrive_Cartesian(double x, double y, double rotation)
+    public void mecanumDrive_Cartesian(double x, double y, double rotation)
     {
         mecanumDrive_Cartesian(x, y, rotation, false, 0.0);
     }   //mecanumDrive_Cartesian
@@ -410,7 +447,7 @@ public interface TrcDriveBase
      * @param rotation specifies the rotation power.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    default void mecanumDrive_Polar(double magnitude, double direction, double rotation, boolean inverted)
+    public void mecanumDrive_Polar(double magnitude, double direction, double rotation, boolean inverted)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
@@ -423,7 +460,7 @@ public interface TrcDriveBase
      * @param direction specifies the direction in degrees.
      * @param rotation specifies the rotation power.
      */
-    default void mecanumDrive_Polar(double magnitude, double direction, double rotation)
+    public void mecanumDrive_Polar(double magnitude, double direction, double rotation)
     {
         mecanumDrive_Polar(magnitude, direction, rotation, false);
     }   //mecanumDrive_Polar
@@ -441,7 +478,7 @@ public interface TrcDriveBase
      * @param gyroAngle specifies the current gyro reading. Used to drive with field reference frame. Leave 0.0 for
      *                  robot reference frame.
      */
-    default void swerveDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
+    public void swerveDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
         throw new UnsupportedOperationException("Not supported!");
     }
@@ -455,7 +492,7 @@ public interface TrcDriveBase
      * @param rotation specifies the rotating power.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    default void swerveDrive_Cartesian(double x, double y, double rotation, boolean inverted)
+    public void swerveDrive_Cartesian(double x, double y, double rotation, boolean inverted)
     {
         swerveDrive_Cartesian(x, y, rotation, inverted, 0.0);
     }
@@ -468,7 +505,7 @@ public interface TrcDriveBase
      * @param y specifies the y power.
      * @param rotation specifies the rotating power.
      */
-    default void swerveDrive_Cartesian(double x, double y, double rotation)
+    public void swerveDrive_Cartesian(double x, double y, double rotation)
     {
         swerveDrive_Cartesian(x, y, rotation, false);
     }
@@ -484,7 +521,7 @@ public interface TrcDriveBase
      * @param gyroAngle specifies the current gyro reading. Used to drive with field reference frame. Leave 0.0 for
      *                  robot reference frame.
      */
-    default void swerveDrive_Polar(double magnitude, double direction, double rotation, boolean inverted, double gyroAngle)
+    public void swerveDrive_Polar(double magnitude, double direction, double rotation, boolean inverted, double gyroAngle)
     {
         direction = Math.toRadians(direction);
         double x = Math.cos(direction) * magnitude;
@@ -501,7 +538,7 @@ public interface TrcDriveBase
      * @param rotation specifies the rotation power.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    default void swerveDrive_Polar(double magnitude, double direction, double rotation, boolean inverted)
+    public void swerveDrive_Polar(double magnitude, double direction, double rotation, boolean inverted)
     {
         swerveDrive_Polar(magnitude, direction, rotation, inverted, 0.0);
     }
@@ -514,7 +551,7 @@ public interface TrcDriveBase
      * @param direction specifies the direction in degrees.
      * @param rotation specifies the rotation power.
      */
-    default void swerveDrive_Polar(double magnitude, double direction, double rotation)
+    public void swerveDrive_Polar(double magnitude, double direction, double rotation)
     {
         swerveDrive_Polar(magnitude, direction, rotation, false, 0.0);
     }
