@@ -41,13 +41,6 @@ public class TrcCommonDriveBase implements TrcDriveBase
     private static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;
     private static final TrcDbgTrace.MsgLevel msgLevel = TrcDbgTrace.MsgLevel.INFO;
 
-    private static final DriveMode[] supportedModes = new DriveMode[] {
-        DriveMode.CURVE_MODE,
-        DriveMode.ARCADE_MODE,
-        DriveMode.TANK_MODE,
-        DriveMode.MECANUM_MODE
-    };
-
     private TrcDbgTrace dbgTrace = null;
 
     private static double DEF_SENSITIVITY = 0.5;
@@ -246,7 +239,7 @@ public class TrcCommonDriveBase implements TrcDriveBase
 
     public List<DriveMode> getSupportedDriveModes()
     {
-        return Arrays.asList(supportedModes);
+        return Arrays.asList(DriveMode.CURVE_MODE, DriveMode.ARCADE_MODE, DriveMode.TANK_MODE, DriveMode.MECANUM_MODE);
     }
 
     /**

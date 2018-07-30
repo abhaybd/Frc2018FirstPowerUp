@@ -12,12 +12,13 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     private final String instanceName;
     private TrcSwerveModule lfModule, rfModule, lrModule, rrModule;
     private double wheelBaseWidth, wheelBaseLength, wheelBaseDiagonal;
-    private double heading, turnSpeed, yPosition, ySpeed, xPosition, xSpeed; // TODO: Add a postperiodic task to set these values
+    private double heading, turnSpeed, yPosition, ySpeed, xPosition, xSpeed;
     private double positionScale;
     private TrcGyro gyro;
     private MotorPowerMapper motorPowerMapper;
     private double lfStallStartTime, rfStallStartTime, lrStallStartTime, rrStallStartTime;
     private double maxOutput;
+    private double sensitivity;
 
     public TrcSwerveDriveBase(String instanceName, double wheelBaseWidth, double wheelBaseLength, TrcGyro gyro,
         TrcSwerveModule lfModule, TrcSwerveModule rfModule, TrcSwerveModule lrModule, TrcSwerveModule rrModule)
@@ -48,7 +49,25 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     @Override
     public List<DriveMode> getSupportedDriveModes()
     {
-        return Arrays.asList(DriveMode.SWERVE_MODE);
+        return Arrays.asList(DriveMode.CURVE_MODE, DriveMode.ARCADE_MODE, DriveMode.TANK_MODE, DriveMode.SWERVE_MODE);
+    }
+
+    @Override
+    public int getNumMotors()
+    {
+        return 4; // Don't count the turn motors
+    }
+
+    @Override
+    public void setSensitivity(double sensitivity)
+    {
+        this.sensitivity = sensitivity;
+    }
+
+    @Override
+    public double getSensitivity()
+    {
+        return sensitivity;
     }
 
     @Override
@@ -199,6 +218,36 @@ public class TrcSwerveDriveBase implements TrcDriveBase
             default:
                 return false;
         }
+    }
+
+    @Override
+    public void tankDrive(double leftPower, double rightPower, boolean inverted)
+    {
+        lfModule.setAngle(0.0);
+        rfModule.setAngle(0.0);
+        lrModule.setAngle(0.0);
+        rrModule.setAngle(0.0);
+
+        leftPower = motorPowerMapper.translateMotorPower(leftPower,
+            positionScale * average(lfModule.getDriveSpeed(), lrModule.getDriveSpeed()));
+        rightPower = motorPowerMapper.translateMotorPower(rightPower,
+            positionScale * average(rfModule.getDriveSpeed(), rrModule.getDriveSpeed()));
+
+        if(inverted)
+        {
+            double temp = leftPower;
+            leftPower = -rightPower;
+            rightPower = -temp;
+        }
+
+        leftPower = TrcUtil.clipRange(leftPower, -maxOutput, maxOutput);
+        rightPower = TrcUtil.clipRange(rightPower, -maxOutput, maxOutput);
+
+        lfModule.setDrivePower(leftPower);
+        lrModule.setDrivePower(leftPower);
+
+        rfModule.setDrivePower(rightPower);
+        rrModule.setDrivePower(rightPower);
     }
 
     @Override

@@ -49,6 +49,7 @@ import frclib.FrcRobotBattery;
 import hallib.HalDashboard;
 import team492.PixyVision.TargetInfo;
 import trclib.TrcCommonDriveBase;
+import trclib.TrcDriveBase;
 import trclib.TrcEmic2TextToSpeech.Voice;
 import trclib.TrcLidarLite;
 import trclib.TrcMaxbotixSonarArray;
@@ -157,7 +158,7 @@ public class Robot extends FrcRobotBase
     public FrcCANTalon leftRearWheel;
     public FrcCANTalon rightFrontWheel;
     public FrcCANTalon rightRearWheel;
-    public TrcCommonDriveBase driveBase;
+    public TrcDriveBase driveBase;
 
     public TrcPidController encoderXPidCtrl;
     public TrcPidController encoderYPidCtrl;

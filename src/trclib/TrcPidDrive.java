@@ -78,7 +78,7 @@ public class TrcPidDrive
     private static final double DEF_BEEP_DURATION       = 0.2;          //in seconds
 
     private final String instanceName;
-    private final TrcCommonDriveBase driveBase;
+    private final TrcDriveBase driveBase;
     private final TrcPidController xPidCtrl;
     private final TrcPidController yPidCtrl;
     private final TrcPidController turnPidCtrl;
@@ -111,7 +111,7 @@ public class TrcPidDrive
      * @param turnPidCtrl specifies the PID controller for turn.
      */
     public TrcPidDrive(
-        final String instanceName, final TrcCommonDriveBase driveBase,
+        final String instanceName, final TrcDriveBase driveBase,
         final TrcPidController xPidCtrl, final TrcPidController yPidCtrl, final TrcPidController turnPidCtrl)
     {
         if (debugEnabled)
@@ -723,7 +723,13 @@ public class TrcPidDrive
 
             if (maintainHeading)
             {
-                driveBase.mecanumDrive_Cartesian(manualX, manualY, turnPower, false, 0.0);
+                if(driveBase.supportsDriveMode(TrcDriveBase.DriveMode.SWERVE_MODE))
+                {
+                    driveBase.swerveDrive_Cartesian(manualX, manualY, turnPower, false, 0.0);
+                } else if(driveBase.supportsDriveMode(TrcDriveBase.DriveMode.MECANUM_MODE))
+                {
+                    driveBase.mecanumDrive_Cartesian(manualX, manualY, turnPower, false, 0.0);
+                }
             }
             else if (expired || stalled || turnOnTarget && (turnOnly || xOnTarget && yOnTarget))
             {
@@ -736,13 +742,9 @@ public class TrcPidDrive
                         notifyEvent = null;
                     }
                 }
-                else if (xPidCtrl != null)
-                {
-                    driveBase.mecanumDrive_Cartesian(0.0, 0.0, 0.0, false, 0.0);
-                }
                 else
                 {
-                    driveBase.drive(0.0, 0.0);
+                    driveBase.stop();
                 }
             }
             else if (turnOnly)
@@ -779,7 +781,13 @@ public class TrcPidDrive
             }
             else if (xPidCtrl != null)
             {
-                driveBase.mecanumDrive_Cartesian(xPower, yPower, turnPower, false, 0.0);
+                if(driveBase.supportsDriveMode(TrcDriveBase.DriveMode.MECANUM_MODE))
+                {
+                    driveBase.mecanumDrive_Cartesian(xPower, yPower, turnPower, false, 0.0);
+                } else if(driveBase.supportsDriveMode(TrcDriveBase.DriveMode.SWERVE_MODE))
+                {
+                    driveBase.swerveDrive_Cartesian(xPower, yPower, turnPower, false, 0.0);
+                }
             }
             else if (turnMode == TurnMode.IN_PLACE)
             {

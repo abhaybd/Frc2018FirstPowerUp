@@ -1,9 +1,11 @@
 package trclib;
 
+import java.util.Arrays;
 import java.util.List;
 
 public interface TrcDriveBase
 {
+    // TODO: Convert this to an abstract class so it can hold variables like sensitivity and implement basic driving
     enum DriveMode
     {
         CURVE_MODE,
@@ -51,9 +53,7 @@ public interface TrcDriveBase
 
     // TODO: Add more methods to make this useful (comparable to TrcCommonDriveBase)
 
-    List<DriveMode> getSupportedDriveModes();
-
-    void setMotorPowerMapper(MotorPowerMapper mapper);
+    int getNumMotors();
 
     void setMaxOutput(double maxOutput);
 
@@ -89,9 +89,29 @@ public interface TrcDriveBase
             isStalled(MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
     }
 
+    default List<DriveMode> getSupportedDriveModes()
+    {
+        return Arrays.asList(DriveMode.CURVE_MODE, DriveMode.ARCADE_MODE, DriveMode.TANK_MODE);
+    }
+
     default boolean supportsDriveMode(DriveMode driveMode)
     {
         return getSupportedDriveModes().contains(driveMode);
+    }
+
+    default void setMotorPowerMapper(MotorPowerMapper mapper)
+    {
+        throw new UnsupportedOperationException("Not supported!");
+    }
+
+    default void setSensitivity(double sensitivity)
+    {
+        throw new UnsupportedOperationException("Not supported!");
+    }
+
+    default double getSensitivity()
+    {
+        throw new UnsupportedOperationException("Not supported!");
     }
 
     default void resetPosition()
@@ -135,7 +155,39 @@ public interface TrcDriveBase
      */
     default void drive(double magnitude, double curve, boolean inverted)
     {
-        throw new UnsupportedOperationException("Not supported!");
+        double leftOutput;
+        double rightOutput;
+        double sensitivity = getSensitivity();
+
+        if (curve < 0.0)
+        {
+            double value = Math.log(-curve);
+            double ratio = (value - sensitivity)/(value + sensitivity);
+            if (ratio == 0.0)
+            {
+                ratio = 0.0000000001;
+            }
+            leftOutput = magnitude/ratio;
+            rightOutput = magnitude;
+        }
+        else if (curve > 0.0)
+        {
+            double value = Math.log(curve);
+            double ratio = (value - sensitivity)/(value + sensitivity);
+            if (ratio == 0.0)
+            {
+                ratio = 0.0000000001;
+            }
+            leftOutput = magnitude;
+            rightOutput = magnitude/ratio;
+        }
+        else
+        {
+            leftOutput = magnitude;
+            rightOutput = magnitude;
+        }
+
+        tankDrive(leftOutput, rightOutput, inverted);
     }
 
     /**
@@ -157,10 +209,7 @@ public interface TrcDriveBase
      * @param rightPower specifies right power value.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    default void tankDrive(double leftPower, double rightPower, boolean inverted)
-    {
-        throw new UnsupportedOperationException("Not supported!");
-    }
+    void tankDrive(double leftPower, double rightPower, boolean inverted);
 
     /**
      * This method implements tank drive where leftPower controls the left motors and right power controls the right
@@ -184,7 +233,22 @@ public interface TrcDriveBase
      */
     default void arcadeDrive(double drivePower, double turnPower, boolean inverted)
     {
-        throw new UnsupportedOperationException("Not supported!");
+        double leftPower;
+        double rightPower;
+
+        drivePower = TrcUtil.clipRange(drivePower);
+        turnPower = TrcUtil.clipRange(turnPower);
+
+        leftPower = drivePower + turnPower;
+        rightPower = drivePower - turnPower;
+        double maxMag = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+        if (maxMag > 1.0)
+        {
+            leftPower /= maxMag;
+            rightPower /= maxMag;
+        }
+
+        tankDrive(leftPower, rightPower, inverted);
     }
 
     /**
