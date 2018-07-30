@@ -13,6 +13,23 @@ public interface TrcDriveBase
         SWERVE_MODE
     }
 
+    enum MotorType
+    {
+        LEFT_FRONT(0),
+        RIGHT_FRONT(1),
+        LEFT_REAR(2),
+        RIGHT_REAR(3),
+        LEFT_MID(4),
+        RIGHT_MID(5);
+
+        public final int value;
+
+        MotorType(int value)
+        {
+            this.value = value;
+        }
+    }   //enum MotorType
+
     /**
      * This interface is provided by the caller to translate the motor power to actual motor power according to
      * the motor curve. This is useful to linearize the motor performance. This is very useful for many reasons.
@@ -53,6 +70,22 @@ public interface TrcDriveBase
     void setYPositionScale(double scale);
 
     void setBrakeMode(boolean enabled);
+
+    boolean isStalled(MotorType motorType, double stallTime);
+
+    void resetStallTimer();
+
+    /**
+     * This method checks if all motors on the drive base have been stalled for at least the specified stallTime.
+     *
+     * @param stallTime specifies the stall time.
+     * @return true if the drive base is stalled, false otherwise.
+     */
+    default boolean isStalled(double stallTime)
+    {
+        return isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) &&
+            isStalled(MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
+    }
 
     default void resetPosition()
     {

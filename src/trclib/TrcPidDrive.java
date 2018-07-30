@@ -59,7 +59,7 @@ public class TrcPidDrive
          * @param pidDrive specifies this TrcPidDrive instance.
          * @param motorType specifies which wheel in the DriveBase is stuck.
          */
-        void stuckWheel(TrcPidDrive pidDrive, TrcCommonDriveBase.MotorType motorType);
+        void stuckWheel(TrcPidDrive pidDrive, TrcDriveBase.MotorType motorType);
 
     }   //interface StuckWheelHandler
 
@@ -686,25 +686,25 @@ public class TrcPidDrive
             {
                 if (driveBase.getNumMotors() > 2)
                 {
-                    if (driveBase.isStalled(TrcCommonDriveBase.MotorType.LEFT_FRONT, stuckTimeout))
+                    if (driveBase.isStalled(TrcDriveBase.MotorType.LEFT_FRONT, stuckTimeout))
                     {
-                        stuckWheelHandler.stuckWheel(this, TrcCommonDriveBase.MotorType.LEFT_FRONT);
+                        stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.LEFT_FRONT);
                     }
 
-                    if (driveBase.isStalled(TrcCommonDriveBase.MotorType.RIGHT_FRONT, stuckTimeout))
+                    if (driveBase.isStalled(TrcDriveBase.MotorType.RIGHT_FRONT, stuckTimeout))
                     {
-                        stuckWheelHandler.stuckWheel(this, TrcCommonDriveBase.MotorType.RIGHT_FRONT);
+                        stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.RIGHT_FRONT);
                     }
                 }
 
-                if (driveBase.isStalled(TrcCommonDriveBase.MotorType.LEFT_REAR, stuckTimeout))
+                if (driveBase.isStalled(TrcDriveBase.MotorType.LEFT_REAR, stuckTimeout))
                 {
-                    stuckWheelHandler.stuckWheel(this, TrcCommonDriveBase.MotorType.LEFT_REAR);
+                    stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.LEFT_REAR);
                 }
 
-                if (driveBase.isStalled(TrcCommonDriveBase.MotorType.RIGHT_REAR, stuckTimeout))
+                if (driveBase.isStalled(TrcDriveBase.MotorType.RIGHT_REAR, stuckTimeout))
                 {
-                    stuckWheelHandler.stuckWheel(this, TrcCommonDriveBase.MotorType.RIGHT_REAR);
+                    stuckWheelHandler.stuckWheel(this, TrcDriveBase.MotorType.RIGHT_REAR);
                 }
             }
 

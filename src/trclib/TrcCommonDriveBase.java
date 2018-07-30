@@ -50,23 +50,6 @@ public class TrcCommonDriveBase implements TrcDriveBase
 
     private TrcDbgTrace dbgTrace = null;
 
-    public enum MotorType
-    {
-        LEFT_FRONT(0),
-        RIGHT_FRONT(1),
-        LEFT_REAR(2),
-        RIGHT_REAR(3),
-        LEFT_MID(4),
-        RIGHT_MID(5);
-
-        public final int value;
-
-        MotorType(int value)
-        {
-            this.value = value;
-        }
-    }   //enum MotorType
-
     private static double DEF_SENSITIVITY = 0.5;
     private static double DEF_MAX_OUTPUT = 1.0;
 

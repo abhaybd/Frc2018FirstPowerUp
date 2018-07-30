@@ -16,6 +16,7 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     private double positionScale;
     private TrcGyro gyro;
     private MotorPowerMapper motorPowerMapper;
+    private double lfStallStartTime, rfStallStartTime, lrStallStartTime, rrStallStartTime;
     public TrcSwerveDriveBase(String instanceName, double wheelBaseWidth, double wheelBaseLength, TrcGyro gyro,
         TrcSwerveModule lfModule, TrcSwerveModule rfModule, TrcSwerveModule lrModule, TrcSwerveModule rrModule)
     {
@@ -164,6 +165,35 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     }
 
     @Override
+    public void resetStallTimer()
+    {
+        lfStallStartTime = rfStallStartTime = lrStallStartTime = rrStallStartTime = TrcUtil.getCurrentTime();
+    }
+
+    @Override
+    public boolean isStalled(MotorType motorType, double stallTime)
+    {
+        double time = TrcUtil.getCurrentTime();
+        switch(motorType)
+        {
+            case LEFT_FRONT:
+                return time - lfStallStartTime >= stallTime;
+
+            case RIGHT_FRONT:
+                return time - rfStallStartTime >= stallTime;
+
+            case LEFT_REAR:
+                return time - lrStallStartTime >= stallTime;
+
+            case RIGHT_REAR:
+                return time - rrStallStartTime >= stallTime;
+
+            default:
+                return false;
+        }
+    }
+
+    @Override
     public void swerveDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
         x = TrcUtil.clipRange(x);
@@ -274,9 +304,13 @@ public class TrcSwerveDriveBase implements TrcDriveBase
             heading = gyro.getZHeading().value;
             turnSpeed = gyro.getZRotationRate().value;
 
+            double lfPos = lfModule.getPosition();
+            double rfPos = rfModule.getPosition();
+            double lrPos = lrModule.getPosition();
+            double rrPos = rrModule.getPosition();
+
             double averageWheelAngle = average(lfModule.getAngle(), rfModule.getAngle(), lrModule.getAngle(), rrModule.getAngle());
-            double averageWheelPosition = positionScale *
-                average(lfModule.getPosition(), rfModule.getPosition(), lrModule.getPosition(), rrModule.getPosition());
+            double averageWheelPosition = positionScale * average(lfPos, rfPos, lrPos, rrPos);
             double averageWheelSpeed = positionScale *
                 average(lfModule.getDriveSpeed(), rfModule.getDriveSpeed(), lrModule.getDriveSpeed(), rrModule.getDriveSpeed());
 
@@ -285,6 +319,13 @@ public class TrcSwerveDriveBase implements TrcDriveBase
 
             xPosition += averageWheelPosition * Math.cos(Math.toRadians(averageWheelAngle));
             yPosition += averageWheelPosition * Math.sin(Math.toRadians(averageWheelAngle));
+
+            double time = TrcUtil.getCurrentTime();
+
+            if(lfPos != 0 || lfModule.getDrivePower() == 0.0) lfStallStartTime = time;
+            if(rfPos != 0 || rfModule.getDrivePower() == 0.0) rfStallStartTime = time;
+            if(lrPos != 0 || lrModule.getDrivePower() == 0.0) lrStallStartTime = time;
+            if(rrPos != 0 || rrModule.getDrivePower() == 0.0) rrStallStartTime = time;
 
             resetModulePositions();
         }
