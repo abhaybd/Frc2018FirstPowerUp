@@ -67,25 +67,6 @@ public class TrcCommonDriveBase implements TrcDriveBase
         }
     }   //enum MotorType
 
-    /**
-     * This interface is provided by the caller to translate the motor power to actual motor power according to
-     * the motor curve. This is useful to linearize the motor performance. This is very useful for many reasons.
-     * It could allow the drive base to drive straight by translating wheel power to actual torque. It could also
-     * allow us to implement our own ramp rate to limit acceleration and deceleration.
-     */
-    public interface MotorPowerMapper
-    {
-        /**
-         * This method is called to translate the desired motor power to the actual motor power taking into
-         * consideration of the motor torque curve with the current motor speed.
-         *
-         * @param power specifies the desired motor power.
-         * @param speed specifies the current motor speed in the unit of encoder counts per second.
-         * @return resulting motor power.
-         */
-        double translateMotorPower(double power, double speed);
-    }   //interface MotorPowerMapper
-
     private static double DEF_SENSITIVITY = 0.5;
     private static double DEF_MAX_OUTPUT = 1.0;
 

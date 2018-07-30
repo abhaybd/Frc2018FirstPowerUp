@@ -15,6 +15,7 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     private double heading, turnSpeed, yPosition, ySpeed, xPosition, xSpeed; // TODO: Add a postperiodic task to set these values
     private double positionScale;
     private TrcGyro gyro;
+    private MotorPowerMapper motorPowerMapper;
     public TrcSwerveDriveBase(String instanceName, double wheelBaseWidth, double wheelBaseLength, TrcGyro gyro,
         TrcSwerveModule lfModule, TrcSwerveModule rfModule, TrcSwerveModule lrModule, TrcSwerveModule rrModule)
     {
@@ -33,6 +34,8 @@ public class TrcSwerveDriveBase implements TrcDriveBase
 
         this.positionScale = 1;
 
+        motorPowerMapper = this::defaultMotorPowerMapper;
+
         TrcTaskMgr.TaskObject driveBaseTaskObj = TrcTaskMgr.getInstance().createTask(
             instanceName + ".driveBaseTask", this::driveBaseTask);
         driveBaseTaskObj.registerTask(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK);
@@ -43,6 +46,17 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     public List<DriveMode> getSupportedDriveModes()
     {
         return Arrays.asList(DriveMode.SWERVE_MODE);
+    }
+
+    @Override
+    public void setMotorPowerMapper(MotorPowerMapper mapper)
+    {
+        motorPowerMapper = (mapper != null ? mapper : this::defaultMotorPowerMapper);
+    }
+
+    private double defaultMotorPowerMapper(double power, double speed)
+    {
+        return power;
     }
 
     @Override
@@ -141,11 +155,26 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     }
 
     @Override
+    public void setBrakeMode(boolean enabled)
+    {
+        lfModule.setBrakeMode(enabled);
+        rfModule.setBrakeMode(enabled);
+        lrModule.setBrakeMode(enabled);
+        rrModule.setBrakeMode(enabled);
+    }
+
+    @Override
     public void swerveDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
         x = TrcUtil.clipRange(x);
         y = TrcUtil.clipRange(y);
         rotation = TrcUtil.clipRange(rotation);
+
+        if(inverted)
+        {
+            x = -x;
+            y = -y;
+        }
 
         if(gyroAngle != 0)
         {
@@ -189,10 +218,10 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         lrModule.setAngle(lrAngle);
         rrModule.setAngle(rrAngle);
 
-        lfModule.setDrivePower(inverted ? -lfPower : lfPower);
-        rfModule.setDrivePower(inverted ? -rfPower : rfPower);
-        lrModule.setDrivePower(inverted ? -lrPower : lrPower);
-        rrModule.setDrivePower(inverted ? -rrPower : rrPower);
+        lfModule.setDrivePower(motorPowerMapper.translateMotorPower(lfPower, lfModule.getDriveSpeed() * positionScale));
+        rfModule.setDrivePower(motorPowerMapper.translateMotorPower(rfPower, rfModule.getDriveSpeed() * positionScale));
+        lrModule.setDrivePower(motorPowerMapper.translateMotorPower(lrPower, lrModule.getDriveSpeed() * positionScale));
+        rrModule.setDrivePower(motorPowerMapper.translateMotorPower(rrPower, rrModule.getDriveSpeed() * positionScale));
     }
 
     private double magnitude(double a, double b)

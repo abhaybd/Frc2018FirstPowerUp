@@ -59,6 +59,11 @@ public class TrcSwerveModule
         return driveMotor.getPosition();
     }
 
+    public void setBrakeMode(boolean enabled)
+    {
+        driveMotor.setBrakeModeEnabled(enabled);
+    }
+
     /**
      * Stop the turn motor from following the target angle. Call <code>setAngle</code> again to re-enable.
      */
