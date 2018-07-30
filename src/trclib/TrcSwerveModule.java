@@ -18,6 +18,11 @@ public class TrcSwerveModule
         turnTaskObj = TrcTaskMgr.getInstance().createTask(instanceName + ".turnTask", this::turnTask);
     }
 
+    public void resetPosition(boolean hardware)
+    {
+        driveMotor.resetPosition(hardware);
+    }
+
     public void setAngle(double angle)
     {
         setEnabled(true);
@@ -42,6 +47,11 @@ public class TrcSwerveModule
     public double getDrivePower()
     {
         return driveMotor.getPower();
+    }
+
+    public double getDriveSpeed()
+    {
+        return driveMotor.getSpeed();
     }
 
     public double getPosition()

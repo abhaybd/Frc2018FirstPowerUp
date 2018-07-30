@@ -19,13 +19,22 @@ public interface TrcDriveBase
 
     void stop();
 
-    void resetPosition();
+    void resetPosition(boolean hardware);
 
     double getHeading();
+
+    double getTurnSpeed();
 
     double getYPosition();
 
     double getYSpeed();
+
+    void setYPositionScale(double scale);
+
+    default void resetPosition()
+    {
+        resetPosition(false);
+    }
 
     default double getXPosition()
     {
@@ -33,6 +42,11 @@ public interface TrcDriveBase
     }
 
     default double getXSpeed()
+    {
+        throw new UnsupportedOperationException("Not supported!");
+    }
+
+    default void setXPositionScale(double scale)
     {
         throw new UnsupportedOperationException("Not supported!");
     }

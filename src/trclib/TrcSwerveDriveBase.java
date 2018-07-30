@@ -12,8 +12,10 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     private final String instanceName;
     private TrcSwerveModule lfModule, rfModule, lrModule, rrModule;
     private double wheelBaseWidth, wheelBaseLength, wheelBaseDiagonal;
-    private double heading, yPosition, ySpeed; // TODO: Add a postperiodic task to set these values
-    public TrcSwerveDriveBase(String instanceName, double wheelBaseWidth, double wheelBaseLength,
+    private double heading, turnSpeed, yPosition, ySpeed, xPosition, xSpeed; // TODO: Add a postperiodic task to set these values
+    private double positionScale;
+    private TrcGyro gyro;
+    public TrcSwerveDriveBase(String instanceName, double wheelBaseWidth, double wheelBaseLength, TrcGyro gyro,
         TrcSwerveModule lfModule, TrcSwerveModule rfModule, TrcSwerveModule lrModule, TrcSwerveModule rrModule)
     {
         this.instanceName = instanceName;
@@ -22,10 +24,19 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         this.wheelBaseLength = wheelBaseLength;
         this.wheelBaseDiagonal = magnitude(wheelBaseWidth, wheelBaseLength);
 
+        this.gyro = gyro;
+
         this.lfModule = lfModule;
         this.rfModule = rfModule;
         this.lrModule = lrModule;
         this.rrModule = rrModule;
+
+        this.positionScale = 1;
+
+        TrcTaskMgr.TaskObject driveBaseTaskObj = TrcTaskMgr.getInstance().createTask(
+            instanceName + ".driveBaseTask", this::driveBaseTask);
+        driveBaseTaskObj.registerTask(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK);
+        driveBaseTaskObj.registerTask(TrcTaskMgr.TaskType.STOP_TASK);
     }
 
     @Override
@@ -34,13 +45,32 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         return Arrays.asList(DriveMode.SWERVE_MODE);
     }
 
-    public void resetPosition()
+    @Override
+    public void setYPositionScale(double scale)
     {
-        heading = 0;
+        positionScale = scale; // Swerve doesn't have different x and y scales
+    }
+
+    @Override
+    public void setXPositionScale(double scale)
+    {
+        positionScale = scale; // Swerve doesn't have different x and y scales
+    }
+
+    @Override
+    public void resetPosition(boolean hardware)
+    {
+        xPosition = 0;
         yPosition = 0;
+        xSpeed = 0;
         ySpeed = 0;
-        // TODO: hardware reset
-        // TODO: Figure out how these values are going to be used/calculated
+        heading = 0;
+        turnSpeed = 0;
+
+        lfModule.resetPosition(hardware);
+        rfModule.resetPosition(hardware);
+        lrModule.resetPosition(hardware);
+        rrModule.resetPosition(hardware);
     }
 
     @Override
@@ -81,15 +111,33 @@ public class TrcSwerveDriveBase implements TrcDriveBase
     }
 
     @Override
+    public double getTurnSpeed()
+    {
+        return turnSpeed;
+    }
+
+    @Override
     public double getYPosition()
     {
         return yPosition;
     }
 
     @Override
+    public double getXPosition()
+    {
+        return xPosition;
+    }
+
+    @Override
     public double getYSpeed()
     {
         return ySpeed;
+    }
+
+    @Override
+    public double getXSpeed()
+    {
+        return xSpeed;
     }
 
     @Override
@@ -166,6 +214,50 @@ public class TrcSwerveDriveBase implements TrcDriveBase
         } else
         {
             return nums;
+        }
+    }
+
+    private double average(double... nums)
+    {
+        double sum = 0;
+        for(double d:nums)
+        {
+            sum += d;
+        }
+        return sum / Math.max(nums.length, 1); // Protect against length == 0
+    }
+
+    private void resetModulePositions()
+    {
+        lfModule.resetPosition(false);
+        rfModule.resetPosition(false);
+        lrModule.resetPosition(false);
+        rrModule.resetPosition(false);
+    }
+
+    private void driveBaseTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
+    {
+        if(taskType == TrcTaskMgr.TaskType.STOP_TASK)
+        {
+            stop();
+        } else
+        {
+            heading = gyro.getZHeading().value;
+            turnSpeed = gyro.getZRotationRate().value;
+
+            double averageWheelAngle = average(lfModule.getAngle(), rfModule.getAngle(), lrModule.getAngle(), rrModule.getAngle());
+            double averageWheelPosition = positionScale *
+                average(lfModule.getPosition(), rfModule.getPosition(), lrModule.getPosition(), rrModule.getPosition());
+            double averageWheelSpeed = positionScale *
+                average(lfModule.getDriveSpeed(), rfModule.getDriveSpeed(), lrModule.getDriveSpeed(), rrModule.getDriveSpeed());
+
+            xSpeed = averageWheelSpeed * Math.cos(Math.toRadians(averageWheelAngle));
+            ySpeed = averageWheelSpeed * Math.sin(Math.toRadians(averageWheelAngle));
+
+            xPosition += averageWheelPosition * Math.cos(Math.toRadians(averageWheelAngle));
+            yPosition += averageWheelPosition * Math.sin(Math.toRadians(averageWheelAngle));
+
+            resetModulePositions();
         }
     }
 }
