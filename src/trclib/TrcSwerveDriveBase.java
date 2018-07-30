@@ -97,6 +97,8 @@ public class TrcSwerveDriveBase extends TrcDriveBase
         stopModule(rfModule);
         stopModule(lrModule);
         stopModule(rrModule);
+
+        resetStallTimer();
     }
 
     private void stopModule(TrcSwerveModule module)
@@ -119,6 +121,8 @@ public class TrcSwerveDriveBase extends TrcDriveBase
         rrModule.setAngle(0.0);
 
         resetPosition();
+
+        resetStallTimer();
     }
 
     @Override
