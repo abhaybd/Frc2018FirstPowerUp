@@ -7,6 +7,7 @@ public class TrcSwerveModule
     private double turnDegreesPerCount;
     private TrcTaskMgr.TaskObject turnTaskObj;
     private boolean trackingTurnAngle;
+    private TrcWarpSpace warpSpace;
     public TrcSwerveModule(String instanceName,
         TrcMotorController driveMotor, TrcMotorController turnMotor, TrcPidController turnPidCtrl, double turnDegreesPerCount)
     {
@@ -14,6 +15,10 @@ public class TrcSwerveModule
         this.turnMotor = turnMotor;
         this.turnDegreesPerCount = turnDegreesPerCount;
         this.turnPidCtrl = turnPidCtrl;
+
+        this.turnPidCtrl.setAbsoluteSetPoint(true);
+
+        warpSpace = new TrcWarpSpace(instanceName + ".warpSpace", 0.0, 360.0);
 
         turnTaskObj = TrcTaskMgr.getInstance().createTask(instanceName + ".turnTask", this::turnTask);
     }
@@ -26,7 +31,7 @@ public class TrcSwerveModule
     public void setAngle(double angle)
     {
         setEnabled(true);
-        turnPidCtrl.setTarget(angle / turnDegreesPerCount);
+        turnPidCtrl.setTarget(angle / turnDegreesPerCount, warpSpace);
     }
 
     public double getAngle()
