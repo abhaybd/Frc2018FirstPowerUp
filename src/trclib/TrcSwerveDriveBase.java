@@ -75,18 +75,39 @@ public class TrcSwerveDriveBase extends TrcDriveBase
     @Override
     public void setYPositionScale(double scale)
     {
+        if (debugEnabled)
+        {
+            final String funcName = "setPositionScale";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "scale=%f", scale);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
         positionScale = scale; // Swerve doesn't have different x and y scales
     }
 
     @Override
     public void setXPositionScale(double scale)
     {
+        if (debugEnabled)
+        {
+            final String funcName = "setPositionScale";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "scale=%f", scale);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
         positionScale = scale; // Swerve doesn't have different x and y scales
     }
 
     @Override
     public void resetPosition(boolean hardware)
     {
+        final String funcName = "resetPosition";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "hardware=%b", hardware);
+        }
+
         xPosition = 0;
         yPosition = 0;
         xSpeed = 0;
@@ -98,17 +119,34 @@ public class TrcSwerveDriveBase extends TrcDriveBase
         rfModule.resetPosition(hardware);
         lrModule.resetPosition(hardware);
         rrModule.resetPosition(hardware);
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
     }
 
     @Override
     public void stop()
     {
+        final String funcName = "stop";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
         stopModule(lfModule);
         stopModule(rfModule);
         stopModule(lrModule);
         stopModule(rrModule);
 
         resetStallTimer();
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
     }
 
     private void stopModule(TrcSwerveModule module)
@@ -120,6 +158,13 @@ public class TrcSwerveDriveBase extends TrcDriveBase
     @Override
     public void reset()
     {
+        final String funcName = "reset";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
         lfModule.setDrivePower(0.0);
         rfModule.setDrivePower(0.0);
         lrModule.setDrivePower(0.0);
@@ -131,49 +176,102 @@ public class TrcSwerveDriveBase extends TrcDriveBase
         rrModule.setAngle(0.0);
 
         resetPosition();
-
         resetStallTimer();
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
     }
 
     @Override
     public double getHeading()
     {
+        if (debugEnabled)
+        {
+            final String funcName = "getHeading";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", heading);
+        }
+
         return heading;
     }
 
     @Override
     public double getTurnSpeed()
     {
+        if (debugEnabled)
+        {
+            final String funcName = "getTurnSpeed";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", turnSpeed);
+        }
+
         return turnSpeed;
     }
 
     @Override
     public double getYPosition()
     {
+        if (debugEnabled)
+        {
+            final String funcName = "getYPosition";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", yPosition);
+        }
+
         return yPosition;
     }
 
     @Override
     public double getXPosition()
     {
+        if (debugEnabled)
+        {
+            final String funcName = "getXPosition";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", xPosition);
+        }
+
         return xPosition;
     }
 
     @Override
     public double getYSpeed()
     {
+        if (debugEnabled)
+        {
+            final String funcName = "getYSpeed";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", ySpeed);
+        }
+
         return ySpeed;
     }
 
     @Override
     public double getXSpeed()
     {
+        if (debugEnabled)
+        {
+            final String funcName = "getXSpeed";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", xSpeed);
+        }
+
         return xSpeed;
     }
 
     @Override
     public void setBrakeMode(boolean enabled)
     {
+        if (debugEnabled)
+        {
+            final String funcName = "setBrakeMode";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "enabled=%s", Boolean.toString(enabled));
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
         lfModule.setBrakeMode(enabled);
         rfModule.setBrakeMode(enabled);
         lrModule.setBrakeMode(enabled);
@@ -183,35 +281,71 @@ public class TrcSwerveDriveBase extends TrcDriveBase
     @Override
     public void resetStallTimer()
     {
+        if (debugEnabled)
+        {
+            final String funcName = "resetStallTimer";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
         lfStallStartTime = rfStallStartTime = lrStallStartTime = rrStallStartTime = TrcUtil.getCurrentTime();
     }
 
     @Override
     public boolean isStalled(MotorType motorType, double stallTime)
     {
+        final String funcName = "isStalled";
         double time = TrcUtil.getCurrentTime();
+        boolean stalled = false;
+
+        if (debugEnabled)
+        {
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "motorType=%s,stallTime=%.3f", motorType, stallTime);
+        }
+
         switch(motorType)
         {
             case LEFT_FRONT:
-                return time - lfStallStartTime >= stallTime;
+                stalled = time - lfStallStartTime >= stallTime;
+                break;
 
             case RIGHT_FRONT:
-                return time - rfStallStartTime >= stallTime;
+                stalled = time - rfStallStartTime >= stallTime;
+                break;
 
             case LEFT_REAR:
-                return time - lrStallStartTime >= stallTime;
+                stalled = time - lrStallStartTime >= stallTime;
+                break;
 
             case RIGHT_REAR:
-                return time - rrStallStartTime >= stallTime;
+                stalled = time - rrStallStartTime >= stallTime;
+                break;
 
             default:
-                return false;
+                break;
         }
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%s", Boolean.toString(stalled));
+        }
+
+        return stalled;
     }
 
     @Override
     public void tankDrive(double leftPower, double rightPower, boolean inverted)
     {
+        final String funcName = "tankDrive";
+
+        if (debugEnabled)
+        {
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "leftPower=%f,rightPower=%f,inverted=%s", leftPower,
+                    rightPower, Boolean.toString(inverted));
+        }
+
         lfModule.setAngle(0.0);
         rfModule.setAngle(0.0);
         lrModule.setAngle(0.0);
@@ -237,11 +371,25 @@ public class TrcSwerveDriveBase extends TrcDriveBase
 
         rfModule.setDrivePower(rightPower);
         rrModule.setDrivePower(rightPower);
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
     }
 
     @Override
     public void swerveDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
+        final String funcName = "serveDrive_Cartesian";
+
+        if (debugEnabled)
+        {
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "x=%f,y=%f,rotation=%f,inverted=%b,gyroAngle=%f",
+                    x, y, rotation, inverted, gyroAngle);
+        }
+
         x = TrcUtil.clipRange(x);
         y = TrcUtil.clipRange(y);
         rotation = TrcUtil.clipRange(rotation);
@@ -256,7 +404,7 @@ public class TrcSwerveDriveBase extends TrcDriveBase
         {
             if(inverted)
             {
-                TrcDbgTrace.getGlobalTracer().traceWarn(instanceName + ".swerveDrive_Cartesian",
+                dbgTrace.traceWarn(instanceName + ".swerveDrive_Cartesian",
                     "You should not be using inverted and field reference frame at the same time!");
             }
 
@@ -298,6 +446,11 @@ public class TrcSwerveDriveBase extends TrcDriveBase
         rfModule.setDrivePower(motorPowerMapper.translateMotorPower(rfPower, rfModule.getDriveSpeed() * positionScale));
         lrModule.setDrivePower(motorPowerMapper.translateMotorPower(lrPower, lrModule.getDriveSpeed() * positionScale));
         rrModule.setDrivePower(motorPowerMapper.translateMotorPower(rrPower, rrModule.getDriveSpeed() * positionScale));
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
     }
 
     private double magnitude(double a, double b)
