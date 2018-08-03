@@ -35,16 +35,6 @@ import java.util.List;
 public class TrcCommonDriveBase extends TrcDriveBase
 {
     private static final String moduleName = "TrcCommonDriveBase";
-    private static final boolean debugEnabled = false;
-    private static final boolean tracingEnabled = false;
-    private static final boolean useGlobalTracer = false;
-    private static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;
-    private static final TrcDbgTrace.MsgLevel msgLevel = TrcDbgTrace.MsgLevel.INFO;
-
-    private TrcDbgTrace dbgTrace = null;
-
-    private static double DEF_SENSITIVITY = 0.5;
-    private static double DEF_MAX_OUTPUT = 1.0;
 
     private TrcMotorController leftFrontMotor;
     private TrcMotorController leftMidMotor;
@@ -55,8 +45,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
     private TrcGyro gyro;
     private MotorPowerMapper motorPowerMapper = null;
     private int numMotors = 0;
-    private double sensitivity = DEF_SENSITIVITY;
-    private double maxOutput = DEF_MAX_OUTPUT;
     private double gyroMaxRotationRate = 0.0;
     private double gyroAssistKp = 1.0;
     private boolean gyroAssistEnabled = false;
@@ -96,13 +84,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
         final TrcMotorController leftRearMotor, final TrcMotorController rightFrontMotor,
         final TrcMotorController rightMidMotor, final TrcMotorController rightRearMotor, final TrcGyro gyro)
     {
-        if (debugEnabled)
-        {
-            dbgTrace = useGlobalTracer ?
-                TrcDbgTrace.getGlobalTracer() :
-                new TrcDbgTrace(moduleName, tracingEnabled, traceLevel, msgLevel);
-        }
-
         this.leftFrontMotor = leftFrontMotor;
         if (leftFrontMotor != null)
             numMotors++;
@@ -250,52 +231,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
     {
         this.motorPowerMapper = motorPowerMapper;
     }   //setMotorPowerMapper
-
-    /**
-     * This method sets the sensitivity for the drive() method.
-     *
-     * @param sensitivity specifies the sensitivity value.
-     */
-    public void setSensitivity(double sensitivity)
-    {
-        final String funcName = "setSensitivity";
-
-        if (debugEnabled)
-        {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "sensitivity=%f", sensitivity);
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
-        }
-
-        this.sensitivity = sensitivity;
-    }   //setSensitivity
-
-    /**
-     * This method gets the sensitivity for the drive() method.
-     *
-     * @return sensitivity value.
-     */
-    public double getSensitivity()
-    {
-        return sensitivity;
-    }
-
-    /**
-     * This method sets the maximum output value of the motor.
-     *
-     * @param maxOutput specifies the maximum output value.
-     */
-    public void setMaxOutput(double maxOutput)
-    {
-        final String funcName = "setMaxOutput";
-
-        if (debugEnabled)
-        {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "maxOutput=%f", maxOutput);
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
-        }
-
-        this.maxOutput = maxOutput;
-    }   //setMaxOutput
 
     /**
      * This method enables gyro assist drive.
@@ -465,15 +400,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
         {
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
         }
-    }   //resetPosition
-
-    /**
-     * This method resets the drive base position odometry. This includes the motor encoders, the gyro heading and
-     * all the cached values.
-     */
-    public void resetPosition()
-    {
-        resetPosition(false);
     }   //resetPosition
 
     /**
@@ -716,28 +642,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         lfStallStartTime = rfStallStartTime = lrStallStartTime = rrStallStartTime = TrcUtil.getCurrentTime();
     }   //resetStallTimer
-
-    /**
-     * This method checks if all motors on the drive base have been stalled for at least the specified stallTime.
-     *
-     * @param stallTime specifies the stall time.
-     * @return true if the drive base is stalled, false otherwise.
-     */
-    public boolean isStalled(double stallTime)
-    {
-        final String funcName = "isStalled";
-        boolean stalled =
-            isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) && isStalled(
-                MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
-
-        if (debugEnabled)
-        {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "stallTime=%.3f", stallTime);
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%s", Boolean.toString(stalled));
-        }
-
-        return stalled;
-    }   //isStalled
 
     /**
      * This method enables/disables brake mode of the drive base.

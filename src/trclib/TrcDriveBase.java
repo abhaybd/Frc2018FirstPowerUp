@@ -5,6 +5,18 @@ import java.util.List;
 
 public abstract class TrcDriveBase
 {
+    private static final String moduleName = "TrcDriveBase";
+
+    protected static final boolean debugEnabled = false;
+    private static final boolean tracingEnabled = false;
+    private static final boolean useGlobalTracer = false;
+
+    private static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;
+    private static final TrcDbgTrace.MsgLevel msgLevel = TrcDbgTrace.MsgLevel.INFO;
+
+    private static double DEF_SENSITIVITY = 0.5;
+    private static double DEF_MAX_OUTPUT = 1.0;
+
     enum DriveMode
     {
         CURVE_MODE,
@@ -50,8 +62,31 @@ public abstract class TrcDriveBase
         double translateMotorPower(double power, double speed);
     }   //interface MotorPowerMapper
 
-    protected double sensitivity;
-    protected double maxOutput;
+    protected double sensitivity = DEF_SENSITIVITY;
+    protected double maxOutput = DEF_MAX_OUTPUT;
+    protected TrcDbgTrace dbgTrace;
+
+    public TrcDriveBase()
+    {
+        if (debugEnabled)
+        {
+            dbgTrace = useGlobalTracer ?
+                TrcDbgTrace.getGlobalTracer() :
+                new TrcDbgTrace(moduleName, tracingEnabled, traceLevel, msgLevel);
+        }
+    }
+
+    /**
+     * Default motor power mapper. Doesn't take speed into account at all.
+     *
+     * @param power Desired power. This will be returned.
+     * @param speed Current speed. Ignored.
+     * @return equal to <parameter>power</parameter>.
+     */
+    protected double defaultMotorPowerMapper(double power, double speed)
+    {
+        return power;
+    }
 
     /**
      * This method returns the number of motors in the drive train.
@@ -125,6 +160,9 @@ public abstract class TrcDriveBase
      */
     abstract boolean isStalled(MotorType motorType, double stallTime);
 
+    /**
+     * This method resets the stall timer.
+     */
     abstract void resetStallTimer();
 
     /**
@@ -135,8 +173,18 @@ public abstract class TrcDriveBase
      */
     public boolean isStalled(double stallTime)
     {
-        return isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) &&
-            isStalled(MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
+        boolean stalled =
+            isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) && isStalled(
+                MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
+
+        if (debugEnabled)
+        {
+            final String funcName = "isStalled";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "stallTime=%.3f", stallTime);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%s", Boolean.toString(stalled));
+        }
+
+        return stalled;
     }
 
     /**
@@ -156,19 +204,14 @@ public abstract class TrcDriveBase
      */
     public double getMaxOutput()
     {
-        return maxOutput;
-    }
+        if (debugEnabled)
+        {
+            final String funcName = "setMaxOutput";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "maxOutput=%f", maxOutput);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
 
-    /**
-     * Default motor power mapper. Doesn't take speed into account at all.
-     *
-     * @param power Desired power. This will be returned.
-     * @param speed Current speed. Ignored.
-     * @return equal to <parameter>power</parameter>.
-     */
-    protected double defaultMotorPowerMapper(double power, double speed)
-    {
-        return power;
+        return maxOutput;
     }
 
     /**
@@ -209,6 +252,13 @@ public abstract class TrcDriveBase
      */
     public void setSensitivity(double sensitivity)
     {
+        if (debugEnabled)
+        {
+            final String funcName = "setSensitivity";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "sensitivity=%f", sensitivity);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
         this.sensitivity = sensitivity;
     }
 

@@ -9,6 +9,8 @@ public class TrcSwerveDriveBase extends TrcDriveBase
      *  Programmed according to the this whitepaper: http://www.chiefdelphi.com/media/papers/download/3028
      */
 
+    private static final int NUM_MOTORS = 4;
+
     private final String instanceName;
     private TrcSwerveModule lfModule, rfModule, lrModule, rrModule;
     private double wheelBaseWidth, wheelBaseLength, wheelBaseDiagonal;
@@ -53,7 +55,15 @@ public class TrcSwerveDriveBase extends TrcDriveBase
     @Override
     public int getNumMotors()
     {
-        return 4; // Don't count the turn motors
+        final String funcName = "getNumMotors";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%d", NUM_MOTORS);
+        }
+
+        return NUM_MOTORS; // Don't count the turn motors
     }
 
     @Override
