@@ -800,78 +800,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
     }   //stop
 
     /**
-     * This method drives the motors at "magnitude" and "curve". Both magnitude and curve are -1.0 to +1.0 values,
-     * where 0.0 represents stopped and not turning. curve less than 0 will turn left and curve greater than 0 will
-     * turn right. The algorithm for steering provides a constant turn radius for any normal speed range, both
-     * forward and backward. Increasing sensitivity causes sharper turns for fixed values of curve.
-     *
-     * @param magnitude specifies the speed setting for the outside wheel in a turn, forward or backwards, +1 to -1.
-     * @param curve     specifies the rate of turn, constant for different forward speeds. Set curve less than 0 for left
-     *                  turn or curve greater than 0 for right turn. Set curve = e^(-r/w) to get a turn radius r for
-     *                  wheel base w of your robot. Conversely, turn radius r = -ln(curve)*w for a given value of curve
-     *                  and wheel base w.
-     * @param inverted  specifies true to invert control (i.e. robot front becomes robot back).
-     */
-    public void drive(double magnitude, double curve, boolean inverted)
-    {
-        final String funcName = "drive";
-        double leftOutput;
-        double rightOutput;
-
-        if (debugEnabled)
-        {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "mag=%f,curve=%f,inverted=%s", magnitude, curve,
-                Boolean.toString(inverted));
-        }
-
-        if (curve < 0.0)
-        {
-            double value = Math.log(-curve);
-            double ratio = (value - sensitivity) / (value + sensitivity);
-            if (ratio == 0.0)
-            {
-                ratio = 0.0000000001;
-            }
-            leftOutput = magnitude / ratio;
-            rightOutput = magnitude;
-        }
-        else if (curve > 0.0)
-        {
-            double value = Math.log(curve);
-            double ratio = (value - sensitivity) / (value + sensitivity);
-            if (ratio == 0.0)
-            {
-                ratio = 0.0000000001;
-            }
-            leftOutput = magnitude;
-            rightOutput = magnitude / ratio;
-        }
-        else
-        {
-            leftOutput = magnitude;
-            rightOutput = magnitude;
-        }
-
-        tankDrive(leftOutput, rightOutput, inverted);
-
-        if (debugEnabled)
-        {
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
-        }
-    }   //drive
-
-    /**
-     * This method drives the motors with the given magnitude and curve values.
-     *
-     * @param magnitude specifies the magnitude value.
-     * @param curve     specifies the curve value.
-     */
-    public void drive(double magnitude, double curve)
-    {
-        drive(magnitude, curve, false);
-    }   //drive
-
-    /**
      * This method implements tank drive where leftPower controls the left motors and right power controls the right
      * motors.
      *
@@ -987,71 +915,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
     }   //tankDrive
 
     /**
-     * This method implements tank drive where leftPower controls the left motors and right power controls the right
-     * motors.
-     *
-     * @param leftPower  specifies left power value.
-     * @param rightPower specifies right power value.
-     */
-    public void tankDrive(double leftPower, double rightPower)
-    {
-        tankDrive(leftPower, rightPower, false);
-    }   //tankDrive
-
-    /**
-     * This method implements arcade drive where drivePower controls how fast the robot goes in the y-axis and
-     * turnPower controls how fast it will turn.
-     *
-     * @param drivePower specifies the drive power value.
-     * @param turnPower  specifies the turn power value.
-     * @param inverted   specifies true to invert control (i.e. robot front becomes robot back).
-     */
-    public void arcadeDrive(double drivePower, double turnPower, boolean inverted)
-    {
-        final String funcName = "arcadeDrive";
-        double leftPower;
-        double rightPower;
-
-        if (debugEnabled)
-        {
-            dbgTrace
-                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "drivePower=%f,turnPower=%f,inverted=%s", drivePower,
-                    turnPower, Boolean.toString(inverted));
-        }
-
-        drivePower = TrcUtil.clipRange(drivePower);
-        turnPower = TrcUtil.clipRange(turnPower);
-
-        leftPower = drivePower + turnPower;
-        rightPower = drivePower - turnPower;
-        double maxMag = Math.max(Math.abs(leftPower), Math.abs(rightPower));
-        if (maxMag > 1.0)
-        {
-            leftPower /= maxMag;
-            rightPower /= maxMag;
-        }
-
-        tankDrive(leftPower, rightPower, inverted);
-
-        if (debugEnabled)
-        {
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
-        }
-    }   //arcadeDrive
-
-    /**
-     * This method implements arcade drive where drivePower controls how fast the robot goes in the y-axis and
-     * turnPower controls how fast it will turn.
-     *
-     * @param drivePower specifies the drive power value.
-     * @param turnPower  specifies the turn power value.
-     */
-    public void arcadeDrive(double drivePower, double turnPower)
-    {
-        arcadeDrive(drivePower, turnPower, false);
-    }   //arcadeDrive
-
-    /**
      * This method implements mecanum drive where x controls how fast the robot will go in the x direction, and y
      * controls how fast the robot will go in the y direction. Rotation controls how fast the robot rotates and
      * gyroAngle specifies the heading the robot should maintain.
@@ -1162,34 +1025,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
     }   //mecanumDrive_Cartesian
 
     /**
-     * This method implements mecanum drive where x controls how fast the robot will go in the x direction, and y
-     * controls how fast the robot will go in the y direction. Rotation controls how fast the robot rotates and
-     * gyroAngle specifies the heading the robot should maintain.
-     *
-     * @param x        specifies the x power.
-     * @param y        specifies the y power.
-     * @param rotation specifies the rotating power.
-     * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
-     */
-    public void mecanumDrive_Cartesian(double x, double y, double rotation, boolean inverted)
-    {
-        mecanumDrive_Cartesian(x, y, rotation, inverted, 0.0);
-    }   //mecanumDrive_Cartesian
-
-    /**
-     * This method implements mecanum drive where x controls how fast the robot will go in the x direction, and y
-     * controls how fast the robot will go in the y direction. Rotation controls how fast the robot rotates.
-     *
-     * @param x        specifies the x power.
-     * @param y        specifies the y power.
-     * @param rotation specifies the rotating power.
-     */
-    public void mecanumDrive_Cartesian(double x, double y, double rotation)
-    {
-        mecanumDrive_Cartesian(x, y, rotation, false, 0.0);
-    }   //mecanumDrive_Cartesian
-
-    /**
      * This method implements mecanum drive where magnitude controls how fast the robot will go in the given direction
      * and how fast it will rotate.
      *
@@ -1286,19 +1121,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
     }   //mecanumDrive_Polar
 
     /**
-     * This method implements mecanum drive where magnitude controls how fast the robot will go in the given direction
-     * and how fast it will rotate.
-     *
-     * @param magnitude specifies the magnitude combining x and y axes.
-     * @param direction specifies the direction in degrees.
-     * @param rotation  specifies the rotation power.
-     */
-    public void mecanumDrive_Polar(double magnitude, double direction, double rotation)
-    {
-        mecanumDrive_Polar(magnitude, direction, rotation, false);
-    }   //mecanumDrive_Polar
-
-    /**
      * This method normalizes the power to the four wheels for mecanum drive.
      *
      * @param wheelPowers specifies the wheel power of all four wheels.
@@ -1332,7 +1154,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * @param taskType specifies the type of task being run.
      * @param runMode  specifies the competition mode that is about to end (e.g. Autonomous, TeleOp, Test).
      */
-    public void driveBaseTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
+    private void driveBaseTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
     {
         final String funcName = "driveBaseTask";
 
