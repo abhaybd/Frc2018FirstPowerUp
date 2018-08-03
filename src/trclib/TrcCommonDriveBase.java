@@ -84,39 +84,43 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * This method is called by different constructors to do common initialization.
      *
-     * @param leftFrontMotor specifies the left front motor of the drive base.
-     * @param leftMidMotor specifies the left mid motor of a 6-wheel drive base.
-     * @param leftRearMotor specifies the left rear motor of the drive base.
+     * @param leftFrontMotor  specifies the left front motor of the drive base.
+     * @param leftMidMotor    specifies the left mid motor of a 6-wheel drive base.
+     * @param leftRearMotor   specifies the left rear motor of the drive base.
      * @param rightFrontMotor specifies the right front motor of the drive base.
-     * @param rightMidMotor specifies the right mid motor of a 6-wheel drive base.
-     * @param rightRearMotor specifies the right rear motor of the drive base.
-     * @param gyro specifies the gyro. If none, it can be set to null.
+     * @param rightMidMotor   specifies the right mid motor of a 6-wheel drive base.
+     * @param rightRearMotor  specifies the right rear motor of the drive base.
+     * @param gyro            specifies the gyro. If none, it can be set to null.
      */
-    private void commonInit(
-        final TrcMotorController leftFrontMotor, final TrcMotorController leftMidMotor,
+    private void commonInit(final TrcMotorController leftFrontMotor, final TrcMotorController leftMidMotor,
         final TrcMotorController leftRearMotor, final TrcMotorController rightFrontMotor,
-        final TrcMotorController rightMidMotor, final TrcMotorController rightRearMotor,
-        final TrcGyro gyro)
+        final TrcMotorController rightMidMotor, final TrcMotorController rightRearMotor, final TrcGyro gyro)
     {
         if (debugEnabled)
         {
-            dbgTrace = useGlobalTracer?
-                TrcDbgTrace.getGlobalTracer():
+            dbgTrace = useGlobalTracer ?
+                TrcDbgTrace.getGlobalTracer() :
                 new TrcDbgTrace(moduleName, tracingEnabled, traceLevel, msgLevel);
         }
 
         this.leftFrontMotor = leftFrontMotor;
-        if (leftFrontMotor != null) numMotors++;
+        if (leftFrontMotor != null)
+            numMotors++;
         this.leftMidMotor = leftMidMotor;
-        if (leftMidMotor != null) numMotors++;
+        if (leftMidMotor != null)
+            numMotors++;
         this.leftRearMotor = leftRearMotor;
-        if (leftRearMotor != null) numMotors++;
+        if (leftRearMotor != null)
+            numMotors++;
         this.rightFrontMotor = rightFrontMotor;
-        if (rightFrontMotor != null) numMotors++;
+        if (rightFrontMotor != null)
+            numMotors++;
         this.rightMidMotor = rightMidMotor;
-        if (rightMidMotor != null) numMotors++;
+        if (rightMidMotor != null)
+            numMotors++;
         this.rightRearMotor = rightRearMotor;
-        if (rightRearMotor != null) numMotors++;
+        if (rightRearMotor != null)
+            numMotors++;
         this.gyro = gyro;
 
         TrcTaskMgr taskMgr = TrcTaskMgr.getInstance();
@@ -134,22 +138,20 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * Constructor: Create an instance of the object.
      *
-     * @param leftFrontMotor specifies the left front motor of the drive base.
-     * @param leftMidMotor specifies the left mid motor of a 6-wheel drive base.
-     * @param leftRearMotor specifies the left rear motor of the drive base.
+     * @param leftFrontMotor  specifies the left front motor of the drive base.
+     * @param leftMidMotor    specifies the left mid motor of a 6-wheel drive base.
+     * @param leftRearMotor   specifies the left rear motor of the drive base.
      * @param rightFrontMotor specifies the right front motor of the drive base.
-     * @param rightMidMotor specifies the right mid motor of a 6-wheel drive base.
-     * @param rightRearMotor specifies the right rear motor of the drive base.
-     * @param gyro specifies the gyro. If none, it can be set to null.
+     * @param rightMidMotor   specifies the right mid motor of a 6-wheel drive base.
+     * @param rightRearMotor  specifies the right rear motor of the drive base.
+     * @param gyro            specifies the gyro. If none, it can be set to null.
      */
-    public TrcCommonDriveBase(
-        final TrcMotorController leftFrontMotor, final TrcMotorController leftMidMotor,
+    public TrcCommonDriveBase(final TrcMotorController leftFrontMotor, final TrcMotorController leftMidMotor,
         final TrcMotorController leftRearMotor, final TrcMotorController rightFrontMotor,
-        final TrcMotorController rightMidMotor, final TrcMotorController rightRearMotor,
-        final TrcGyro gyro)
+        final TrcMotorController rightMidMotor, final TrcMotorController rightRearMotor, final TrcGyro gyro)
     {
-        if (leftFrontMotor == null || leftMidMotor == null || leftRearMotor == null ||
-            rightFrontMotor == null || rightMidMotor == null || rightRearMotor == null)
+        if (leftFrontMotor == null || leftMidMotor == null || leftRearMotor == null || rightFrontMotor == null
+            || rightMidMotor == null || rightRearMotor == null)
         {
             throw new IllegalArgumentException("All 6 motors must not be null.");
         }
@@ -159,15 +161,14 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * Constructor: Create an instance of the object.
      *
-     * @param leftFrontMotor specifies the left front motor of the drive base.
-     * @param leftMidMotor specifies the left mid motor of a 6-wheel drive base.
-     * @param leftRearMotor specifies the left rear motor of the drive base.
+     * @param leftFrontMotor  specifies the left front motor of the drive base.
+     * @param leftMidMotor    specifies the left mid motor of a 6-wheel drive base.
+     * @param leftRearMotor   specifies the left rear motor of the drive base.
      * @param rightFrontMotor specifies the right front motor of the drive base.
-     * @param rightMidMotor specifies the right mid motor of a 6-wheel drive base.
-     * @param rightRearMotor specifies the right rear motor of the drive base.
+     * @param rightMidMotor   specifies the right mid motor of a 6-wheel drive base.
+     * @param rightRearMotor  specifies the right rear motor of the drive base.
      */
-    public TrcCommonDriveBase(
-        final TrcMotorController leftFrontMotor, final TrcMotorController leftMidMotor,
+    public TrcCommonDriveBase(final TrcMotorController leftFrontMotor, final TrcMotorController leftMidMotor,
         final TrcMotorController leftRearMotor, final TrcMotorController rightFrontMotor,
         final TrcMotorController rightMidMotor, final TrcMotorController rightRearMotor)
     {
@@ -177,16 +178,14 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * Constructor: Create an instance of the 4-wheel drive base.
      *
-     * @param leftFrontMotor specifies the left front motor of the drive base.
-     * @param leftRearMotor specifies the left rear motor of the drive base.
+     * @param leftFrontMotor  specifies the left front motor of the drive base.
+     * @param leftRearMotor   specifies the left rear motor of the drive base.
      * @param rightFrontMotor specifies the right front motor of the drive base.
-     * @param rightRearMotor specifies the right rear motor of the drive base.
-     * @param gyro specifies the gyro. If none, it can be set to null.
+     * @param rightRearMotor  specifies the right rear motor of the drive base.
+     * @param gyro            specifies the gyro. If none, it can be set to null.
      */
-    public TrcCommonDriveBase(
-        final TrcMotorController leftFrontMotor, final TrcMotorController leftRearMotor,
-        final TrcMotorController rightFrontMotor, final TrcMotorController rightRearMotor,
-        final TrcGyro gyro)
+    public TrcCommonDriveBase(final TrcMotorController leftFrontMotor, final TrcMotorController leftRearMotor,
+        final TrcMotorController rightFrontMotor, final TrcMotorController rightRearMotor, final TrcGyro gyro)
     {
         if (leftFrontMotor == null || leftRearMotor == null || rightFrontMotor == null || rightRearMotor == null)
         {
@@ -198,13 +197,12 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * Constructor: Create an instance of the 4-wheel drive base.
      *
-     * @param leftFrontMotor specifies the left front motor of the drive base.
-     * @param leftRearMotor specifies the left rear motor of the drive base.
+     * @param leftFrontMotor  specifies the left front motor of the drive base.
+     * @param leftRearMotor   specifies the left rear motor of the drive base.
      * @param rightFrontMotor specifies the right front motor of the drive base.
-     * @param rightRearMotor specifies the right rear motor of the drive base.
+     * @param rightRearMotor  specifies the right rear motor of the drive base.
      */
-    public TrcCommonDriveBase(
-        final TrcMotorController leftFrontMotor, final TrcMotorController leftRearMotor,
+    public TrcCommonDriveBase(final TrcMotorController leftFrontMotor, final TrcMotorController leftRearMotor,
         final TrcMotorController rightFrontMotor, final TrcMotorController rightRearMotor)
     {
         this(leftFrontMotor, leftRearMotor, rightFrontMotor, rightRearMotor, null);
@@ -213,11 +211,12 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * Constructor: Create an instance of the 2-wheel drive base.
      *
-     * @param leftMotor specifies the left rear motor of the drive base.
+     * @param leftMotor  specifies the left rear motor of the drive base.
      * @param rightMotor specifies the right rear motor of the drive base.
-     * @param gyro specifies the gyro. If none, it can be set to null.
+     * @param gyro       specifies the gyro. If none, it can be set to null.
      */
-    public TrcCommonDriveBase(final TrcMotorController leftMotor, final TrcMotorController rightMotor, final TrcGyro gyro)
+    public TrcCommonDriveBase(final TrcMotorController leftMotor, final TrcMotorController rightMotor,
+        final TrcGyro gyro)
     {
         if (leftMotor == null || rightMotor == null)
         {
@@ -229,7 +228,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * Constructor: Create an instance of the 2-wheel drive base.
      *
-     * @param leftMotor specifies the left rear motor of the drive base.
+     * @param leftMotor  specifies the left rear motor of the drive base.
      * @param rightMotor specifies the right rear motor of the drive base.
      */
     public TrcCommonDriveBase(final TrcMotorController leftMotor, final TrcMotorController rightMotor)
@@ -302,7 +301,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * This method enables gyro assist drive.
      *
      * @param gyroMaxRotationRate specifies the maximum rotation rate of the robot base reported by the gyro.
-     * @param gyroAssistKp specifies the gyro assist proportional constant.
+     * @param gyroAssistKp        specifies the gyro assist proportional constant.
      */
     public void enableGyroAssist(double gyroMaxRotationRate, double gyroAssistKp)
     {
@@ -310,9 +309,9 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(
-                funcName, TrcDbgTrace.TraceLevel.API, "gyroMaxRate=%f,gyroAssistKp=%f",
-                gyroMaxRotationRate, gyroAssistKp);
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "gyroMaxRate=%f,gyroAssistKp=%f", gyroMaxRotationRate,
+                    gyroAssistKp);
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
         }
 
@@ -360,7 +359,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * This method inverts direction of a given motor in the drive train.
      *
-     * @param motorType specifies the motor in the drive train.
+     * @param motorType  specifies the motor in the drive train.
      * @param isInverted specifies true if inverting motor direction.
      */
     public void setInvertedMotor(MotorType motorType, boolean isInverted)
@@ -369,8 +368,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API,
-                                "type=%s,inverted=%s", motorType.toString(), Boolean.toString(isInverted));
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "type=%s,inverted=%s", motorType.toString(),
+                Boolean.toString(isInverted));
         }
 
         switch (motorType)
@@ -439,13 +438,20 @@ public class TrcCommonDriveBase extends TrcDriveBase
             dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
         }
 
-        if (leftFrontMotor != null) leftFrontMotor.resetPosition(hardware);
-        if (leftMidMotor != null) leftMidMotor.resetPosition(hardware);
-        if (leftRearMotor != null) leftRearMotor.resetPosition(hardware);
-        if (rightFrontMotor != null) rightFrontMotor.resetPosition(hardware);
-        if (rightMidMotor != null) rightMidMotor.resetPosition(hardware);
-        if (rightRearMotor != null) rightRearMotor.resetPosition(hardware);
-        if (gyro != null) gyro.resetZIntegrator();
+        if (leftFrontMotor != null)
+            leftFrontMotor.resetPosition(hardware);
+        if (leftMidMotor != null)
+            leftMidMotor.resetPosition(hardware);
+        if (leftRearMotor != null)
+            leftRearMotor.resetPosition(hardware);
+        if (rightFrontMotor != null)
+            rightFrontMotor.resetPosition(hardware);
+        if (rightMidMotor != null)
+            rightMidMotor.resetPosition(hardware);
+        if (rightRearMotor != null)
+            rightRearMotor.resetPosition(hardware);
+        if (gyro != null)
+            gyro.resetZIntegrator();
 
         xPos = 0.0;
         yPos = 0.0;
@@ -662,8 +668,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API,
-                    "motorType=%s,stallTime=%.3f", motorType, stallTime);
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "motorType=%s,stallTime=%.3f", motorType, stallTime);
         }
 
         switch (motorType)
@@ -720,8 +726,9 @@ public class TrcCommonDriveBase extends TrcDriveBase
     public boolean isStalled(double stallTime)
     {
         final String funcName = "isStalled";
-        boolean stalled = isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) &&
-                          isStalled(MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
+        boolean stalled =
+            isStalled(MotorType.LEFT_FRONT, stallTime) && isStalled(MotorType.RIGHT_FRONT, stallTime) && isStalled(
+                MotorType.LEFT_REAR, stallTime) && isStalled(MotorType.RIGHT_REAR, stallTime);
 
         if (debugEnabled)
         {
@@ -747,12 +754,18 @@ public class TrcCommonDriveBase extends TrcDriveBase
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
         }
 
-        if (leftFrontMotor != null) leftFrontMotor.setBrakeModeEnabled(enabled);
-        if (rightFrontMotor != null) rightFrontMotor.setBrakeModeEnabled(enabled);
-        if (leftMidMotor != null) leftMidMotor.setBrakeModeEnabled(enabled);
-        if (rightMidMotor != null) rightMidMotor.setBrakeModeEnabled(enabled);
-        if (leftRearMotor != null) leftRearMotor.setBrakeModeEnabled(enabled);
-        if (rightRearMotor != null) rightRearMotor.setBrakeModeEnabled(enabled);
+        if (leftFrontMotor != null)
+            leftFrontMotor.setBrakeModeEnabled(enabled);
+        if (rightFrontMotor != null)
+            rightFrontMotor.setBrakeModeEnabled(enabled);
+        if (leftMidMotor != null)
+            leftMidMotor.setBrakeModeEnabled(enabled);
+        if (rightMidMotor != null)
+            rightMidMotor.setBrakeModeEnabled(enabled);
+        if (leftRearMotor != null)
+            leftRearMotor.setBrakeModeEnabled(enabled);
+        if (rightRearMotor != null)
+            rightRearMotor.setBrakeModeEnabled(enabled);
     }   //setBrakeMode
 
     /**
@@ -767,12 +780,18 @@ public class TrcCommonDriveBase extends TrcDriveBase
             dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
         }
 
-        if (leftFrontMotor != null) leftFrontMotor.setPower(0.0);
-        if (rightFrontMotor != null) rightFrontMotor.setPower(0.0);
-        if (leftRearMotor != null) leftRearMotor.setPower(0.0);
-        if (rightRearMotor != null) rightRearMotor.setPower(0.0);
-        if (leftMidMotor != null) leftMidMotor.setPower(0.0);
-        if (rightMidMotor != null) rightMidMotor.setPower(0.0);
+        if (leftFrontMotor != null)
+            leftFrontMotor.setPower(0.0);
+        if (rightFrontMotor != null)
+            rightFrontMotor.setPower(0.0);
+        if (leftRearMotor != null)
+            leftRearMotor.setPower(0.0);
+        if (rightRearMotor != null)
+            rightRearMotor.setPower(0.0);
+        if (leftMidMotor != null)
+            leftMidMotor.setPower(0.0);
+        if (rightMidMotor != null)
+            rightMidMotor.setPower(0.0);
 
         if (debugEnabled)
         {
@@ -787,11 +806,11 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * forward and backward. Increasing sensitivity causes sharper turns for fixed values of curve.
      *
      * @param magnitude specifies the speed setting for the outside wheel in a turn, forward or backwards, +1 to -1.
-     * @param curve specifies the rate of turn, constant for different forward speeds. Set curve less than 0 for left
-     *              turn or curve greater than 0 for right turn. Set curve = e^(-r/w) to get a turn radius r for
-     *              wheel base w of your robot. Conversely, turn radius r = -ln(curve)*w for a given value of curve
-     *              and wheel base w.
-     * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
+     * @param curve     specifies the rate of turn, constant for different forward speeds. Set curve less than 0 for left
+     *                  turn or curve greater than 0 for right turn. Set curve = e^(-r/w) to get a turn radius r for
+     *                  wheel base w of your robot. Conversely, turn radius r = -ln(curve)*w for a given value of curve
+     *                  and wheel base w.
+     * @param inverted  specifies true to invert control (i.e. robot front becomes robot back).
      */
     public void drive(double magnitude, double curve, boolean inverted)
     {
@@ -801,31 +820,31 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "mag=%f,curve=%f,inverted=%s",
-                                magnitude, curve, Boolean.toString(inverted));
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "mag=%f,curve=%f,inverted=%s", magnitude, curve,
+                Boolean.toString(inverted));
         }
 
         if (curve < 0.0)
         {
             double value = Math.log(-curve);
-            double ratio = (value - sensitivity)/(value + sensitivity);
+            double ratio = (value - sensitivity) / (value + sensitivity);
             if (ratio == 0.0)
             {
                 ratio = 0.0000000001;
             }
-            leftOutput = magnitude/ratio;
+            leftOutput = magnitude / ratio;
             rightOutput = magnitude;
         }
         else if (curve > 0.0)
         {
             double value = Math.log(curve);
-            double ratio = (value - sensitivity)/(value + sensitivity);
+            double ratio = (value - sensitivity) / (value + sensitivity);
             if (ratio == 0.0)
             {
                 ratio = 0.0000000001;
             }
             leftOutput = magnitude;
-            rightOutput = magnitude/ratio;
+            rightOutput = magnitude / ratio;
         }
         else
         {
@@ -845,7 +864,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * This method drives the motors with the given magnitude and curve values.
      *
      * @param magnitude specifies the magnitude value.
-     * @param curve specifies the curve value.
+     * @param curve     specifies the curve value.
      */
     public void drive(double magnitude, double curve)
     {
@@ -856,9 +875,9 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * This method implements tank drive where leftPower controls the left motors and right power controls the right
      * motors.
      *
-     * @param leftPower specifies left power value.
+     * @param leftPower  specifies left power value.
      * @param rightPower specifies right power value.
-     * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
+     * @param inverted   specifies true to invert control (i.e. robot front becomes robot back).
      */
     public void tankDrive(double leftPower, double rightPower, boolean inverted)
     {
@@ -866,9 +885,9 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API,
-                                "leftPower=%f,rightPower=%f,inverted=%s",
-                                leftPower, rightPower, Boolean.toString(inverted));
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "leftPower=%f,rightPower=%f,inverted=%s", leftPower,
+                    rightPower, Boolean.toString(inverted));
         }
 
         leftPower = TrcUtil.clipRange(leftPower);
@@ -883,9 +902,9 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (gyroAssistEnabled)
         {
-            double diffPower = (leftPower - rightPower)/2.0;
-            double assistPower =
-                TrcUtil.clipRange(gyroAssistKp*(diffPower - gyro.getZRotationRate().value/gyroMaxRotationRate));
+            double diffPower = (leftPower - rightPower) / 2.0;
+            double assistPower = TrcUtil
+                .clipRange(gyroAssistKp * (diffPower - gyro.getZRotationRate().value / gyroMaxRotationRate));
             leftPower += assistPower;
             rightPower -= assistPower;
             double maxMag = Math.max(Math.abs(leftPower), Math.abs(rightPower));
@@ -971,7 +990,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * This method implements tank drive where leftPower controls the left motors and right power controls the right
      * motors.
      *
-     * @param leftPower specifies left power value.
+     * @param leftPower  specifies left power value.
      * @param rightPower specifies right power value.
      */
     public void tankDrive(double leftPower, double rightPower)
@@ -984,8 +1003,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * turnPower controls how fast it will turn.
      *
      * @param drivePower specifies the drive power value.
-     * @param turnPower specifies the turn power value.
-     * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
+     * @param turnPower  specifies the turn power value.
+     * @param inverted   specifies true to invert control (i.e. robot front becomes robot back).
      */
     public void arcadeDrive(double drivePower, double turnPower, boolean inverted)
     {
@@ -995,9 +1014,9 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API,
-                                "drivePower=%f,turnPower=%f,inverted=%s",
-                                drivePower, turnPower, Boolean.toString(inverted));
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "drivePower=%f,turnPower=%f,inverted=%s", drivePower,
+                    turnPower, Boolean.toString(inverted));
         }
 
         drivePower = TrcUtil.clipRange(drivePower);
@@ -1025,7 +1044,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * turnPower controls how fast it will turn.
      *
      * @param drivePower specifies the drive power value.
-     * @param turnPower specifies the turn power value.
+     * @param turnPower  specifies the turn power value.
      */
     public void arcadeDrive(double drivePower, double turnPower)
     {
@@ -1037,10 +1056,10 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * controls how fast the robot will go in the y direction. Rotation controls how fast the robot rotates and
      * gyroAngle specifies the heading the robot should maintain.
      *
-     * @param x specifies the x power.
-     * @param y specifies the y power.
-     * @param rotation specifies the rotating power.
-     * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
+     * @param x         specifies the x power.
+     * @param y         specifies the y power.
+     * @param rotation  specifies the rotating power.
+     * @param inverted  specifies true to invert control (i.e. robot front becomes robot back).
      * @param gyroAngle specifies the gyro angle to maintain.
      */
     public void mecanumDrive_Cartesian(double x, double y, double rotation, boolean inverted, double gyroAngle)
@@ -1049,8 +1068,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "x=%f,y=%f,rot=%f,inverted=%s,angle=%f",
-                                x, y, rotation, Boolean.toString(inverted), gyroAngle);
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "x=%f,y=%f,rot=%f,inverted=%s,angle=%f", x, y,
+                rotation, Boolean.toString(inverted), gyroAngle);
         }
 
         if (numMotors != 4)
@@ -1070,19 +1089,20 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         double cosA = Math.cos(Math.toRadians(gyroAngle));
         double sinA = Math.sin(Math.toRadians(gyroAngle));
-        double x1 = x*cosA - y*sinA;
-        double y1 = x*sinA + y*cosA;
+        double x1 = x * cosA - y * sinA;
+        double y1 = x * sinA + y * cosA;
 
         if (gyroAssistEnabled)
         {
             double zRotationRate = gyro.getZRotationRate().value;
-            double normalizedRotationRate = zRotationRate/gyroMaxRotationRate;
+            double normalizedRotationRate = zRotationRate / gyroMaxRotationRate;
             double error = rotation - normalizedRotationRate;
-            rotation += TrcUtil.clipRange(gyroAssistKp*error);
-            if(debugEnabled)
+            rotation += TrcUtil.clipRange(gyroAssistKp * error);
+            if (debugEnabled)
             {
-                dbgTrace.traceInfo("mecanumDrive_Cartesian", 
-                    "Gyro assist: rotationTarget=%.3f normalizedRotationRate=%.3f", rotation, normalizedRotationRate);
+                dbgTrace
+                    .traceInfo("mecanumDrive_Cartesian", "Gyro assist: rotationTarget=%.3f normalizedRotationRate=%.3f",
+                        rotation, normalizedRotationRate);
             }
         }
 
@@ -1146,8 +1166,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * controls how fast the robot will go in the y direction. Rotation controls how fast the robot rotates and
      * gyroAngle specifies the heading the robot should maintain.
      *
-     * @param x specifies the x power.
-     * @param y specifies the y power.
+     * @param x        specifies the x power.
+     * @param y        specifies the y power.
      * @param rotation specifies the rotating power.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
@@ -1160,8 +1180,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
      * This method implements mecanum drive where x controls how fast the robot will go in the x direction, and y
      * controls how fast the robot will go in the y direction. Rotation controls how fast the robot rotates.
      *
-     * @param x specifies the x power.
-     * @param y specifies the y power.
+     * @param x        specifies the x power.
+     * @param y        specifies the y power.
      * @param rotation specifies the rotating power.
      */
     public void mecanumDrive_Cartesian(double x, double y, double rotation)
@@ -1175,8 +1195,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
      *
      * @param magnitude specifies the magnitude combining x and y axes.
      * @param direction specifies the direction in degrees.
-     * @param rotation specifies the rotation power.
-     * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
+     * @param rotation  specifies the rotation power.
+     * @param inverted  specifies true to invert control (i.e. robot front becomes robot back).
      */
     public void mecanumDrive_Polar(double magnitude, double direction, double rotation, boolean inverted)
     {
@@ -1184,8 +1204,8 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "mag=%f,dir=%f,rot=%f,inverted=%s",
-                                magnitude, direction, rotation, Boolean.toString(inverted));
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "mag=%f,dir=%f,rot=%f,inverted=%s", magnitude,
+                direction, rotation, Boolean.toString(inverted));
         }
 
         if (numMotors != 4)
@@ -1206,14 +1226,15 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
         if (gyroAssistEnabled)
         {
-            rotation += TrcUtil.clipRange(gyroAssistKp*(rotation - gyro.getZRotationRate().value/gyroMaxRotationRate));
+            rotation += TrcUtil
+                .clipRange(gyroAssistKp * (rotation - gyro.getZRotationRate().value / gyroMaxRotationRate));
         }
 
         double wheelPowers[] = new double[4];
-        wheelPowers[MotorType.LEFT_FRONT.value] = (sinD*magnitude + rotation);
-        wheelPowers[MotorType.RIGHT_FRONT.value] = (cosD*magnitude - rotation);
-        wheelPowers[MotorType.LEFT_REAR.value] = (cosD*magnitude + rotation);
-        wheelPowers[MotorType.RIGHT_REAR.value] = (sinD*magnitude - rotation);
+        wheelPowers[MotorType.LEFT_FRONT.value] = (sinD * magnitude + rotation);
+        wheelPowers[MotorType.RIGHT_FRONT.value] = (cosD * magnitude - rotation);
+        wheelPowers[MotorType.LEFT_REAR.value] = (cosD * magnitude + rotation);
+        wheelPowers[MotorType.RIGHT_REAR.value] = (sinD * magnitude - rotation);
         normalize(wheelPowers);
 
         double wheelPower;
@@ -1270,7 +1291,7 @@ public class TrcCommonDriveBase extends TrcDriveBase
      *
      * @param magnitude specifies the magnitude combining x and y axes.
      * @param direction specifies the direction in degrees.
-     * @param rotation specifies the rotation power.
+     * @param rotation  specifies the rotation power.
      */
     public void mecanumDrive_Polar(double magnitude, double direction, double rotation)
     {
@@ -1306,9 +1327,10 @@ public class TrcCommonDriveBase extends TrcDriveBase
     /**
      * This method is called periodically to monitor the encoders and gyro to update the odometry data or when
      * the competition mode is about to end.
-=     *
+     * =     *
+     *
      * @param taskType specifies the type of task being run.
-     * @param runMode specifies the competition mode that is about to end (e.g. Autonomous, TeleOp, Test).
+     * @param runMode  specifies the competition mode that is about to end (e.g. Autonomous, TeleOp, Test).
      */
     public void driveBaseTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
     {
@@ -1415,17 +1437,26 @@ public class TrcCommonDriveBase extends TrcDriveBase
 
             if (numMotors == 4)
             {
-                xPos = ((lfEnc + rrEnc) - (rfEnc + lrEnc))*xScale/4.0;
-                yPos = (lfEnc + lrEnc + rfEnc + rrEnc)*yScale/4.0;
-                rotPos = ((lfEnc + lrEnc) - (rfEnc + rrEnc))*rotScale/4.0;
-                xSpeed = ((lfSpeed + rrSpeed) - (rfSpeed + lrSpeed))*xScale/4.0;
-                ySpeed = (lfSpeed + lrSpeed + rfSpeed + rrSpeed)*yScale/4.0;
+                xPos = ((lfEnc + rrEnc) - (rfEnc + lrEnc)) * xScale / 4.0;
+                yPos = (lfEnc + lrEnc + rfEnc + rrEnc) * yScale / 4.0;
+                rotPos = ((lfEnc + lrEnc) - (rfEnc + rrEnc)) * rotScale / 4.0;
+                xSpeed = ((lfSpeed + rrSpeed) - (rfSpeed + lrSpeed)) * xScale / 4.0;
+                ySpeed = (lfSpeed + lrSpeed + rfSpeed + rrSpeed) * yScale / 4.0;
             }
             else
             {
-                yPos = (lrEnc + rrEnc)*yScale/2.0;
-                rotPos = (lrEnc - rrEnc)*rotScale/2.0;
-                ySpeed = (lrSpeed + rrSpeed)*yScale/2.0;
+                double leftChange = lrEnc - prevLeftRearPos;
+                double rightChange = rrEnc - prevRightRearPos;
+                if (sign(leftChange) == sign(rightChange))
+                {
+                    rotPos += (leftChange - rightChange) * 180.0 / (Math.PI * rotScale); // Driving in a curve
+                }
+                else
+                {
+                    rotPos += (leftChange - rightChange) * 180.0 / (2.0 * Math.PI * rotScale); // Turning in place
+                }
+                yPos = (lrEnc + rrEnc) * yScale / 2.0;
+                ySpeed = (lrSpeed + rrSpeed) * yScale / 2.0;
             }
 
             if (gyro != null)
@@ -1439,15 +1470,19 @@ public class TrcCommonDriveBase extends TrcDriveBase
             }
 
             double currTime = TrcUtil.getCurrentTime();
-            double lfPower = leftFrontMotor != null? leftFrontMotor.getPower(): 0.0;
-            double rfPower = rightFrontMotor != null? rightFrontMotor.getPower(): 0.0;
-            double lrPower = leftRearMotor != null? leftRearMotor.getPower(): 0.0;
-            double rrPower = rightRearMotor != null? rightRearMotor.getPower(): 0.0;
+            double lfPower = leftFrontMotor != null ? leftFrontMotor.getPower() : 0.0;
+            double rfPower = rightFrontMotor != null ? rightFrontMotor.getPower() : 0.0;
+            double lrPower = leftRearMotor != null ? leftRearMotor.getPower() : 0.0;
+            double rrPower = rightRearMotor != null ? rightRearMotor.getPower() : 0.0;
 
-            if (lfEnc != prevLeftFrontPos || lfPower == 0.0) lfStallStartTime = currTime;
-            if (rfEnc != prevRightFrontPos || rfPower == 0.0) rfStallStartTime = currTime;
-            if (lrEnc != prevLeftRearPos || lrPower == 0.0) lrStallStartTime = currTime;
-            if (rrEnc != prevRightRearPos || rrPower == 0.0) rrStallStartTime = currTime;
+            if (lfEnc != prevLeftFrontPos || lfPower == 0.0)
+                lfStallStartTime = currTime;
+            if (rfEnc != prevRightFrontPos || rfPower == 0.0)
+                rfStallStartTime = currTime;
+            if (lrEnc != prevLeftRearPos || lrPower == 0.0)
+                lrStallStartTime = currTime;
+            if (rrEnc != prevRightRearPos || rrPower == 0.0)
+                rrStallStartTime = currTime;
 
             prevLeftFrontPos = lfEnc;
             prevRightFrontPos = rfEnc;
@@ -1464,5 +1499,18 @@ public class TrcCommonDriveBase extends TrcDriveBase
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.TASK);
         }
     }   //driveBaseTask
+
+    private int sign(double value)
+    {
+        if (value > 0)
+        {
+            return 1;
+        }
+        else if (value < 0)
+        {
+            return -1;
+        }
+        return 0;
+    }
 
 }   //class TrcCommonDriveBase
