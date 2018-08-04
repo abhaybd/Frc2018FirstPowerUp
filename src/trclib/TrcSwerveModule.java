@@ -17,18 +17,18 @@ public class TrcSwerveModule
     private TrcWarpSpace warpSpace;
     private TrcDbgTrace dbgTrace;
 
-    public TrcSwerveModule(String instanceName,
-        TrcMotorController driveMotor, TrcMotorController turnMotor, double turnDegreesPerCount,
-        TrcPidController.PidCoefficients turnPidCoefficients, double turnTolerance, double turnOutputLimit)
+    public TrcSwerveModule(String instanceName, TrcMotorController driveMotor, TrcMotorController turnMotor,
+        double turnDegreesPerCount, TrcPidController.PidCoefficients turnPidCoefficients, double turnTolerance,
+        double turnOutputLimit)
     {
         this.driveMotor = driveMotor;
         this.turnMotor = turnMotor;
         this.turnDegreesPerCount = turnDegreesPerCount;
 
-        this.turnPidCtrl = new TrcPidController(instanceName + ".turnPidCtrl", turnPidCoefficients,
-            turnTolerance, this::getAngle);
+        this.turnPidCtrl = new TrcPidController(instanceName + ".turnPidCtrl", turnPidCoefficients, turnTolerance,
+            this::getAngle);
         this.turnPidCtrl.setAbsoluteSetPoint(true);
-        this.turnPidCtrl.setTargetRange(0,360);
+        this.turnPidCtrl.setTargetRange(0, 360);
         this.turnPidCtrl.setOutputLimit(turnOutputLimit);
 
         warpSpace = new TrcWarpSpace(instanceName + ".warpSpace", 0.0, 360.0);
@@ -227,7 +227,7 @@ public class TrcSwerveModule
         if (debugEnabled)
         {
             final String funcName = "isTrackingTurnAngle";
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API,"=%b", trackingTurnAngle);
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "=%b", trackingTurnAngle);
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
         }
 
@@ -242,10 +242,11 @@ public class TrcSwerveModule
     private void setEnabled(boolean enabled)
     {
         trackingTurnAngle = enabled;
-        if(enabled)
+        if (enabled)
         {
             turnTaskObj.registerTask(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK);
-        } else
+        }
+        else
         {
             turnTaskObj.unregisterTask(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK);
         }
@@ -253,14 +254,15 @@ public class TrcSwerveModule
 
     /**
      * It's the turn task. Pretty self explanatory. Also, you shouldn't be reading this because you don't need to.
+     *
      * @param taskType What type of task? duh.
-     * @param runMode What mode is it being run in? duh.
+     * @param runMode  What mode is it being run in? duh.
      */
     private void turnTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
     {
         turnMotor.setPower(turnPidCtrl.isOnTarget() ? 0.0 : turnPidCtrl.getOutput());
 
-        if(debugEnabled)
+        if (debugEnabled)
         {
             turnPidCtrl.printPidInfo(dbgTrace);
         }
