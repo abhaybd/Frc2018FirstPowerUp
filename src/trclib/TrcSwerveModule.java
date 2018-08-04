@@ -43,13 +43,25 @@ public class TrcSwerveModule
         }
     }
 
+    /**
+     * Reset the encoder of the drive motor.
+     *
+     * @param hardware Whether or not to do a hardware or software reset.
+     */
     public void resetPosition(boolean hardware)
     {
         driveMotor.resetPosition(hardware);
     }
 
+    /**
+     * Set the target angle for the turn motor. The turn motor will constantly try to keep this angle.
+     *
+     * @param angle The angle to set the turn motor to, in degrees, in the range [0,360).
+     */
     public void setAngle(double angle)
     {
+        angle = angle % 360;
+
         if (debugEnabled)
         {
             final String funcName = "setAngle";
@@ -61,6 +73,11 @@ public class TrcSwerveModule
         turnPidCtrl.setTarget(angle, warpSpace);
     }
 
+    /**
+     * The current angle of the turn motor. This is not necessarily the target angle.
+     *
+     * @return The angle of the turn motor, in degrees, in the range [0,360).
+     */
     public double getAngle()
     {
         double angle = (turnMotor.getPosition() * turnDegreesPerCount) % 360.0;
@@ -75,6 +92,11 @@ public class TrcSwerveModule
         return angle;
     }
 
+    /**
+     * Get the power being supplied to the turn motor.
+     *
+     * @return Power being supplied to the turn motor, in the range [-1,1].
+     */
     public double getTurnPower()
     {
         double power = turnMotor.getPower();
@@ -89,6 +111,11 @@ public class TrcSwerveModule
         return power;
     }
 
+    /**
+     * Set the drive motor to drive with this much power.
+     *
+     * @param power Power to supply to drive motor, in the range [-1,1].
+     */
     public void setDrivePower(double power)
     {
         if (debugEnabled)
@@ -101,6 +128,11 @@ public class TrcSwerveModule
         driveMotor.setPower(power);
     }
 
+    /**
+     * Get the power being supplied to the drive motor.
+     *
+     * @return Power being supplied to the drive motor, in the range [-1,1].
+     */
     public double getDrivePower()
     {
         double power = driveMotor.getPower();
@@ -114,6 +146,11 @@ public class TrcSwerveModule
         return power;
     }
 
+    /**
+     * The current speed of the drive motor.
+     *
+     * @return Speed of the drive motor in sensor units per second.
+     */
     public double getDriveSpeed()
     {
         double speed = driveMotor.getSpeed();
@@ -128,6 +165,11 @@ public class TrcSwerveModule
         return speed;
     }
 
+    /**
+     * The current position of the drive motor.
+     *
+     * @return Position of the drive motor in sensor units.
+     */
     public double getPosition()
     {
         double position = driveMotor.getPosition();
@@ -142,6 +184,11 @@ public class TrcSwerveModule
         return position;
     }
 
+    /**
+     * Set the brake mode.
+     *
+     * @param enabled If true, the motors will brake when stopped. If false, they will coast instead.
+     */
     public void setBrakeMode(boolean enabled)
     {
         if (debugEnabled)
@@ -169,6 +216,12 @@ public class TrcSwerveModule
         setEnabled(false);
     }
 
+    /**
+     * Whether or not the turn motor is following the target angle. This will be true if
+     * <code>stopTrackingTurnAngle()</code> was called.
+     *
+     * @return True if the turn motor is following the target angle. False otherwise.
+     */
     public boolean isTrackingTurnAngle()
     {
         if (debugEnabled)
@@ -181,6 +234,11 @@ public class TrcSwerveModule
         return trackingTurnAngle;
     }
 
+    /**
+     * Enables or disables the turnTask. The turnTask is responsible for making sure the turn motor tracks the target angle.
+     *
+     * @param enabled Enable or disable the turnTask?
+     */
     private void setEnabled(boolean enabled)
     {
         trackingTurnAngle = enabled;
@@ -193,6 +251,11 @@ public class TrcSwerveModule
         }
     }
 
+    /**
+     * It's the turn task. Pretty self explanatory. Also, you shouldn't be reading this because you don't need to.
+     * @param taskType What type of task? duh.
+     * @param runMode What mode is it being run in? duh.
+     */
     private void turnTask(TrcTaskMgr.TaskType taskType, TrcRobot.RunMode runMode)
     {
         turnMotor.setPower(turnPidCtrl.isOnTarget() ? 0.0 : turnPidCtrl.getOutput());
