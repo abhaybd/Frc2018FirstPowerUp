@@ -9,14 +9,18 @@ public class TrcSwerveModule
     private boolean trackingTurnAngle;
     private TrcWarpSpace warpSpace;
     public TrcSwerveModule(String instanceName,
-        TrcMotorController driveMotor, TrcMotorController turnMotor, TrcPidController turnPidCtrl, double turnDegreesPerCount)
+        TrcMotorController driveMotor, TrcMotorController turnMotor, double turnDegreesPerCount,
+        TrcPidController.PidCoefficients turnPidCoefficients, double turnTolerance, double turnOutputLimit)
     {
         this.driveMotor = driveMotor;
         this.turnMotor = turnMotor;
         this.turnDegreesPerCount = turnDegreesPerCount;
-        this.turnPidCtrl = turnPidCtrl;
 
+        this.turnPidCtrl = new TrcPidController(instanceName + ".turnPidCtrl", turnPidCoefficients,
+            turnTolerance, this::getAngle);
         this.turnPidCtrl.setAbsoluteSetPoint(true);
+        this.turnPidCtrl.setTargetRange(0,360);
+        this.turnPidCtrl.setOutputLimit(turnOutputLimit);
 
         warpSpace = new TrcWarpSpace(instanceName + ".warpSpace", 0.0, 360.0);
 
@@ -31,12 +35,12 @@ public class TrcSwerveModule
     public void setAngle(double angle)
     {
         setEnabled(true);
-        turnPidCtrl.setTarget(angle / turnDegreesPerCount, warpSpace);
+        turnPidCtrl.setTarget(angle, warpSpace);
     }
 
     public double getAngle()
     {
-        return turnMotor.getPosition() * turnDegreesPerCount;
+        return (turnMotor.getPosition() * turnDegreesPerCount) % 360.0;
     }
 
     public double getTurnPower()
