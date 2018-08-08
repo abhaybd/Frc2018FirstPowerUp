@@ -74,8 +74,8 @@ public class Robot extends FrcRobotBase
 
     public static final boolean USE_TRACELOG = true;
     public static final boolean USE_NAV_X = true;
-    public static final boolean USE_SONAR = true;
-    public static final boolean USE_MAXBOTIX_SONAR_ARRAY = true;
+    public static final boolean USE_SONAR = false;
+    public static final boolean USE_MAXBOTIX_SONAR_ARRAY = false;
     public static final boolean USE_LIDAR = false;
     public static final boolean USE_USB_CAM = false;
     public static final boolean USE_PIXY_SPI = false;

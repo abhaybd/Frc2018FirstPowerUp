@@ -58,7 +58,7 @@ public class MotionProfileTest implements TrcRobot.RobotCommand
     public void start()
     {
         TrcTankMotionProfile profile = TrcTankMotionProfile
-            .loadProfileFromCsv("/home/lvuser/loop_left_Jaci.csv", "/home/lvuser/loop_right_Jaci.csv");
+            .loadProfileFromCsv("/home/lvuser/right_turn_left_Jaci.csv", "/home/lvuser/right_turn_right_Jaci.csv");
         follower.start(profile);
         robot.globalTracer.traceInfo(instanceName + ".start", "Started following path!");
 
