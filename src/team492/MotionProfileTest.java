@@ -16,10 +16,12 @@ import java.util.Date;
 
 public class MotionProfileTest implements TrcRobot.RobotCommand
 {
-    private static final double kP = 1.275;
+    private static final double kP = 2.24889; // Rescaled pid
     private static final double kI = 0.0;
-    private static final double kD = 0.0956;
-    private static final double kF = 0.8525; // TODO: Calculate this according to Phoenix docs
+    private static final double kD = 0.224889; // Rescaled pid
+    // kF * topSpeed = 1023. topSpeed is encoderUnits/100ms
+    private static final double kF = 0.8525; // TODO: tune this
+    // TODO: tune the wheelbase in the profiles
 
     private static final boolean WRITE_CSV = true;
 
@@ -39,15 +41,20 @@ public class MotionProfileTest implements TrcRobot.RobotCommand
         follower.setLeftMotors(robot.leftFrontWheel, robot.leftRearWheel);
         follower.setRightMotors(robot.rightFrontWheel, robot.rightRearWheel);
         
-        refreshData("Test/TargetPosLeft",0.0);
-        refreshData("Test/ActualPosLeft",0.0);
-        refreshData("Test/TargetVelLeft",0.0);
-        refreshData("Test/ActualVelLeft",0.0);
+        refreshData("Test/TargetPosLeft");
+        refreshData("Test/ActualPosLeft");
+        refreshData("Test/TargetVelLeft");
+        refreshData("Test/ActualVelLeft");
 
-        refreshData("Test/TargetPosRight",0.0);
-        refreshData("Test/ActualPosRight",0.0);
-        refreshData("Test/TargetVelRight",0.0);
-        refreshData("Test/ActualVelRight",0.0);
+        refreshData("Test/TargetPosRight");
+        refreshData("Test/ActualPosRight");
+        refreshData("Test/TargetVelRight");
+        refreshData("Test/ActualVelRight");
+    }
+
+    private void refreshData(String name)
+    {
+        refreshData(name, 0.0);
     }
     
     private void refreshData(String name, double defaultValue)
