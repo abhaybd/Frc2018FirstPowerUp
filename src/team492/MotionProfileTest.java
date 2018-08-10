@@ -16,10 +16,10 @@ import java.util.Date;
 
 public class MotionProfileTest implements TrcRobot.RobotCommand
 {
-    private static final double kP = 1.194; //1.275;
+    private static final double kP = 0.5651851839;
     private static final double kI = 0.0;
-    private static final double kD = 0.0899; //0.0956;
-    private static final double kF = 1.12111; // TODO: Calculate this according to Phoenix docs
+    private static final double kD = 0.1695555552;
+    private static final double kF = 1.131266385; // TODO: Calculate this according to Phoenix docs
 
     private static final boolean WRITE_CSV = true;
 
@@ -58,7 +58,7 @@ public class MotionProfileTest implements TrcRobot.RobotCommand
     public void start()
     {
         TrcTankMotionProfile profile = TrcTankMotionProfile
-            .loadProfileFromCsv("/home/lvuser/right_turn_left_Jaci.csv", "/home/lvuser/right_turn_right_Jaci.csv");
+            .loadProfileFromCsv("/home/lvuser/loop_left_Jaci.csv", "/home/lvuser/loop_right_Jaci.csv");
         follower.start(profile);
         robot.globalTracer.traceInfo(instanceName + ".start", "Started following path!");
 
