@@ -160,7 +160,7 @@ public class TrcPidController
                 new TrcDbgTrace(moduleName + "." + instanceName, tracingEnabled, traceLevel, msgLevel);
         }
 
-        dashboard = HalDashboard.getInstance();
+        // dashboard = HalDashboard.getInstance();
         this.instanceName = instanceName;
         this.pidCoefficients = pidCoefficients;
         this.tolerance = Math.abs(tolerance);
