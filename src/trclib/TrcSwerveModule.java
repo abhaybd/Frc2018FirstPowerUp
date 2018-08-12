@@ -28,7 +28,7 @@ public class TrcSwerveModule
         this.turnPidCtrl = new TrcPidController(instanceName + ".turnPidCtrl", turnPidCoefficients, turnTolerance,
             this::getAngle);
         this.turnPidCtrl.setAbsoluteSetPoint(true);
-        this.turnPidCtrl.setTargetRange(0, 360);
+        this.turnPidCtrl.setTargetRange(-360, 360);
         this.turnPidCtrl.setOutputLimit(turnOutputLimit);
 
         warpSpace = new TrcWarpSpace(instanceName + ".warpSpace", 0.0, 360.0);
@@ -60,7 +60,7 @@ public class TrcSwerveModule
      */
     public void setAngle(double angle)
     {
-        angle = angle % 360;
+        angle = TrcUtil.modulo(angle, 360);
 
         if (debugEnabled)
         {
@@ -80,7 +80,7 @@ public class TrcSwerveModule
      */
     public double getAngle()
     {
-        double angle = (turnMotor.getPosition() * turnDegreesPerCount) % 360.0;
+        double angle = TrcUtil.modulo(turnMotor.getPosition() * turnDegreesPerCount, 360.0);
 
         if (debugEnabled)
         {
@@ -89,6 +89,24 @@ public class TrcSwerveModule
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", angle);
         }
 
+        return angle;
+    }
+
+    /**
+     * The target angle of the turn motor. This is not necessarily the actual angle.
+     *
+     * @return The target angle of the turn motor, in degrees, in the range [0,360).
+     */
+    public double getTargetAngle()
+    {
+        double angle = TrcUtil.modulo(turnPidCtrl.getTarget(), 360);
+
+        if (debugEnabled)
+        {
+            final String funcName = "getTargetAngle";
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=%f", angle);
+        }
         return angle;
     }
 
@@ -241,6 +259,11 @@ public class TrcSwerveModule
      */
     private void setEnabled(boolean enabled)
     {
+        if (trackingTurnAngle == enabled)
+        {
+            return;
+        }
+
         trackingTurnAngle = enabled;
         if (enabled)
         {

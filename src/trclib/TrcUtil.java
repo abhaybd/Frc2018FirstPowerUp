@@ -87,6 +87,20 @@ public class TrcUtil
     }   //getTimestamp
 
     /**
+     * Calculate the modulo of the two numbers. Unlike the <code>%</code> operator, this will return in the range [0,b).
+     * For some reason, in Java, the <code>%</code> operator actually does remainder, which means the result is in the
+     * range (-b,b).
+     *
+     * @param a The dividend
+     * @param b The divisor
+     * @return The modulo, in the range [0,360)
+     */
+    public static double modulo(double a, double b)
+    {
+        return ((a % b) + b) % b;
+    }
+
+    /**
      * This method puts the current thread to sleep for the given time in msec. It handles InterruptException where
      * it recalculates the remaining time and calls sleep again repeatedly until the specified sleep time has past.
      *
