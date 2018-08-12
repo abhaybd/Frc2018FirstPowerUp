@@ -363,6 +363,21 @@ public class TrcSwerveDriveBase extends TrcDriveBase
             rightPower = -temp;
         }
 
+        if (gyroAssistEnabled)
+        {
+            double diffPower = (leftPower - rightPower) / 2.0;
+            double assistPower = TrcUtil
+                .clipRange(gyroAssistKp * (diffPower - gyro.getZRotationRate().value / gyroMaxRotationRate));
+            leftPower += assistPower;
+            rightPower -= assistPower;
+            double maxMag = Math.max(Math.abs(leftPower), Math.abs(rightPower));
+            if (maxMag > 1.0)
+            {
+                leftPower /= maxMag;
+                rightPower /= maxMag;
+            }
+        }
+
         leftPower = TrcUtil.clipRange(leftPower, -maxOutput, maxOutput);
         rightPower = TrcUtil.clipRange(rightPower, -maxOutput, maxOutput);
 

@@ -233,47 +233,6 @@ public class TrcCommonDriveBase extends TrcDriveBase
     }   //setMotorPowerMapper
 
     /**
-     * This method enables gyro assist drive.
-     *
-     * @param gyroMaxRotationRate specifies the maximum rotation rate of the robot base reported by the gyro.
-     * @param gyroAssistKp        specifies the gyro assist proportional constant.
-     */
-    public void enableGyroAssist(double gyroMaxRotationRate, double gyroAssistKp)
-    {
-        final String funcName = "enableGyroAssist";
-
-        if (debugEnabled)
-        {
-            dbgTrace
-                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "gyroMaxRate=%f,gyroAssistKp=%f", gyroMaxRotationRate,
-                    gyroAssistKp);
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
-        }
-
-        this.gyroMaxRotationRate = gyroMaxRotationRate;
-        this.gyroAssistKp = gyroAssistKp;
-        this.gyroAssistEnabled = true;
-    }   //enableGyroAssist
-
-    /**
-     * This method enables/disables gyro assist drive.
-     */
-    public void disableGyroAssist()
-    {
-        final String funcName = "enableGyroAssist";
-
-        if (debugEnabled)
-        {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
-        }
-
-        this.gyroMaxRotationRate = 0.0;
-        this.gyroAssistKp = 1.0;
-        this.gyroAssistEnabled = false;
-    }   //disableGyroAssist
-
-    /**
      * This method returns the number of motors in the drive train.
      *
      * @return number of motors.

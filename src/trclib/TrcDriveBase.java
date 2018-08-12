@@ -17,7 +17,7 @@ public abstract class TrcDriveBase
     private static double DEF_SENSITIVITY = 0.5;
     private static double DEF_MAX_OUTPUT = 1.0;
 
-    enum DriveMode
+    public enum DriveMode
     {
         CURVE_MODE,
         ARCADE_MODE,
@@ -49,7 +49,7 @@ public abstract class TrcDriveBase
      * It could allow the drive base to drive straight by translating wheel power to actual torque. It could also
      * allow us to implement our own ramp rate to limit acceleration and deceleration.
      */
-    interface MotorPowerMapper
+    public interface MotorPowerMapper
     {
         /**
          * This method is called to translate the desired motor power to the actual motor power taking into
@@ -65,6 +65,8 @@ public abstract class TrcDriveBase
     protected double sensitivity = DEF_SENSITIVITY;
     protected double maxOutput = DEF_MAX_OUTPUT;
     protected TrcDbgTrace dbgTrace;
+    protected boolean gyroAssistEnabled = false;
+    protected double gyroMaxRotationRate, gyroAssistKp;
 
     public TrcDriveBase()
     {
@@ -93,12 +95,12 @@ public abstract class TrcDriveBase
      *
      * @return number of motors.
      */
-    abstract int getNumMotors();
+    public abstract int getNumMotors();
 
     /**
      * This methods stops the drive base.
      */
-    abstract void stop();
+    public abstract void stop();
 
     /**
      * This method resets the drive base position odometry. This includes the motor encoders, the gyro heading and
@@ -106,35 +108,35 @@ public abstract class TrcDriveBase
      *
      * @param hardware specifies true for resetting hardware position, false for resetting software position.
      */
-    abstract void resetPosition(boolean hardware);
+    public abstract void resetPosition(boolean hardware);
 
     /**
      * This method returns the gyro heading of the drive base in degrees.
      *
      * @return gyro heading.
      */
-    abstract double getHeading();
+    public abstract double getHeading();
 
     /**
      * This method returns the drive base turn speed.
      *
      * @return turn speed.
      */
-    abstract double getTurnSpeed();
+    public abstract double getTurnSpeed();
 
     /**
      * This method returns the Y position in scaled unit.
      *
      * @return Y position.
      */
-    abstract double getYPosition();
+    public abstract double getYPosition();
 
     /**
      * This method returns the drive base speed in the Y direction.
      *
      * @return Y speed.
      */
-    abstract double getYSpeed();
+    public abstract double getYSpeed();
 
     /**
      * This method sets the Y position scale. The raw position from the encoder is in encoder counts. By setting the
@@ -142,14 +144,14 @@ public abstract class TrcDriveBase
      *
      * @param scale specifies the Y position scale.
      */
-    abstract void setYPositionScale(double scale);
+    public abstract void setYPositionScale(double scale);
 
     /**
      * This method enables/disables brake mode of the drive base.
      *
      * @param enabled specifies true to enable brake mode, false to disable it.
      */
-    abstract void setBrakeMode(boolean enabled);
+    public abstract void setBrakeMode(boolean enabled);
 
     /**
      * This method checks whether this specific motor is stalled.
@@ -158,12 +160,54 @@ public abstract class TrcDriveBase
      * @param stallTime How many seconds of stalling to count as stalling?
      * @return Whether this motor has stalled for <parameter>stallTime</parameter> seconds
      */
-    abstract boolean isStalled(MotorType motorType, double stallTime);
+    public abstract boolean isStalled(MotorType motorType, double stallTime);
 
     /**
      * This method resets the stall timer.
      */
-    abstract void resetStallTimer();
+    public abstract void resetStallTimer();
+
+    /**
+     * This method enables gyro assist drive. Gyro assist will use the gyro sensor to apply corrective power to try to
+     * maintain a consistent heading. If gyro assist is enabled, it will only be applied for drive modes that support it.
+     *
+     * @param gyroMaxRotationRate specifies the maximum rotation rate of the robot base reported by the gyro.
+     * @param gyroAssistKp        specifies the gyro assist proportional constant.
+     */
+    public void enableGyroAssist(double gyroMaxRotationRate, double gyroAssistKp)
+    {
+        final String funcName = "enableGyroAssist";
+
+        if (debugEnabled)
+        {
+            dbgTrace
+                .traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "gyroMaxRate=%f,gyroAssistKp=%f", gyroMaxRotationRate,
+                    gyroAssistKp);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
+        this.gyroMaxRotationRate = gyroMaxRotationRate;
+        this.gyroAssistKp = gyroAssistKp;
+        this.gyroAssistEnabled = true;
+    }
+
+    /**
+     * This method disables gyro assist drive.
+     */
+    public void disableGyroAssist()
+    {
+        final String funcName = "enableGyroAssist";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+
+        this.gyroMaxRotationRate = 0.0;
+        this.gyroAssistKp = 1.0;
+        this.gyroAssistEnabled = false;
+    }
 
     /**
      * This method checks if all motors on the drive base have been stalled for at least the specified stallTime.
@@ -390,7 +434,7 @@ public abstract class TrcDriveBase
      * @param rightPower specifies right power value.
      * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
      */
-    abstract void tankDrive(double leftPower, double rightPower, boolean inverted);
+    public abstract void tankDrive(double leftPower, double rightPower, boolean inverted);
 
     /**
      * This method implements tank drive where leftPower controls the left motors and right power controls the right
