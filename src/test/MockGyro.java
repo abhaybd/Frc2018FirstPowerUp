@@ -7,19 +7,20 @@ public class MockGyro extends TrcGyro
 {
     public MockGyro(String instanceName)
     {
-        super(instanceName, 1, TrcGyro.GYRO_HAS_Z_AXIS);
+        super(instanceName, 3,
+            TrcGyro.GYRO_HAS_X_AXIS | TrcGyro.GYRO_HAS_Y_AXIS | TrcGyro.GYRO_HAS_Z_AXIS);
     }
 
     @Override
     public SensorData<Double> getRawXData(DataType dataType)
     {
-        return null;
+        return new SensorData<>(TrcUtil.getCurrentTime(), 0.0);
     }
 
     @Override
     public SensorData<Double> getRawYData(DataType dataType)
     {
-        return null;
+        return new SensorData<>(TrcUtil.getCurrentTime(), 0.0);
     }
 
     @Override
