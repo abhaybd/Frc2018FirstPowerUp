@@ -275,6 +275,10 @@ public class TrcTaskMgr
      */
     public static TrcTaskMgr getInstance()
     {
+        if(instance == null)
+        {
+            instance = new TrcTaskMgr();
+        }
         return instance;
     }   //getInstance
 
