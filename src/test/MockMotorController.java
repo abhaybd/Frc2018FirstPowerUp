@@ -25,9 +25,9 @@ public class MockMotorController implements TrcMotorController
                 double currTime = TrcUtil.getCurrentTime();
                 double positionTime = position.timestamp;
                 if(currTime == positionTime) continue;
-                double positionChange = (power * topSpeed) * (currTime - positionTime);
+                speed = power * topSpeed;
+                double positionChange = speed * (currTime - positionTime);
                 double newPosition = position.value + positionChange;
-                speed = positionChange / (currTime - positionTime);
                 synchronized (position)
                 {
                     position.timestamp = currTime;

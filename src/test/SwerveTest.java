@@ -2,8 +2,10 @@ package test;
 
 import trclib.TrcGyro;
 import trclib.TrcPidController;
+import trclib.TrcRobot;
 import trclib.TrcSwerveDriveBase;
 import trclib.TrcSwerveModule;
+import trclib.TrcTaskMgr;
 
 import java.awt.event.KeyEvent;
 
@@ -15,7 +17,7 @@ public class SwerveTest
         double length = 48.0;
 
         double turnDegreesPerCount = 1.0;
-        TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(0.2);
+        TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(0.02);
         double turnTolerance = 1;
         double turnOutputLimit = 1;
 
@@ -38,6 +40,7 @@ public class SwerveTest
             lfModule, rfModule, lrModule, rrModule);
 
         KeyListener listener = KeyListener.getInstance();
+        TrcTaskMgr taskMgr = TrcTaskMgr.getInstance();
 
         while(true)
         {
@@ -51,7 +54,7 @@ public class SwerveTest
                 + "lfAngle=%05.1f,rfAngle=%05.1f,lrAngle=%05.1f,rrAngle=%05.1f",
                 x, y, turn,
                 lfModule.getDrivePower(), rfModule.getDrivePower(), lrModule.getDrivePower(), rrModule.getDrivePower(),
-                lfModule.getTargetAngle(), rfModule.getTargetAngle(), lrModule.getTargetAngle(), rrModule.getTargetAngle());
+                lfModule.getAngle(), rfModule.getAngle(), lrModule.getAngle(), rrModule.getAngle());
             try
             {
                 Thread.sleep(50);
@@ -60,6 +63,8 @@ public class SwerveTest
             {
                 e.printStackTrace();
             }
+
+            taskMgr.executeTaskType(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK, TrcRobot.RunMode.TELEOP_MODE);
         }
     }
 }
