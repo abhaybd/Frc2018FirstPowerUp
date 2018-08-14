@@ -30,11 +30,22 @@ public class RPC
     private static final int DEFAULT_PORT = 4444;
     private static RPC instance;
 
+    /**
+     * Get the instance of the RPC server. If an instance doesn't exist, create one and bind it to the default port.
+     *
+     * @return The RPC server instance
+     */
     public static RPC getInstance()
     {
         return getInstance(DEFAULT_PORT);
     }
 
+    /**
+     * Get the instance of the RPC server. If an instance doesn't exist, create one and bind it to the specified port.
+     *
+     * @param port Port to bind the RPC server if it doesn't exist.
+     * @return The RPC server instance
+     */
     public static RPC getInstance(int port)
     {
         if(instance == null)
@@ -66,6 +77,19 @@ public class RPC
         this.unboxMap = Collections.unmodifiableMap(unboxMap);
     }
 
+    /**
+     * Is the RPC server currently running?
+     *
+     * @return True if the RPC server is running, false otherwise.
+     */
+    public boolean isActive()
+    {
+        return serverSocket != null;
+    }
+
+    /**
+     * Initialize the RPC server if it is not already running. If it is, do nothing.
+     */
     public void start()
     {
         if(serverSocket != null) return;
@@ -84,6 +108,10 @@ public class RPC
         }
     }
 
+    /**
+     * Close the RPC server socket, interrupt all the threads, and wait for the threads to end.
+     * This method does not return until all the threads have stopped.
+     */
     public void close()
     {
         if(serverSocket != null)
