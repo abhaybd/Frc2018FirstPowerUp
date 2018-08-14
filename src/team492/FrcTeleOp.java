@@ -36,6 +36,7 @@ public class FrcTeleOp implements TrcRobot.RobotMode
     private boolean slowDriveOverride = false;
     private DriveMode driveMode = DriveMode.MECANUM_MODE;
     private boolean driveInverted = false;
+    private boolean fieldReference = false; // Drive by field reference frame?
     private boolean gyroAssist = false;
     private int winchDirection = 0;
 
@@ -89,6 +90,7 @@ public class FrcTeleOp implements TrcRobot.RobotMode
             //
             // DriveBase operation.
             //
+            double x, y, rot, heading;
             switch (driveMode)
             {
                 case TANK_MODE:
@@ -114,20 +116,31 @@ public class FrcTeleOp implements TrcRobot.RobotMode
                     break;
 
                 case MECANUM_MODE:
-                    double x = leftDriveX;
-                    double y = rightDriveY;
-                    double rot = robot.rightDriveStick.getTwistWithDeadband(true);
+                    x = leftDriveX;
+                    y = rightDriveY;
+                    rot = robot.rightDriveStick.getTwistWithDeadband(true);
                     if (slowDriveOverride)
                     {
                         x /= RobotInfo.DRIVE_SLOW_XSCALE;
                         y /= RobotInfo.DRIVE_SLOW_YSCALE;
                         rot /= RobotInfo.DRIVE_SLOW_TURNSCALE;
                     }
-//                    double xForceOz = x * RobotInfo.MAX_WHEEL_FORCE_OZ;
-//                    double yForceOz = y * RobotInfo.MAX_WHEEL_FORCE_OZ;
-                    robot.driveBase.mecanumDrive_Cartesian(x, y, rot, driveInverted);
-//                    HalDashboard.putNumber("xForceOz", xForceOz);
-//                    HalDashboard.putNumber("yForceOz", yForceOz);
+                    heading = (driveInverted || !fieldReference) ? 0 : robot.driveBase.getHeading();
+                    robot.driveBase.mecanumDrive_Cartesian(x, y, rot, driveInverted, heading);
+                    break;
+
+                case SWERVE_MODE:
+                    x = leftDriveX;
+                    y = rightDriveY;
+                    rot = robot.rightDriveStick.getTwistWithDeadband(true);
+                    if (slowDriveOverride)
+                    {
+                        x /= RobotInfo.DRIVE_SLOW_XSCALE;
+                        y /= RobotInfo.DRIVE_SLOW_YSCALE;
+                        rot /= RobotInfo.DRIVE_SLOW_TURNSCALE;
+                    }
+                    heading = (driveInverted || !fieldReference) ? 0 : robot.driveBase.getHeading();
+                    robot.driveBase.swerveDrive_Cartesian(x, y, rot, driveInverted, heading);
                     break;
             }
 
