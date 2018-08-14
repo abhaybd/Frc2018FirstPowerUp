@@ -3,26 +3,28 @@ package test;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 public class RPC
 {
     public static void main(String[] args)
     {
-        RPC.getInstance();
+        RPC.getInstance().start();
     }
 
     private static final int DEFAULT_PORT = 4444;
@@ -42,43 +44,77 @@ public class RPC
         return instance;
     }
 
-    private final ServerSocket serverSocket;
+    private ServerSocket serverSocket = null;
     private Map<Class<?>,Class<?>> unboxMap;
-    private Thread thread, requestHandlerThread;
-    private Map<String,Object> variables;
+    private Thread connectionHandlerThread;
+    private List<Thread> requestHandlerThreads = new ArrayList<>();
+    private int port;
 
     private RPC(int port)
     {
+        this.port = port;
+
+        Map<Class<?>,Class<?>> unboxMap = new HashMap<>();
+        unboxMap.put(Double.class, double.class);
+        unboxMap.put(Integer.class, int.class);
+        unboxMap.put(Float.class, float.class);
+        unboxMap.put(Long.class, long.class);
+        unboxMap.put(Boolean.class, boolean.class);
+        unboxMap.put(Character.class, char.class);
+        unboxMap.put(Byte.class, byte.class);
+        unboxMap.put(Short.class, short.class);
+        this.unboxMap = Collections.unmodifiableMap(unboxMap);
+    }
+
+    public void start()
+    {
+        if(serverSocket != null) return;
         try
         {
             serverSocket = new ServerSocket(port);
 
-            variables = new ConcurrentHashMap<>();
-
-            unboxMap = new ConcurrentHashMap<>();
-            unboxMap.put(Double.class, double.class);
-            unboxMap.put(Integer.class, int.class);
-            unboxMap.put(Float.class, float.class);
-            unboxMap.put(Long.class, long.class);
-            unboxMap.put(Boolean.class, boolean.class);
-            unboxMap.put(Character.class, char.class);
-            unboxMap.put(Byte.class, byte.class);
-            unboxMap.put(Short.class, short.class);
-
-            thread = new Thread(this::rpcThread);
-            thread.setDaemon(false);
-            thread.start();
+            connectionHandlerThread = new Thread(this::rpcThread);
+            connectionHandlerThread.setDaemon(false);
+            connectionHandlerThread.start();
         }
         catch (IOException e)
         {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
     public void close()
     {
-        thread.interrupt();
-        requestHandlerThread.interrupt();
+        if(serverSocket != null)
+        {
+            try
+            {
+                serverSocket.close();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+        connectionHandlerThread.interrupt();
+        for(Thread t : requestHandlerThreads)
+        {
+            t.interrupt();
+        }
+
+        for(Thread t : requestHandlerThreads)
+        {
+            try
+            {
+                t.join();
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void rpcThread()
@@ -95,6 +131,10 @@ public class RPC
 
                 launchRequestHandlerThread(in, out);
             }
+            catch(InterruptedIOException e)
+            {
+                break;
+            }
             catch (IOException e)
             {
                 e.printStackTrace();
@@ -104,11 +144,12 @@ public class RPC
 
     private void launchRequestHandlerThread(final BufferedReader in, final PrintStream out)
     {
-        requestHandlerThread = new Thread(() ->
+        Thread t = new Thread(() ->
         {
             try
             {
                 Gson gson = new Gson();
+                Map<String,Object> variables = new HashMap<>();
                 while(!Thread.interrupted())
                 {
                     String line = in.readLine();
@@ -173,8 +214,9 @@ public class RPC
                 e.printStackTrace();
             }
         });
-        requestHandlerThread.setDaemon(true);
-        requestHandlerThread.start();
+        t.setDaemon(true);
+        t.start();
+        requestHandlerThreads.add(t);
     }
 
     private class RPCRequest
