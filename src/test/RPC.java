@@ -181,7 +181,8 @@ public class RPC
                 while(!Thread.interrupted())
                 {
                     String line = in.readLine();
-                    if(line.length() == 0) continue;
+                    if(line == null) break;
+                    else if(line.length() == 0) continue;
                     System.out.println("Received request: " + line);
                     RPCRequest request = gson.fromJson(line, new TypeToken<RPCRequest>(){}.getType());
                     Class<?>[] argClasses = request.getUnboxedClasses(unboxMap).toArray(new Class<?>[0]);
