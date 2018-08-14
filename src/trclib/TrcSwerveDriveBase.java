@@ -468,36 +468,20 @@ public class TrcSwerveDriveBase extends TrcDriveBase
         }
     }
 
-    private double magnitude(double a, double b)
+    private double magnitude(double... nums)
     {
-        return Math.sqrt(a*a + b*b);
+        return Math.sqrt(Arrays.stream(nums).map(e -> e*e).sum());
     }
 
     private double[] normalize(double... nums)
     {
-        if(nums.length == 0)
-        {
-             return nums;
-        }
-
-        double max = Arrays.stream(nums).max().getAsDouble();
-        if(max > 1)
-        {
-            return Arrays.stream(nums).map(x -> x/max).toArray();
-        } else
-        {
-            return nums;
-        }
+        double max = Arrays.stream(nums).max().orElse(0.0);
+        return max > 1 ? Arrays.stream(nums).map(x -> x/max).toArray() : nums;
     }
 
-    private double average(double... nums)
+    private double average(double... toAverage)
     {
-        double sum = 0;
-        for(double d:nums)
-        {
-            sum += d;
-        }
-        return sum / Math.max(nums.length, 1); // Protect against length == 0
+        return Arrays.stream(toAverage).average().orElse(0.0);
     }
 
     private void resetModulePositions()

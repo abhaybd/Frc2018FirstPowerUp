@@ -7,4 +7,4 @@ What this does is change the old TrcDriveBase to TrcCommonDriveBase (it implemen
 
 Then, the new swerve functionality is added to TrcSwerveDriveBase.
 
-Also, drivebases will implement supportedDriveModes(), which will tell users of that class what drive modes are supported by that implementation of TrcDriveBase. It's pretty nifty, if I may say so myself.
+Also, drivebases will implement `supportedDriveModes()`, which will tell users of that class what drive modes are supported by that implementation of TrcDriveBase. It's pretty nifty, if I may say so myself.
