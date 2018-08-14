@@ -9,16 +9,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
 public class RPC
 {
-
     public static void main(String[] args)
     {
         RPC.getInstance();
@@ -45,7 +46,6 @@ public class RPC
     private Map<Class<?>,Class<?>> unboxMap;
     private Thread thread, requestHandlerThread;
     private Map<String,Object> variables;
-    private BlockingQueue<RPCResponse> commQueue;
 
     private RPC(int port)
     {
@@ -53,10 +53,9 @@ public class RPC
         {
             serverSocket = new ServerSocket(port);
 
-            variables = new HashMap<>();
-            commQueue = new LinkedBlockingQueue<>();
+            variables = new ConcurrentHashMap<>();
 
-            unboxMap = new HashMap<>();
+            unboxMap = new ConcurrentHashMap<>();
             unboxMap.put(Double.class, double.class);
             unboxMap.put(Integer.class, int.class);
             unboxMap.put(Float.class, float.class);
@@ -67,7 +66,7 @@ public class RPC
             unboxMap.put(Short.class, short.class);
 
             thread = new Thread(this::rpcThread);
-            thread.setDaemon(true);
+            thread.setDaemon(false);
             thread.start();
         }
         catch (IOException e)
@@ -84,17 +83,22 @@ public class RPC
 
     private void rpcThread()
     {
-        try
+        while(!Thread.interrupted())
         {
-            Socket socket = serverSocket.accept();
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintStream out = new PrintStream(socket.getOutputStream());
+            try
+            {
+                System.out.println("Waiting for connection...");
+                Socket socket = serverSocket.accept();
+                System.out.println("Received connection from " + socket.getInetAddress().toString());
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                PrintStream out = new PrintStream(socket.getOutputStream());
 
-            launchRequestHandlerThread(in, out);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
+                launchRequestHandlerThread(in, out);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -107,38 +111,61 @@ public class RPC
                 Gson gson = new Gson();
                 while(!Thread.interrupted())
                 {
-                    try
+                    String line = in.readLine();
+                    if(line.length() == 0) continue;
+                    System.out.println("Received request: " + line);
+                    RPCRequest request = gson.fromJson(line, new TypeToken<RPCRequest>(){}.getType());
+                    Class<?>[] argClasses = request.getUnboxedClasses(unboxMap).toArray(new Class<?>[0]);
+                    boolean success = true;
+                    if(request.instantiate)
                     {
-                        String line = in.readLine();
-                        RPCRequest request = gson.fromJson(line, new TypeToken<RPCRequest>(){}.getType());
-                        Class<?>[] argClasses = request.getUnboxedClasses().toArray(new Class<?>[0]);
-                        if(request.instantiate)
+                        try
                         {
                             Class<?> clazz = Class.forName(request.className);
                             Constructor<?> constructor = clazz.getConstructor(argClasses);
                             Object object = constructor.newInstance(request.args.toArray());
                             variables.put(request.objectName, object);
-                        } else
+
+                        } catch(ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
+                            IllegalAccessException | InstantiationException e)
                         {
-                            Object object = variables.get(request.objectName);
-                            if(object == null && !request.objectName.equals("static")) continue;
-                            Method method = object.getClass().getMethod(request.methodName, argClasses);
-                            Object result = method.invoke(object, request.args.toArray());
-                            if(result != null)
-                            {
-                                RPCResponse response = new RPCResponse();
-                                response.id = request.id;
-                                response.value = result;
-                                String jsonResponse = gson.toJson(response);
-                                out.println(jsonResponse);
-                                out.flush();
-                            }
+                            e.printStackTrace();
+                            success = false;
                         }
-                    }
-                    catch(ClassNotFoundException | NullPointerException | IllegalAccessException
-                        | InvocationTargetException | NoSuchMethodException | InstantiationException e)
+                        RPCResponse response = new RPCResponse();
+                        response.id = request.id;
+                        response.value = success;
+
+                        String jsonResponse = gson.toJson(response);
+                        System.out.println("Sending response: " + jsonResponse);
+                        out.println(jsonResponse);
+                        out.flush();
+                    } else
                     {
-                        e.printStackTrace();
+                        Object object = variables.get(request.objectName);
+                        if(object == null && !request.objectName.equals("static")) continue;
+
+                        Object result = null;
+                        try
+                        {
+                            Class<?> clazz = object == null ? Class.forName(request.className) : object.getClass();
+                            Method method = clazz.getMethod(request.methodName, argClasses);
+                            result = method.invoke(object, request.args.toArray());
+                        } catch(NullPointerException | NoSuchMethodException |
+                            IllegalAccessException | InvocationTargetException |
+                            ClassNotFoundException e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                        RPCResponse response = new RPCResponse();
+                        response.id = request.id;
+                        response.value = result;
+
+                        String jsonResponse = gson.toJson(response);
+                        System.out.println("Sending response: " + jsonResponse);
+                        out.println(jsonResponse);
+                        out.flush();
                     }
                 }
             } catch (IOException e)
@@ -164,9 +191,16 @@ public class RPC
             return args.stream().map(Object::getClass).collect(Collectors.toList());
         }
 
-        public List<Class<?>> getUnboxedClasses()
+        public List<Class<?>> getUnboxedClasses(Map<Class<?>,Class<?>> unboxMap)
         {
-            return args.stream().map(e -> unboxMap.get(e.getClass())).collect(Collectors.toList());
+            List<Class<?>> unboxedClasses = new ArrayList<>();
+            for(Object o : args)
+            {
+                Class<?> clazz = o.getClass();
+                Class<?> unboxedClazz = unboxMap.getOrDefault(clazz, clazz);
+                unboxedClasses.add(unboxedClazz);
+            }
+            return unboxedClasses;
         }
     }
 
