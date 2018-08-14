@@ -1,10 +1,6 @@
 # Frc2018FirstPowerUp
-This is the branch to develop swerve drive. The testing and simulation will happen [here.](https://github.com/coolioasjulio/Frc2018FirstPowerUp/tree/SwerveDrive-Testing)
+This is a branch to test swerve drive. The development will happen on the branch called [SwerveDrive.](https://github.com/coolioasjulio/Frc2018FirstPowerUp/tree/SwerveDrive) This branch is dedicated to testing the implementation without using the robot. It will be kept up to date with the other branch as development continues.
 
-To implement swerve drive, the TrcDriveBase has been completely restructured. Before, TrcDriveBase implemented everything, making it a hulking behemoth of a class. An absolute unit, that one. Simple collosal. That makes it pretty difficult to add more stuff to it, since it's huge and complicated.
+This branch has code to create mock motor controllers and gyros, and run a swerve drive object, printing status to the console. Additionally, I made a simulator in Unity3D, which uses RPC to communicate with the swerve implementation in this library. This simulator will allow you to actually drive the robot. It's cool. The simulation is [here.](https://github.com/coolioasjulio/FrcDrive)
 
-What this does is change the old TrcDriveBase to TrcCommonDriveBase (it implements the common drive methods + mecanum) and moves a lot of shared functionality to the new TrcDriveBase. This cuts almost 400 lines of code off. The new TrcDriveBase is an abstract class with the shared functionality. Since curve drive and arcade drive are built on tank drive, those are implemented in TrcDriveBase. Additionally, all method overloads are also implemented. (the optional parameters for all drive modes) Also, support for all the other stuff like MotorPowerMapper, GyroAssist, etc. At minimum, a drive base class extending TrcDriveBase must implement TankDrive and a few other getter classes for the yPosition, heading, etc. Additionally, some stuff like GyroAssist and MotorPowerMapper will not be applied unless the drive methods explicitly use it.
-
-Then, the new swerve functionality is added to TrcSwerveDriveBase.
-
-Also, drivebases will implement `supportedDriveModes()`, which will tell users of that class what drive modes are supported by that implementation of TrcDriveBase. It's pretty nifty, if I may say so myself.
+In order to run the simulation, run RPC.java FIRST. Then, start the unity scene, and it will connect.
