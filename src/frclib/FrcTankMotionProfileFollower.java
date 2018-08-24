@@ -177,6 +177,7 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
      * @param event   Event to signal when path has been followed
      * @param timeout Maximum number of seconds to spend following the path. 0.0 means no timeout.
      */
+    @Override
     public void start(TrcTankMotionProfile profile, TrcEvent event, double timeout)
     {
         if (leftMaster == null || rightMaster == null)
@@ -224,7 +225,13 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
         setTaskEnabled(true);
     }
 
-    public TrcTankMotionProfile activeProfile()
+    /**
+     * The motion profile currently being followed by the follower.
+     *
+     * @return The profile object currently being followed. null if not following any profile.
+     */
+    @Override
+    public TrcTankMotionProfile getActiveProfile()
     {
         return this.profile;
     }
@@ -234,6 +241,7 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
      *
      * @return True if yes, false otherwise
      */
+    @Override
     public boolean isActive()
     {
         return sm.isEnabled();
@@ -244,6 +252,7 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
      *
      * @return True if someone has called the cancel() method while it was running, false otherwise
      */
+    @Override
     public boolean isCancelled()
     {
         return cancelled;
@@ -252,6 +261,7 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
     /**
      * Stop following the path and cancel the event.
      */
+    @Override
     public void cancel()
     {
         cancelled = true;

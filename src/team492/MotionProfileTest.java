@@ -78,8 +78,8 @@ public class MotionProfileTest implements TrcRobot.RobotCommand
                     PrintStream out = new PrintStream(new FileOutputStream(new File(dir, timeStamp + "_conversions.csv")));
                     TrcTankMotionProfile.TrcMotionProfilePoint[] leftPoints = profile.getLeftPoints();
                     TrcTankMotionProfile.TrcMotionProfilePoint[] rightPoints = profile.getRightPoints();
-                    TrcTankMotionProfile.TrcMotionProfilePoint[] leftPointsScaled = follower.activeProfile().getLeftPoints();
-                    TrcTankMotionProfile.TrcMotionProfilePoint[] rightPointsScaled = follower.activeProfile().getRightPoints();
+                    TrcTankMotionProfile.TrcMotionProfilePoint[] leftPointsScaled = follower.getActiveProfile().getLeftPoints();
+                    TrcTankMotionProfile.TrcMotionProfilePoint[] rightPointsScaled = follower.getActiveProfile().getRightPoints();
                     out.println("Time,LeftPos,LeftSpeed,RightPos,RightSpeed,"
                         + "LeftPosScaled,LeftSpeedScaled,RightPosScaled,RightSpeedScaled");
                     double time = 0.0;
