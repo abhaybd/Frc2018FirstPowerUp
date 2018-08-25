@@ -113,7 +113,7 @@ public class TrcUtil
 
     /**
      * This method calculates the modulo of two numbers. Unlike the <code>%</code> operator, this returns a number
-     * in the range [0, b). For some reason, in Java, the <code>%</code> operator actually does reminder, which
+     * in the range [0, b). For some reason, in Java, the <code>%</code> operator actually does remainder, which
      * means the result is in the range (-b, b).
      *
      * @param a specifies the dividend.
@@ -170,9 +170,12 @@ public class TrcUtil
     {
         double maxMagnitude = Arrays.stream(nums).map(Math::abs).max().orElse(0.0);
 
-        for(int i = 0; i < nums.length; i++)
+        if(maxMagnitude > 1)
         {
-            nums[i] /= maxMagnitude;
+            for(int i = 0; i < nums.length; i++)
+            {
+                nums[i] /= maxMagnitude;
+            }
         }
     }   //normalizeInPlace
 
