@@ -156,7 +156,7 @@ public class TrcUtil
     public static double[] normalize(double... nums)
     {
         double maxMagnitude = Arrays.stream(nums).map(Math::abs).max().orElse(0.0);
-        return maxMagnitude > 1.0? Arrays.stream(nums).map(x -> x/maxMagnitude).toArray(): nums;
+        return maxMagnitude > 1.0 ? Arrays.stream(nums).map(x -> x/maxMagnitude).toArray() : nums;
     }   //normalize
 
     /**
@@ -189,7 +189,7 @@ public class TrcUtil
      */
     public static int clipRange(int value, int lowLimit, int highLimit)
     {
-        return (value < lowLimit)? lowLimit: (value > highLimit)? highLimit: value;
+        return Math.min(Math.max(value, lowLimit), highLimit);
     }   //clipRange
 
     /**
@@ -202,7 +202,7 @@ public class TrcUtil
      */
     public static double clipRange(double value, double lowLimit, double highLimit)
     {
-        return (value < lowLimit)? lowLimit: (value > highLimit)? highLimit: value;
+        return Math.min(Math.max(value, lowLimit), highLimit);
     }   //clipRange
 
     /**
