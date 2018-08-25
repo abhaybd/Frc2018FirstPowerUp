@@ -189,7 +189,7 @@ public abstract class TrcDriveBase
     public void setPositionScales(double yScale)
     {
         setPositionScales(1.0, yScale, 1.0);
-    }
+    }   //setPositionScales
 
     /**
      * This method returns the raw X position in raw sensor unit.

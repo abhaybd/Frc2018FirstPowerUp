@@ -117,7 +117,7 @@ public class TrcUtil
      * means the result is in the range (-b, b).
      *
      * @param a specifies the dividend.
-     * @param b spepcifies the divisor.
+     * @param b specifies the divisor.
      * @return the modulo in the range [0, b)
      */
     public static double modulo(double a, double b)
@@ -170,7 +170,7 @@ public class TrcUtil
     {
         double maxMagnitude = Arrays.stream(nums).map(Math::abs).max().orElse(0.0);
 
-        if(maxMagnitude > 1)
+        if (maxMagnitude > 1.0)
         {
             for(int i = 0; i < nums.length; i++)
             {
