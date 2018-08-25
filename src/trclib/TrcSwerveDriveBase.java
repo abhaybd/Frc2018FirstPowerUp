@@ -62,6 +62,8 @@ public class TrcSwerveDriveBase extends TrcSimpleDriveBase
         this.wheelBaseWidth = wheelBaseWidth;
         this.wheelBaseLength = wheelBaseLength;
         this.wheelBaseDiagonal = TrcUtil.magnitude(wheelBaseWidth, wheelBaseLength);
+
+        setPositionScales(1.0, 1.0);
         // TODO: do zero calibration on all four wheels.
     }   //TrcSwerveDriveBase
 
