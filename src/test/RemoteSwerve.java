@@ -45,15 +45,16 @@ public class RemoteSwerve
 
 
         TrcPidActuator lfActuator = new TrcPidActuator("LF_ACT", lfMotor, in, lfCtrl, 0.1);
-        lfModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), lfActuator);
         TrcPidActuator rfActuator = new TrcPidActuator("RF_ACT", rfMotor, in, rfCtrl, 0.1);
-        rfModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), rfActuator);
         TrcPidActuator lrActuator = new TrcPidActuator("LR_ACT", lrMotor, in, lrCtrl, 0.1);
-        lrModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), lrActuator);
         TrcPidActuator rrActuator = new TrcPidActuator("RR_ACT", rrMotor, in, rrCtrl, 0.1);
+
+        lfModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), lfActuator);
+        rfModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), rfActuator);
+        lrModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), lrActuator);
         rrModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), rrActuator);
 
-        driveBase = new TrcSwerveDriveBase(lfModule, rfModule, lrModule, rrModule, gyro, width, length);
+        driveBase = new TrcSwerveDriveBase(lfModule, lrModule, rfModule, rrModule, gyro, width, length);
 
         taskMgr = TrcTaskMgr.getInstance();
     }
