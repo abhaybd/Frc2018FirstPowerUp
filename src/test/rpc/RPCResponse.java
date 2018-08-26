@@ -8,9 +8,14 @@ public class RPCResponse
 
     public RPCResponse(long id, Object value)
     {
+        this(id, value, false);
+    }
+
+    public RPCResponse(long id, Object value, boolean isException)
+    {
         this.id = id;
         this.value = value;
-        this.isException = value instanceof Exception;
+        this.isException = isException;
     }
 
     public Object getValue()
