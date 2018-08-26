@@ -12,12 +12,9 @@ public class RemoteSwerve
     private final TrcSwerveDriveBase driveBase;
     private final TrcTaskMgr taskMgr;
 
-    public RemoteSwerve()
+    public RemoteSwerve(double width, double length)
     {
         new TrcTaskMgr();
-
-        double width = 39.0;
-        double length = 39.0;
 
         TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(0.02);
         double turnTolerance = 1;
