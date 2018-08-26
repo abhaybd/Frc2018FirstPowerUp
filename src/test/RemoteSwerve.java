@@ -14,27 +14,46 @@ public class RemoteSwerve
 
     public RemoteSwerve()
     {
+        new TrcTaskMgr();
+
         double width = 39.0;
         double length = 39.0;
 
-        double turnDegreesPerCount = 1.0;
         TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(0.02);
         double turnTolerance = 1;
-        double turnOutputLimit = 1;
 
         gyro = new MockGyro("Gyro");
 
-        lfModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), new MockMotorController(720),
-            turnDegreesPerCount, pidCoefficients, turnTolerance, turnOutputLimit);
-        rfModule = new TrcSwerveModule("rfModule", new MockMotorController(3600), new MockMotorController(720),
-            turnDegreesPerCount, pidCoefficients, turnTolerance, turnOutputLimit);
-        lrModule = new TrcSwerveModule("lrModule", new MockMotorController(3600), new MockMotorController(720),
-            turnDegreesPerCount, pidCoefficients, turnTolerance, turnOutputLimit);
-        rrModule = new TrcSwerveModule("rrModule", new MockMotorController(3600), new MockMotorController(720),
-            turnDegreesPerCount, pidCoefficients, turnTolerance, turnOutputLimit);
+        MockMotorController lfMotor = new MockMotorController(720);
+        MockMotorController rfMotor = new MockMotorController(720);
+        MockMotorController lrMotor = new MockMotorController(720);
+        MockMotorController rrMotor = new MockMotorController(720);
 
-        driveBase = new TrcSwerveDriveBase("SwerveDrive", width, length, lfModule, rfModule,
-            lrModule, rrModule, gyro);
+        TrcPidController lfCtrl = new TrcPidController("LFPID", pidCoefficients, turnTolerance, lfMotor::getPosition);
+        TrcPidController rfCtrl = new TrcPidController("RFPID", pidCoefficients, turnTolerance, rfMotor::getPosition);
+        TrcPidController lrCtrl = new TrcPidController("LRPID", pidCoefficients, turnTolerance, lrMotor::getPosition);
+        TrcPidController rrCtrl = new TrcPidController("RRPID", pidCoefficients, turnTolerance, rrMotor::getPosition);
+
+        TrcDigitalInput in = new TrcDigitalInput("Input")
+        {
+            @Override
+            public boolean isActive()
+            {
+                return false;
+            }
+        };
+
+
+        TrcPidActuator lfActuator = new TrcPidActuator("LF_ACT", lfMotor, in, lfCtrl, 0.1);
+        lfModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), lfActuator);
+        TrcPidActuator rfActuator = new TrcPidActuator("RF_ACT", rfMotor, in, rfCtrl, 0.1);
+        rfModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), rfActuator);
+        TrcPidActuator lrActuator = new TrcPidActuator("LR_ACT", lrMotor, in, lrCtrl, 0.1);
+        lrModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), lrActuator);
+        TrcPidActuator rrActuator = new TrcPidActuator("RR_ACT", rrMotor, in, rrCtrl, 0.1);
+        rrModule = new TrcSwerveModule("lfModule", new MockMotorController(3600), rrActuator);
+
+        driveBase = new TrcSwerveDriveBase(lfModule, rfModule, lrModule, rrModule, gyro, width, length);
 
         taskMgr = TrcTaskMgr.getInstance();
     }
@@ -46,15 +65,15 @@ public class RemoteSwerve
         driveBase.holonomicDrive(x, y, turn, gyroAngle);
 
         SwerveStatus status = new SwerveStatus();
-        status.lfPower = (float) lfModule.getDrivePower();
-        status.rfPower = (float) rfModule.getDrivePower();
-        status.lrPower = (float) lrModule.getDrivePower();
-        status.rrPower = (float) rrModule.getDrivePower();
+        status.lfPower = (float) lfModule.getPower();
+        status.rfPower = (float) rfModule.getPower();
+        status.lrPower = (float) lrModule.getPower();
+        status.rrPower = (float) rrModule.getPower();
 
-        status.lfAngle = (float) lfModule.getTargetAngle();
-        status.rfAngle = (float) rfModule.getTargetAngle();
-        status.lrAngle = (float) lrModule.getTargetAngle();
-        status.rrAngle = (float) rrModule.getTargetAngle();
+        status.lfAngle = (float) lfModule.getSteerAngle();
+        status.rfAngle = (float) rfModule.getSteerAngle();
+        status.lrAngle = (float) lrModule.getSteerAngle();
+        status.rrAngle = (float) rrModule.getSteerAngle();
 
         taskMgr.executeTaskType(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK, TrcRobot.RunMode.TELEOP_MODE);
 

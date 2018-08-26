@@ -1,10 +1,11 @@
 package test;
 
+import trclib.TrcMotor;
 import trclib.TrcMotorController;
 import trclib.TrcSensor;
 import trclib.TrcUtil;
 
-public class MockMotorController implements TrcMotorController
+public class MockMotorController extends TrcMotor
 {
     final private TrcSensor.SensorData<Double> position;
     private double power;
@@ -17,6 +18,8 @@ public class MockMotorController implements TrcMotorController
      */
     public MockMotorController(final double topSpeed)
     {
+        super("MockMotorController");
+
         position = new TrcSensor.SensorData<>(TrcUtil.getCurrentTime(),0.0);
 
         monitorThread = new Thread(() -> {
@@ -53,6 +56,12 @@ public class MockMotorController implements TrcMotorController
     }
 
     @Override
+    public boolean getInverted()
+    {
+        return false;
+    }
+
+    @Override
     public double getPosition()
     {
         return position.value;
@@ -71,6 +80,18 @@ public class MockMotorController implements TrcMotorController
     }
 
     @Override
+    public boolean isLowerLimitSwitchActive()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean isUpperLimitSwitchActive()
+    {
+        return false;
+    }
+
+    @Override
     public void resetPosition(boolean hardware)
     {
         synchronized (position)
@@ -84,24 +105,6 @@ public class MockMotorController implements TrcMotorController
     public void set(double power)
     {
         this.power = power;
-    }
-
-    @Override
-    public boolean getInverted()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isLowerLimitSwitchActive()
-    {
-        return false;
-    }
-
-    @Override
-    public boolean isUpperLimitSwitchActive()
-    {
-        return false;
     }
 
     @Override
