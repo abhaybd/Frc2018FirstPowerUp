@@ -43,6 +43,7 @@ public class FrcTest extends FrcTeleOp
     {
         SENSORS_TEST,
         SUBSYSTEMS_TEST,
+        VELOCITY_TUNER,
         CALC_DRIVE_BASE_WIDTH,
         MEASURE_ROBOT_STATS,
         DRIVE_MOTORS_TEST,
@@ -76,6 +77,7 @@ public class FrcTest extends FrcTeleOp
     private DriveBaseWidth calcDriveBaseWidth = null;
     private RobotStats robotStats = null;
     private CmdAutoDiagnostics autoDiagnostics = null;
+    private VelocityControlTuner velocityTuner = null;
 
     private int motorIndex = 0;
     private boolean pickupOverride = false;
@@ -93,12 +95,15 @@ public class FrcTest extends FrcTeleOp
 
         calcDriveBaseWidth = new DriveBaseWidth(robot);
         robotStats = new RobotStats(robot);
+        velocityTuner = new VelocityControlTuner("Velocity Tuner", robot);
+
         //
         // Create and populate Test Mode specific menus.
         //
         testMenu = new FrcChoiceMenu<>("Test/Tests");
         testMenu.addChoice("Sensors Test", FrcTest.Test.SENSORS_TEST, true, false);
         testMenu.addChoice("Subsystems Test", FrcTest.Test.SUBSYSTEMS_TEST, false, false);
+        testMenu.addChoice("Velocity Tuner", Test.VELOCITY_TUNER, false, false);
         testMenu.addChoice("Drive Base Width", Test.CALC_DRIVE_BASE_WIDTH, false, false);
         testMenu.addChoice("Measure Robot Stats", FrcTest.Test.MEASURE_ROBOT_STATS, false, false);
         testMenu.addChoice("Drive Motors Test", FrcTest.Test.DRIVE_MOTORS_TEST, false, false);
@@ -149,6 +154,10 @@ public class FrcTest extends FrcTeleOp
                 if (robot.leftSonarArray != null) robot.leftSonarArray.startRanging(true);
                 if (robot.rightSonarArray != null) robot.rightSonarArray.startRanging(true);
                 if (robot.frontSonarArray != null) robot.frontSonarArray.startRanging(true);
+                break;
+
+            case VELOCITY_TUNER:
+                velocityTuner.start();
                 break;
 
             case CALC_DRIVE_BASE_WIDTH:
@@ -213,6 +222,10 @@ public class FrcTest extends FrcTeleOp
             case MEASURE_ROBOT_STATS:
                 robotStats.stop();
                 break;
+
+            case VELOCITY_TUNER:
+                velocityTuner.stop();
+                break;
              
             default:
                 break;
@@ -265,6 +278,10 @@ public class FrcTest extends FrcTeleOp
 
             case AUTO_DIAGNOSTICS:
                 autoDiagnostics.cmdPeriodic(elapsedTime);
+                break;
+
+            case VELOCITY_TUNER:
+                velocityTuner.cmdPeriodic(elapsedTime);
                 break;
                 
             case CALC_DRIVE_BASE_WIDTH:
