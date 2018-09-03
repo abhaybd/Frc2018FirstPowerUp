@@ -38,7 +38,7 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
     private double totalSquareError;
 
     /**
-     * The units on these MUST be in units/sec
+     * The units on these MUST be in in/sec
      */
     private double targetSpeed;
     private double maxRobotSpeed;
@@ -79,7 +79,7 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
     }
 
     /**
-     * Start following velocity. Test/MaxRobotSpeed in HalDashboard MUST be in encoder units per second.
+     * Start following velocity. Test/MaxRobotSpeed in HalDashboard MUST be in inches per second.
      */
     public void start()
     {
@@ -89,7 +89,7 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
     /**
      * Start following velocity.
      *
-     * @param maxRobotSpeed The maximum robot speed in encoder units per second.
+     * @param maxRobotSpeed The maximum robot speed in inches per second.
      */
     public void start(double maxRobotSpeed)
     {
@@ -104,7 +104,7 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
         driveTime = HalDashboard.getNumber("Test/DriveTime", 0.0);
         this.maxRobotSpeed = maxRobotSpeed;
 
-        // Convert from units/sec -> units/100ms
+        // Convert from in/sec -> in/100ms
         robot.leftFrontWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
         robot.rightFrontWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
         robot.leftRearWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
@@ -144,11 +144,17 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
     @Override
     public boolean cmdPeriodic(double elapsedTime)
     {
+        double actualSpeed = robot.driveBase.getYSpeed() * RobotInfo.ENCODER_Y_INCHES_PER_COUNT;
+        
         if(fileOut != null)
         {
-            double speed = robot.driveBase.getYSpeed();
-            fileOut.printf("%.3f,%.3f\n", targetSpeed, speed);
+            fileOut.printf("%.3f,%.3f\n", targetSpeed, actualSpeed);
         }
+
+        double error = targetSpeed - actualSpeed;
+        totalSquareError += Math.pow(error, 2.0);
+        totalAbsoluteError += Math.abs(error);
+        numDataPoints++;
 
         HalDashboard.putNumber("Test/MAE", totalAbsoluteError / (double)numDataPoints);
         HalDashboard.putNumber("Test/RMSE", Math.sqrt(totalSquareError / (double)numDataPoints));
@@ -212,11 +218,5 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
 
         double throttle = targetSpeed / maxRobotSpeed;
         robot.driveBase.tankDrive(throttle, throttle);
-
-        double actualSpeed = robot.driveBase.getYSpeed();
-        double error = targetSpeed - actualSpeed;
-        totalSquareError += Math.pow(error, 2.0);
-        totalAbsoluteError += Math.abs(error);
-        numDataPoints++;
     }
 }
