@@ -26,42 +26,35 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
 
     private static final boolean WRITE_CSV = true;
 
-    // TODO: Tune these
-    private static final double kP = 0.0;
-    private static final double kI = 0.0;
-    private static final double kD = 0.0;
-    private static final double kF = 0.0;
-
     private double startTime;
     private double lastTime;
     private double maxSpeed, maxAcceleration, driveTime;
-    private double targetSpeed;
-    private double maxRobotSpeed;
     private TrcTaskMgr.TaskObject taskObj;
     private State state;
     private Robot robot;
     private PrintStream fileOut;
+    private int numDataPoints;
+    private double totalAbsoluteError;
+    private double totalSquareError;
+
+    /**
+     * The units on these MUST be in units/sec
+     */
+    private double targetSpeed;
+    private double maxRobotSpeed;
 
     public VelocityControlTuner(String instanceName, Robot robot)
     {
         this.robot = robot;
 
-        taskObj = TrcTaskMgr.getInstance().createTask(instanceName + ".velocityTask", this::velocityTask);
-
-        TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(kP, kI, kD, kF);
-
-        // Convert from in/sec -> in/100ms
-        robot.leftFrontWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
-        robot.rightFrontWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
-        robot.leftRearWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
-        robot.rightRearWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
-
         refreshNumber("Test/MaxRobotSpeed");
         refreshNumber("Test/MaxSpeed");
         refreshNumber("Test/MaxAcceleration");
         refreshNumber("Test/DriveTime");
+        refreshNumber("Test/MAE"); // MAE is mean absolute error
+        refreshNumber("Test/RMSE"); // RMSE is root mean square error
 
-        maxRobotSpeed = HalDashboard.getNumber("Test/MaxRobotSpeed", 0.0);
+        taskObj = TrcTaskMgr.getInstance().createTask(instanceName + ".velocityTask", this::velocityTask);
 
         if(WRITE_CSV)
         {
@@ -85,18 +78,51 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
         HalDashboard.putNumber(key, HalDashboard.getNumber(key, 0.0));
     }
 
+    /**
+     * Start following velocity. Test/MaxRobotSpeed in HalDashboard MUST be in encoder units per second.
+     */
     public void start()
     {
-        this.maxSpeed = HalDashboard.getNumber("Test/MaxSpeed", 0.0);
-        this.maxAcceleration = HalDashboard.getNumber("Test/MaxAcceleration", 0.0);
-        this.driveTime = HalDashboard.getNumber("Test/DriveTime", 0.0);
+        start(HalDashboard.getNumber("Test/MaxRobotSpeed", 0.0));
+    }
+
+    /**
+     * Start following velocity.
+     *
+     * @param maxRobotSpeed The maximum robot speed in encoder units per second.
+     */
+    public void start(double maxRobotSpeed)
+    {
+        TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(
+            HalDashboard.getNumber("Test/kP", 0.0),
+            HalDashboard.getNumber("Test/kI", 0.0),
+            HalDashboard.getNumber("Test/kD", 0.0),
+            HalDashboard.getNumber("Test/kF", 0.0));
+
+        maxSpeed = HalDashboard.getNumber("Test/MaxSpeed", 0.0);
+        maxAcceleration = HalDashboard.getNumber("Test/MaxAcceleration", 0.0);
+        driveTime = HalDashboard.getNumber("Test/DriveTime", 0.0);
+        this.maxRobotSpeed = maxRobotSpeed;
+
+        // Convert from units/sec -> units/100ms
+        robot.leftFrontWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
+        robot.rightFrontWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
+        robot.leftRearWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
+        robot.rightRearWheel.enableVelocityMode(maxRobotSpeed * 0.1, pidCoefficients);
+
+        totalAbsoluteError = 0;
+        totalSquareError = 0;
+        numDataPoints = 0;
 
         setEnabled(true);
     }
 
     public void stop()
     {
+        robot.driveBase.stop();
         setEnabled(false);
+        maxRobotSpeed = 0.0;
+        targetSpeed = 0.0;
     }
 
     private void setEnabled(boolean enabled)
@@ -120,13 +146,12 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
     {
         if(fileOut != null)
         {
-            double avgSpeed = TrcUtil.average(
-                robot.leftFrontWheel.getSpeed(),
-                robot.rightFrontWheel.getSpeed(),
-                robot.leftRearWheel.getSpeed(),
-                robot.rightRearWheel.getSpeed());
-            fileOut.printf("%.3f,%.3f\n", targetSpeed, avgSpeed);
+            double speed = robot.driveBase.getYSpeed();
+            fileOut.printf("%.3f,%.3f\n", targetSpeed, speed);
         }
+
+        HalDashboard.putNumber("Test/MAE", totalAbsoluteError / (double)numDataPoints);
+        HalDashboard.putNumber("Test/RMSE", Math.sqrt(totalSquareError / (double)numDataPoints));
         return false;
     }
 
@@ -134,6 +159,15 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
     {
         double currentTime = TrcUtil.getCurrentTime();
         double timeSinceLast = currentTime - lastTime;
+
+        if(maxRobotSpeed == 0.0)
+        {
+            state = State.DONE;
+        }
+        else if(currentTime - startTime >= driveTime)
+        {
+            state = State.DECELERATE;
+        }
 
         switch(state)
         {
@@ -170,7 +204,7 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
                 break;
 
             case DONE:
-                setEnabled(false);
+                stop();
                 break;
         }
 
@@ -178,5 +212,11 @@ public class VelocityControlTuner implements TrcRobot.RobotCommand
 
         double throttle = targetSpeed / maxRobotSpeed;
         robot.driveBase.tankDrive(throttle, throttle);
+
+        double actualSpeed = robot.driveBase.getYSpeed();
+        double error = targetSpeed - actualSpeed;
+        totalSquareError += Math.pow(error, 2.0);
+        totalAbsoluteError += Math.abs(error);
+        numDataPoints++;
     }
 }
