@@ -92,7 +92,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     public void enableKinematicDrive(double wheelBase, double trackWidth, double maxXSpeed, double maxYSpeed,
         double maxAngularSpeed, double maxMotorSpeed)
     {
-        this.k = (wheelBase + trackWidth) / 2.0;
+        this.k = TrcUtil.average(wheelBase, trackWidth);
         this.maxXSpeed = maxXSpeed;
         this.maxYSpeed = maxYSpeed;
         this.maxAngularVelocity = maxAngularSpeed;
