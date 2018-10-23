@@ -189,7 +189,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
             rotation += getGyroAssistPower(rotation);
         }
 
-        double wheelPowers[] = new double[4];
+        double[] wheelPowers = new double[4];
         wheelPowers[MotorType.LEFT_FRONT.value] = x + y + rotation;
         wheelPowers[MotorType.RIGHT_FRONT.value] = -x + y - rotation;
         wheelPowers[MotorType.LEFT_REAR.value] = -x + y + rotation;
@@ -230,12 +230,6 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
 
         updateXOdometry(TrcUtil.average(lfEnc, -rfEnc, -lrEnc, rrEnc),
             TrcUtil.average(lfSpeed, -rfSpeed, -lrSpeed, rrSpeed));
-
-        if (kinematicDriveEnabled)
-        {
-            // According to the paper by Ether.
-            updateRotationOdometry(TrcUtil.average(-lfEnc, rfEnc, -lrEnc, rrEnc) / k);
-        }
     }   //updateOdometry
 
 }   //class TrcMecanumDriveBase
