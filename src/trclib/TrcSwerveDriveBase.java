@@ -236,25 +236,9 @@ public class TrcSwerveDriveBase extends TrcSimpleDriveBase
         y = TrcUtil.clipRange(y);
         rotation = TrcUtil.clipRange(rotation);
 
-        if(inverted)
-        {
-            x = -x;
-            y = -y;
-        }
-
-        if(gyroAngle != 0)
-        {
-            if(inverted)
-            {
-                dbgTrace.traceWarn(
-                    funcName, "You should not be using inverted and field reference frame at the same time!");
-            }
-
-            double gyroRadians = Math.toRadians(gyroAngle);
-            double temp = y * Math.cos(gyroRadians) + x * Math.sin(gyroRadians);
-            x = -y * Math.sin(gyroRadians) + x * Math.cos(gyroRadians);
-            y = temp;
-        }
+        double[] transformedCommands = transformCommands(x, y, inverted, gyroAngle);
+        x = transformedCommands[0];
+        y = transformedCommands[1];
 
         double a = x - (rotation * wheelBaseLength/wheelBaseDiagonal);
         double b = x + (rotation * wheelBaseLength/wheelBaseDiagonal);

@@ -28,19 +28,24 @@ package trclib;
  */
 public class TrcMecanumDriveBase extends TrcSimpleDriveBase
 {
+    private double k;
+    private double maxXSpeed;
+    private double maxYSpeed;
+    private double maxAngularVelocity;
+    private double maxMotorSpeed;
+    private boolean kinematicDriveEnabled = false;
+
     /**
      * Constructor: Create an instance of the 4-wheel mecanum drive base.
      *
-     * @param leftFrontMotor specifies the left front motor of the drive base.
-     * @param leftRearMotor specifies the left rear motor of the drive base.
+     * @param leftFrontMotor  specifies the left front motor of the drive base.
+     * @param leftRearMotor   specifies the left rear motor of the drive base.
      * @param rightFrontMotor specifies the right front motor of the drive base.
-     * @param rightRearMotor specifies the right rear motor of the drive base.
-     * @param gyro specifies the gyro. If none, it can be set to null.
+     * @param rightRearMotor  specifies the right rear motor of the drive base.
+     * @param gyro            specifies the gyro. If none, it can be set to null.
      */
-    public TrcMecanumDriveBase(
-        TrcMotorController leftFrontMotor, TrcMotorController leftRearMotor,
-        TrcMotorController rightFrontMotor, TrcMotorController rightRearMotor,
-        TrcGyro gyro)
+    public TrcMecanumDriveBase(TrcMotorController leftFrontMotor, TrcMotorController leftRearMotor,
+        TrcMotorController rightFrontMotor, TrcMotorController rightRearMotor, TrcGyro gyro)
     {
         super(leftFrontMotor, leftRearMotor, rightFrontMotor, rightRearMotor, gyro);
     }   //TrcMecanumDriveBase
@@ -48,13 +53,12 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     /**
      * Constructor: Create an instance of the 4-wheel mecanum drive base.
      *
-     * @param leftFrontMotor specifies the left front motor of the drive base.
-     * @param leftRearMotor specifies the left rear motor of the drive base.
+     * @param leftFrontMotor  specifies the left front motor of the drive base.
+     * @param leftRearMotor   specifies the left rear motor of the drive base.
      * @param rightFrontMotor specifies the right front motor of the drive base.
-     * @param rightRearMotor specifies the right rear motor of the drive base.
+     * @param rightRearMotor  specifies the right rear motor of the drive base.
      */
-    public TrcMecanumDriveBase(
-        TrcMotorController leftFrontMotor, TrcMotorController leftRearMotor,
+    public TrcMecanumDriveBase(TrcMotorController leftFrontMotor, TrcMotorController leftRearMotor,
         TrcMotorController rightFrontMotor, TrcMotorController rightRearMotor)
     {
         super(leftFrontMotor, leftRearMotor, rightFrontMotor, rightRearMotor, null);
@@ -72,41 +76,113 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     }   //supportsHolonomicDrive
 
     /**
+     * Starts using "smart kinematics", shown by a paper by Ether:
+     * http://www.chiefdelphi.com/media/papers/download/2722
+     * The units don't matter, as long as they are consistent.
+     * wheelBase, trackWidth, maxXSpeed, maxYSpeed, and maxMotorSpeed should all have the same distance unit.
+     * All time units should be consistent. The numerator of maxAngularSpeed should be in radians.
+     *
+     * @param wheelBase       Distance between the front and back wheels.
+     * @param trackWidth      Distance between the left and right wheels.
+     * @param maxXSpeed       Max speed of the robot in the x axis
+     * @param maxYSpeed       Max speed of the robot in the y axis.
+     * @param maxAngularSpeed Max rotation speed of the robot with the numerator as radians.
+     * @param maxMotorSpeed   Max tangential speed of the drive motor
+     */
+    public void enableKinematicDrive(double wheelBase, double trackWidth, double maxXSpeed, double maxYSpeed,
+        double maxAngularSpeed, double maxMotorSpeed)
+    {
+        this.k = (wheelBase + trackWidth) / 2.0;
+        this.maxXSpeed = maxXSpeed;
+        this.maxYSpeed = maxYSpeed;
+        this.maxAngularVelocity = maxAngularSpeed;
+        this.maxMotorSpeed = maxMotorSpeed;
+        kinematicDriveEnabled = true;
+    }
+
+    public void disableKinematicDrive()
+    {
+        kinematicDriveEnabled = false;
+    }
+
+    /**
      * This method implements holonomic drive where x controls how fast the robot will go in the x direction, and y
      * controls how fast the robot will go in the y direction. Rotation controls how fast the robot rotates and
      * gyroAngle specifies the heading the robot should maintain.
      *
-     * @param x specifies the x power.
-     * @param y specifies the y power.
-     * @param rotation specifies the rotating power.
-     * @param inverted specifies true to invert control (i.e. robot front becomes robot back).
+     * @param x         specifies the x power.
+     * @param y         specifies the y power.
+     * @param rotation  specifies the rotating power.
+     * @param inverted  specifies true to invert control (i.e. robot front becomes robot back).
      * @param gyroAngle specifies the gyro angle to maintain.
      */
     @Override
     protected void holonomicDrive(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
+        if (kinematicDriveEnabled)
+        {
+            smartKinematicsDrive(x, y, rotation, inverted, gyroAngle);
+        }
+        else
+        {
+            regularMecanumDrive(x, y, rotation, inverted, gyroAngle);
+        }
+    }   //holonomicDrive
+
+    private void smartKinematicsDrive(double x, double y, double rotation, boolean inverted, double gyroAngle)
+    {
         final String funcName = "holonomicDrive";
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "x=%f,y=%f,rot=%f,inverted=%s,angle=%f",
-                                x, y, rotation, Boolean.toString(inverted), gyroAngle);
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "x=%f,y=%f,rot=%f,inverted=%s,angle=%f", x, y,
+                rotation, Boolean.toString(inverted), gyroAngle);
+        }
+
+        double[] transformedCommands = transformCommands(x, y, inverted, gyroAngle);
+        x = transformedCommands[0];
+        y = transformedCommands[1];
+
+        x *= maxXSpeed;
+        y *= maxYSpeed;
+        rotation *= maxAngularVelocity;
+
+        // The units are in dist/time
+        // dist is the same distance unit used to define the max speeds and robot dimensions
+        // time is the same time unit used to define the max speeds
+        double lfSpeed = x + y + k * rotation;
+        double rfSpeed = -x + y - k * rotation;
+        double lrSpeed = -x + y + k * rotation;
+        double rrSpeed = x + y - k * rotation;
+
+        leftFrontMotor.set(lfSpeed / maxMotorSpeed);
+        rightFrontMotor.set(rfSpeed / maxMotorSpeed);
+        leftRearMotor.set(lrSpeed / maxMotorSpeed);
+        rightRearMotor.set(rrSpeed / maxMotorSpeed);
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
+        }
+    }
+
+    private void regularMecanumDrive(double x, double y, double rotation, boolean inverted, double gyroAngle)
+    {
+        final String funcName = "holonomicDrive";
+
+        if (debugEnabled)
+        {
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "x=%f,y=%f,rot=%f,inverted=%s,angle=%f", x, y,
+                rotation, Boolean.toString(inverted), gyroAngle);
         }
 
         x = TrcUtil.clipRange(x);
         y = TrcUtil.clipRange(y);
         rotation = TrcUtil.clipRange(rotation);
 
-        if (inverted)
-        {
-            x = -x;
-            y = -y;
-        }
-
-        double cosA = Math.cos(Math.toRadians(gyroAngle));
-        double sinA = Math.sin(Math.toRadians(gyroAngle));
-        double x1 = x*cosA - y*sinA;
-        double y1 = x*sinA + y*cosA;
+        double[] transformedCommands = transformCommands(x, y, inverted, gyroAngle);
+        x = transformedCommands[0];
+        y = transformedCommands[1];
 
         if (isGyroAssistEnabled())
         {
@@ -114,35 +190,35 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         }
 
         double wheelPowers[] = new double[4];
-        wheelPowers[MotorType.LEFT_FRONT.value] = x1 + y1 + rotation;
-        wheelPowers[MotorType.RIGHT_FRONT.value] = -x1 + y1 - rotation;
-        wheelPowers[MotorType.LEFT_REAR.value] = -x1 + y1 + rotation;
-        wheelPowers[MotorType.RIGHT_REAR.value] = x1 + y1 - rotation;
+        wheelPowers[MotorType.LEFT_FRONT.value] = x + y + rotation;
+        wheelPowers[MotorType.RIGHT_FRONT.value] = -x + y - rotation;
+        wheelPowers[MotorType.LEFT_REAR.value] = -x + y + rotation;
+        wheelPowers[MotorType.RIGHT_REAR.value] = x + y - rotation;
         TrcUtil.normalizeInPlace(wheelPowers);
 
         double wheelPower;
 
-        wheelPower = motorPowerMapper.translateMotorPower(
-            wheelPowers[MotorType.LEFT_FRONT.value], leftFrontMotor.getSpeed());
+        wheelPower = motorPowerMapper
+            .translateMotorPower(wheelPowers[MotorType.LEFT_FRONT.value], leftFrontMotor.getSpeed());
         leftFrontMotor.set(wheelPower);
 
-        wheelPower = motorPowerMapper.translateMotorPower(
-            wheelPowers[MotorType.RIGHT_FRONT.value], rightFrontMotor.getSpeed());
+        wheelPower = motorPowerMapper
+            .translateMotorPower(wheelPowers[MotorType.RIGHT_FRONT.value], rightFrontMotor.getSpeed());
         rightFrontMotor.set(wheelPower);
 
-        wheelPower = motorPowerMapper.translateMotorPower(
-            wheelPowers[MotorType.LEFT_REAR.value], leftRearMotor.getSpeed());
+        wheelPower = motorPowerMapper
+            .translateMotorPower(wheelPowers[MotorType.LEFT_REAR.value], leftRearMotor.getSpeed());
         leftRearMotor.set(wheelPower);
 
-        wheelPower = motorPowerMapper.translateMotorPower(
-            wheelPowers[MotorType.RIGHT_REAR.value], rightRearMotor.getSpeed());
+        wheelPower = motorPowerMapper
+            .translateMotorPower(wheelPowers[MotorType.RIGHT_REAR.value], rightRearMotor.getSpeed());
         rightRearMotor.set(wheelPower);
 
         if (debugEnabled)
         {
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
         }
-    }   //holonomicDrive
+    }
 
     /**
      * This method is called periodically to monitor the encoders to update the odometry data.
@@ -150,29 +226,16 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     @Override
     protected void updateOdometry()
     {
-        //
-        // Call super class to update Y and rotation odometry.
-        //
         super.updateOdometry();
-        //
-        // According to RobotDrive.mecanumDrive_Cartesian in WPILib:
-        //
-        // LF =  x + y + rot    RF = -x + y - rot
-        // LR = -x + y + rot    RR =  x + y - rot
-        //
-        // (LF + RR) - (RF + LR) = (2x + 2y) - (-2x + 2y)
-        // => (LF + RR) - (RF + LR) = 4x
-        // => x = ((LF + RR) - (RF + LR))/4
-        //
-        // LF + RF + LR + RR = 4y
-        // => y = (LF + RF + LR + RR)/4
-        //
-        // (LF + LR) - (RF + RR) = (2y + 2rot) - (2y - 2rot)
-        // => (LF + LR) - (RF + RR) = 4rot
-        // => rot = ((LF + LR) - (RF + RR))/4
-        //
-        updateXOdometry(
-            TrcUtil.average(lfEnc, rrEnc, -rfEnc, -lrEnc), TrcUtil.average(lfSpeed, rrSpeed, -rfSpeed, -lrSpeed));
+
+        updateXOdometry(TrcUtil.average(lfEnc, -rfEnc, -lrEnc, rrEnc),
+            TrcUtil.average(lfSpeed, -rfSpeed, -lrSpeed, rrSpeed));
+
+        if (kinematicDriveEnabled)
+        {
+            // According to the paper by Ether.
+            updateRotationOdometry(TrcUtil.average(-lfEnc, rfEnc, -lrEnc, rrEnc) / k);
+        }
     }   //updateOdometry
 
 }   //class TrcMecanumDriveBase
