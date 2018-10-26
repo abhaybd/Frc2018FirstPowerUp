@@ -226,6 +226,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     @Override
     protected void updateOdometry()
     {
+        // TODO: Figure out gradlerio so Apache Commons Math can be packaged. It's necessary for better forward kinematics.
         super.updateOdometry();
 
         updateXOdometry(TrcUtil.average(lfEnc, -rfEnc, -lrEnc, rrEnc),
