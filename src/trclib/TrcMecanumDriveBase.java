@@ -22,6 +22,17 @@
 
 package trclib;
 
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.fitting.leastsquares.MultivariateJacobianFunction;
+import org.apache.commons.math3.linear.Array2DRowRealMatrix;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.util.Pair;
+
 /**
  * This class implements a platform independent mecanum drive base. A mecanum drive base consists of 4 motor driven
  * wheels. It extends the TrcSimpleDriveBase class so it inherits all the SimpleDriveBase methods and features.
@@ -34,6 +45,10 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     private double maxAngularVelocity;
     private double maxMotorSpeed;
     private boolean kinematicDriveEnabled = false;
+    private RealVector guess;
+    private MecanumModel model;
+    private LeastSquaresOptimizer optimizer;
+    private Double lastTime = null;
 
     /**
      * Constructor: Create an instance of the 4-wheel mecanum drive base.
@@ -48,6 +63,10 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         TrcMotorController rightFrontMotor, TrcMotorController rightRearMotor, TrcGyro gyro)
     {
         super(leftFrontMotor, leftRearMotor, rightFrontMotor, rightRearMotor, gyro);
+
+        guess = new ArrayRealVector(new double[] { 0, 0, 0 });
+        model = new MecanumModel();
+        optimizer = new LevenbergMarquardtOptimizer();
     }   //TrcMecanumDriveBase
 
     /**
@@ -61,7 +80,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     public TrcMecanumDriveBase(TrcMotorController leftFrontMotor, TrcMotorController leftRearMotor,
         TrcMotorController rightFrontMotor, TrcMotorController rightRearMotor)
     {
-        super(leftFrontMotor, leftRearMotor, rightFrontMotor, rightRearMotor, null);
+        this(leftFrontMotor, leftRearMotor, rightFrontMotor, rightRearMotor, null);
     }   //TrcMecanumDriveBase
 
     /**
@@ -98,11 +117,13 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         this.maxAngularVelocity = maxAngularSpeed;
         this.maxMotorSpeed = maxMotorSpeed;
         kinematicDriveEnabled = true;
+        lastTime = null;
     }
 
     public void disableKinematicDrive()
     {
         kinematicDriveEnabled = false;
+        lastTime = null;
     }
 
     /**
@@ -129,6 +150,15 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         }
     }   //holonomicDrive
 
+    private double[] inverseKinematics(double x, double y, double rotation)
+    {
+        double lfSpeed = x + y + k * rotation;
+        double rfSpeed = -x + y - k * rotation;
+        double lrSpeed = -x + y + k * rotation;
+        double rrSpeed = x + y - k * rotation;
+        return new double[] { lfSpeed, rfSpeed, lrSpeed, rrSpeed };
+    }
+
     private void kinematicDrive(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
         final String funcName = "holonomicDrive";
@@ -150,15 +180,12 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         // The units are in dist/time
         // dist is the same distance unit used to define the max speeds and robot dimensions
         // time is the same time unit used to define the max speeds
-        double lfSpeed = x + y + k * rotation;
-        double rfSpeed = -x + y - k * rotation;
-        double lrSpeed = -x + y + k * rotation;
-        double rrSpeed = x + y - k * rotation;
+        double[] wheelSpeeds = inverseKinematics(x, y, rotation);
 
-        leftFrontMotor.set(lfSpeed / maxMotorSpeed);
-        rightFrontMotor.set(rfSpeed / maxMotorSpeed);
-        leftRearMotor.set(lrSpeed / maxMotorSpeed);
-        rightRearMotor.set(rrSpeed / maxMotorSpeed);
+        leftFrontMotor.set(wheelSpeeds[0] / maxMotorSpeed);
+        rightFrontMotor.set(wheelSpeeds[1] / maxMotorSpeed);
+        leftRearMotor.set(wheelSpeeds[2] / maxMotorSpeed);
+        rightRearMotor.set(wheelSpeeds[3] / maxMotorSpeed);
 
         if (debugEnabled)
         {
@@ -226,11 +253,55 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     @Override
     protected void updateOdometry()
     {
-        // TODO: Figure out gradlerio so Apache Commons Math can be packaged. It's necessary for better forward kinematics.
         super.updateOdometry();
 
-        updateXOdometry(TrcUtil.average(lfEnc, -rfEnc, -lrEnc, rrEnc),
-            TrcUtil.average(lfSpeed, -rfSpeed, -lrSpeed, rrSpeed));
+        if (kinematicDriveEnabled)
+        {
+            double time = TrcUtil.getCurrentTime();
+            if (lastTime == null)
+            {
+                lastTime = time;
+                return;
+            }
+
+            double dt = time - lastTime;
+
+            RealVector observation = new ArrayRealVector(new double[] { lfSpeed, rfSpeed, lrSpeed, rrSpeed });
+            // maxEvaluations and maxIterations are 200 but in testing it never exceeded 3
+            LeastSquaresProblem problem = LeastSquaresFactory.create(model, observation, guess, null, 200, 200);
+            LeastSquaresOptimizer.Optimum optimum = optimizer.optimize(problem);
+            double[] robotSpeed = optimum.getPoint().toArray();
+            double xSpeed = robotSpeed[0];
+            double ySpeed = robotSpeed[1];
+            double rotSpeed = robotSpeed[2];
+            // TODO: do we want to transform by robot heading?
+            updateXOdometry(getRawXPosition() + dt * xSpeed, xSpeed);
+            updateYOdometry(getRawYPosition() + dt * ySpeed, ySpeed);
+            updateRotationOdometry(getRawRotationPosition() + Math.toDegrees(dt * rotSpeed));
+            lastTime = time;
+        }
+        else
+        {
+            updateXOdometry(TrcUtil.average(lfEnc, -rfEnc, -lrEnc, rrEnc),
+                TrcUtil.average(lfSpeed, -rfSpeed, -lrSpeed, rrSpeed));
+        }
     }   //updateOdometry
 
+    private class MecanumModel implements MultivariateJacobianFunction
+    {
+        public Pair<RealVector, RealMatrix> value(RealVector commands)
+        {
+            double x = commands.getEntry(0);
+            double y = commands.getEntry(1);
+            double rotation = commands.getEntry(2);
+
+            double[] wheelSpeeds = inverseKinematics(x, y, rotation);
+
+            ArrayRealVector output = new ArrayRealVector(wheelSpeeds);
+            double[][] jacobian = new double[][] { { 1.0, 1.0, k }, { -1.0, 1.0, -k }, { -1.0, 1.0, k },
+                { 1.0, 1.0, -k } };
+            Array2DRowRealMatrix jacobianMatrix = new Array2DRowRealMatrix(jacobian);
+            return new Pair<>(output, jacobianMatrix);
+        }
+    }
 }   //class TrcMecanumDriveBase
