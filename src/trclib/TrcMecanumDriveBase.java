@@ -121,7 +121,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     {
         if (kinematicDriveEnabled)
         {
-            smartKinematicsDrive(x, y, rotation, inverted, gyroAngle);
+            kinematicDrive(x, y, rotation, inverted, gyroAngle);
         }
         else
         {
@@ -129,7 +129,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         }
     }   //holonomicDrive
 
-    private void smartKinematicsDrive(double x, double y, double rotation, boolean inverted, double gyroAngle)
+    private void kinematicDrive(double x, double y, double rotation, boolean inverted, double gyroAngle)
     {
         final String funcName = "holonomicDrive";
 
