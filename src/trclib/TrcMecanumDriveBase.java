@@ -253,8 +253,6 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     @Override
     protected void updateOdometry()
     {
-        super.updateOdometry();
-
         if (kinematicDriveEnabled)
         {
             double time = TrcUtil.getCurrentTime();
@@ -265,6 +263,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
             }
 
             double dt = time - lastTime;
+            super.updateSensors();
 
             RealVector observation = new ArrayRealVector(new double[] { lfSpeed, rfSpeed, lrSpeed, rrSpeed });
             // maxEvaluations and maxIterations are 200 but in testing it never exceeded 3
@@ -282,6 +281,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         }
         else
         {
+            super.updateOdometry();
             updateXOdometry(TrcUtil.average(lfEnc, -rfEnc, -lrEnc, rrEnc),
                 TrcUtil.average(lfSpeed, -rfSpeed, -lrSpeed, rrSpeed));
         }
