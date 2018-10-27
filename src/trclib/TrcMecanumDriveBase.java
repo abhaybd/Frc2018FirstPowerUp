@@ -49,6 +49,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
     private MecanumModel model;
     private LeastSquaresOptimizer optimizer;
     private Double lastTime = null;
+    private double lastXSpeed, lastYSpeed, lastRotSpeed;
 
     /**
      * Constructor: Create an instance of the 4-wheel mecanum drive base.
@@ -216,11 +217,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
             rotation += getGyroAssistPower(rotation);
         }
 
-        double[] wheelPowers = new double[4];
-        wheelPowers[MotorType.LEFT_FRONT.value] = x + y + rotation;
-        wheelPowers[MotorType.RIGHT_FRONT.value] = -x + y - rotation;
-        wheelPowers[MotorType.LEFT_REAR.value] = -x + y + rotation;
-        wheelPowers[MotorType.RIGHT_REAR.value] = x + y - rotation;
+        double[] wheelPowers = inverseKinematics(x, y, rotation);
         TrcUtil.normalizeInPlace(wheelPowers);
 
         double wheelPower;
@@ -256,13 +253,7 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
         if (kinematicDriveEnabled)
         {
             double time = TrcUtil.getCurrentTime();
-            if (lastTime == null)
-            {
-                lastTime = time;
-                return;
-            }
 
-            double dt = time - lastTime;
             super.updateSensors();
 
             RealVector observation = new ArrayRealVector(new double[] { lfSpeed, rfSpeed, lrSpeed, rrSpeed });
@@ -273,11 +264,27 @@ public class TrcMecanumDriveBase extends TrcSimpleDriveBase
             double xSpeed = robotSpeed[0];
             double ySpeed = robotSpeed[1];
             double rotSpeed = robotSpeed[2];
+
+            if (lastTime == null)
+            {
+                lastTime = time;
+                lastXSpeed = xSpeed;
+                lastYSpeed = ySpeed;
+                lastRotSpeed = rotSpeed;
+                return;
+            }
+
+            double dt = time - lastTime;
+            // Trapezoid integration
             // TODO: do we want to transform by robot heading?
-            updateXOdometry(getRawXPosition() + dt * xSpeed, xSpeed);
-            updateYOdometry(getRawYPosition() + dt * ySpeed, ySpeed);
-            updateRotationOdometry(getRawRotationPosition() + Math.toDegrees(dt * rotSpeed));
+            updateXOdometry(getRawXPosition() + dt * TrcUtil.average(xSpeed, lastXSpeed), xSpeed);
+            updateYOdometry(getRawYPosition() + dt * TrcUtil.average(ySpeed, lastYSpeed), ySpeed);
+            updateRotationOdometry(
+                getRawRotationPosition() + Math.toDegrees(dt * TrcUtil.average(rotSpeed, lastRotSpeed)));
             lastTime = time;
+            lastXSpeed = xSpeed;
+            lastYSpeed = ySpeed;
+            lastRotSpeed = rotSpeed;
         }
         else
         {
