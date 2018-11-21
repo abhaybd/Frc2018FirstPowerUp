@@ -35,11 +35,11 @@ public class RobotInfo
     //
     public static final double FIELD_LENGTH                     = 54*12.0;
     public static final double FIELD_WIDTH                      = 27*12.0;
-    
+
     public static final double EXCHANGE_WIDTH                   = 21.0; // 1ft 9in
     public static final double SWITCH_FENCE_HEIGHT              = 18.75; // 1ft 6.75in
     public static final double SWITCH_FENCE_WIDTH               = 153.5; // 12ft 9.5in
-    
+
     public static final double CUBE_HEIGHT                      = 11.0;
     public static final double CUBE_WIDTH                       = 13.0;
     public static final double CUBE_DEPTH                       = 13.0;
@@ -172,7 +172,7 @@ public class RobotInfo
     public static final double DRIVE_ENCODER_COUNTS_PER_ROTATION= 1440.0;
     public static final double DRIVE_GYRO_ASSIST_KP             = 1.5;
     public static final double DRIVE_MAX_ROTATION_RATE          = 6.5;      //radians per second
-    
+
     public static final double DRIVE_MAX_XPID_POWER             = 0.7;
     public static final double DRIVE_MAX_YPID_POWER             = 0.7;
     public static final double DRIVE_MAX_TURNPID_POWER          = 0.7;
@@ -186,32 +186,15 @@ public class RobotInfo
     public static final double ENCODER_X_KI                     = 0.0;
     public static final double ENCODER_X_KD                     = 0.015;
     public static final double ENCODER_X_KF                     = 0.0;
-    public static final double ENCODER_X_TOLERANCE              = 1.0;
+    public static final double ENCODER_X_TOLERANCE              = 2.0;
 
-    // 2-20-2018: 0.0171099037270041, 0.04, 0.0, 0.0077 -- competition robot
-    // 2-24-2018: 0.0172358143438125, 0.02, 0.0, 0.004 --practice robot
-    
-    // 3-16-2018: 0.0172358143438125; 0.03, 0.0, 0.001 -- practice robot
-    // 3-28-2018: 0.01557713764963807531380753138075, 0.02, 0.0, 0.0015   -- competition robot
-    // 0.01557713764963807531380753138075
-    // 0.0168605528551718
-    // don't worry this is for tank drive im not crazy i swear
-    public static final double ENCODER_Y_INCHES_PER_COUNT       = 0.0176933159; // 0.0175344339;
-    public static final double ENCODER_Y_KP                     = 0.01;
+    public static final double ENCODER_Y_INCHES_PER_COUNT       = 0.01778656;
+    public static final double ENCODER_Y_KP                     = 0.04;
     public static final double ENCODER_Y_KI                     = 0.0;
-    public static final double ENCODER_Y_KD                     = 0.003;
+    public static final double ENCODER_Y_KD                     = 0.004;
     public static final double ENCODER_Y_KF                     = 0.0;
     public static final double ENCODER_Y_TOLERANCE              = 2.0;
 
-    // 2017-04-05: 0.03, 0.0, 0.003
-    // 2-20-2018: 0.02, 0.0, 0.0025
-    // 2-20-2018: 0.015, 0.0, 0.0012 -- competition robot
-    //2-24-2018: 0.017, 0.0, 0.0017  - practice robot constants
-    //2-27-2018: 0.015, 0.0, 0.0    -- practice robot
-    //3-16-2018: 0.016, 0.0, 0.001    -- practice robot
-    //3-17-2018: 0.012, 0.0, 0.001    -- practice robot
-    //3-24-2018: 0.018, 0.0, 0.0016   -- competition robot
-    //3-28-2018: 0.02, 0.0, 0.00175   -- competition robot
     public static final double GYRO_TURN_KP                     = 0.02;
     public static final double GYRO_TURN_KI                     = 0.0;
     public static final double GYRO_TURN_KD                     = 0.00175;
@@ -296,7 +279,7 @@ public class RobotInfo
     public static final double OPPOSITE_SWITCH_OVERSHOOT        = 35.0;
     public static final double STRAFE_FROM_SWITCH_DISTANCE      = 24.0;
     public static final double POSITION_TO_STRAFE_DISTANCE      = 108.0;
-    
+
     //
     // CmdScaleAuto constants.
     //

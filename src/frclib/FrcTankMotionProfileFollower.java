@@ -51,7 +51,7 @@ import trclib.TrcUtil;
 
 public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
 {
-    private static final double MIN_TRAJ_SECONDS = 0.5; // How many seconds of points to buffer before beginning?
+    private static final double MIN_TRAJ_SECONDS = 0.2; // How many seconds of points to buffer before beginning?
     private static final TrajectoryDuration DEFAULT_TRAJECTORY_DURATION = TrajectoryDuration.Trajectory_Duration_10ms;
 
     private enum State

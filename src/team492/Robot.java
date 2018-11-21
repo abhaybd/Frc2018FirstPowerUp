@@ -365,13 +365,14 @@ public class Robot extends FrcRobotBase
         //
         // Create other hardware subsystems.
         //
-        elevator = new Elevator(this);
-        cubePickup = new CubePickup(this);
-        winch = new Winch(this);
-        leftFlipper = new FrcPneumatic("leftFlipper", RobotInfo.CANID_PCM1, 
-            RobotInfo.SOL_LEFT_FLIPPER_EXTEND, RobotInfo.SOL_LEFT_FLIPPER_RETRACT);
-        rightFlipper =  new FrcPneumatic("rightFlipper", RobotInfo.CANID_PCM1, 
-            RobotInfo.SOL_RIGHT_FLIPPER_EXTEND, RobotInfo.SOL_RIGHT_FLIPPER_RETRACT);
+        // This isn't present on the satellite
+//        elevator = new Elevator(this);
+//        cubePickup = new CubePickup(this);
+//        winch = new Winch(this);
+//        leftFlipper = new FrcPneumatic("leftFlipper", RobotInfo.CANID_PCM1,
+//            RobotInfo.SOL_LEFT_FLIPPER_EXTEND, RobotInfo.SOL_LEFT_FLIPPER_RETRACT);
+//        rightFlipper =  new FrcPneumatic("rightFlipper", RobotInfo.CANID_PCM1,
+//            RobotInfo.SOL_RIGHT_FLIPPER_EXTEND, RobotInfo.SOL_RIGHT_FLIPPER_RETRACT);
 
         //
         // AutoAssist commands.
@@ -380,7 +381,8 @@ public class Robot extends FrcRobotBase
         cmdStrafeUntilCube = new CmdStrafeUntilCube(this);
         cmdExchangeAlign = new CmdExchangeAlign(this);
 
-        diagnostics = new OnBoardDiagnostics(this);
+        // Don't need this rn.
+        // diagnostics = new OnBoardDiagnostics(this);
 
         //
         // Create Robot Modes.

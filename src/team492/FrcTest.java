@@ -34,6 +34,7 @@ import trclib.TrcRevBlinkin.LEDPattern;
 import trclib.TrcRobot.RunMode;
 import trclib.TrcStateMachine;
 import trclib.TrcTimer;
+import trclib.TrcUtil;
 
 public class FrcTest extends FrcTeleOp
 {
@@ -41,24 +42,12 @@ public class FrcTest extends FrcTeleOp
 
     public enum Test
     {
-        SENSORS_TEST,
-        SUBSYSTEMS_TEST,
-        CALC_DRIVE_BASE_WIDTH,
-        MEASURE_ROBOT_STATS,
-        DRIVE_MOTORS_TEST,
-        AUTO_DIAGNOSTICS,
-        X_TIMED_DRIVE,
-        Y_TIMED_DRIVE,
-        X_DISTANCE_DRIVE,
-        Y_DISTANCE_DRIVE,
-        TURN_DEGREES,
-        LIVE_WINDOW
+        SENSORS_TEST, SUBSYSTEMS_TEST, CALC_DRIVE_BASE_WIDTH, MEASURE_ROBOT_STATS, DRIVE_MOTORS_TEST, AUTO_DIAGNOSTICS, X_TIMED_DRIVE, Y_TIMED_DRIVE, X_DISTANCE_DRIVE, Y_DISTANCE_DRIVE, TURN_DEGREES, LIVE_WINDOW
     } // enum Test
 
     private enum State
     {
-        START,
-        DONE
+        START, DONE
     } // State
 
     private TrcEvent event;
@@ -115,8 +104,7 @@ public class FrcTest extends FrcTeleOp
     // Overriding TrcRobot.RobotMode.
     //
 
-    @Override
-    public void startMode(RunMode prevMode)
+    @Override public void startMode(RunMode prevMode)
     {
         //
         // Call TeleOp startMode.
@@ -146,15 +134,18 @@ public class FrcTest extends FrcTeleOp
                 // So let it flow to the next case.
                 //
             case SUBSYSTEMS_TEST:
-                if (robot.leftSonarArray != null) robot.leftSonarArray.startRanging(true);
-                if (robot.rightSonarArray != null) robot.rightSonarArray.startRanging(true);
-                if (robot.frontSonarArray != null) robot.frontSonarArray.startRanging(true);
+                if (robot.leftSonarArray != null)
+                    robot.leftSonarArray.startRanging(true);
+                if (robot.rightSonarArray != null)
+                    robot.rightSonarArray.startRanging(true);
+                if (robot.frontSonarArray != null)
+                    robot.frontSonarArray.startRanging(true);
                 break;
 
             case CALC_DRIVE_BASE_WIDTH:
                 calcDriveBaseWidth.start();
                 break;
-                
+
             case MEASURE_ROBOT_STATS:
                 robotStats.start();
                 break;
@@ -195,39 +186,40 @@ public class FrcTest extends FrcTeleOp
                 break;
         }
 
-        robot.lidar = new Lidar("Lidar", I2C.Port.kMXP, (byte)0x62);
+        robot.lidar = new Lidar("Lidar", I2C.Port.kMXP, (byte) 0x62);
         LiveWindow.setEnabled(liveWindowEnabled);
         sm.start(State.START);
     } // startMode
 
-    @Override
-    public void stopMode(RunMode nextMode)
+    @Override public void stopMode(RunMode nextMode)
     {
         //
         // Call TeleOp stopMode.
         //
         super.stopMode(nextMode);
-        
-        switch(test)
+
+        switch (test)
         {
             case MEASURE_ROBOT_STATS:
                 robotStats.stop();
                 break;
-             
+
             default:
                 break;
         }
 
-        if (robot.leftSonarArray != null) robot.leftSonarArray.stopRanging();
-        if (robot.rightSonarArray != null) robot.rightSonarArray.stopRanging();
-        if (robot.frontSonarArray != null) robot.frontSonarArray.stopRanging();
+        if (robot.leftSonarArray != null)
+            robot.leftSonarArray.stopRanging();
+        if (robot.rightSonarArray != null)
+            robot.rightSonarArray.stopRanging();
+        if (robot.frontSonarArray != null)
+            robot.frontSonarArray.stopRanging();
     } // stopMode
 
     //
     // Must override TeleOp so it doesn't fight with us.
     //
-    @Override
-    public void runPeriodic(double elapsedTime)
+    @Override public void runPeriodic(double elapsedTime)
     {
         switch (test)
         {
@@ -254,8 +246,7 @@ public class FrcTest extends FrcTeleOp
         robot.diagnostics.updateDiagnosticsAndDashboard();
     } // runPeriodic
 
-    @Override
-    public void runContinuous(double elapsedTime)
+    @Override public void runContinuous(double elapsedTime)
     {
         switch (test)
         {
@@ -266,11 +257,11 @@ public class FrcTest extends FrcTeleOp
             case AUTO_DIAGNOSTICS:
                 autoDiagnostics.cmdPeriodic(elapsedTime);
                 break;
-                
+
             case CALC_DRIVE_BASE_WIDTH:
                 calcDriveBaseWidth.cmdPeriodic(elapsedTime);
                 break;
-                
+
             case MEASURE_ROBOT_STATS:
                 robotStats.cmdPeriodic(elapsedTime);
                 break;
@@ -283,7 +274,7 @@ public class FrcTest extends FrcTeleOp
                 double rrEnc = robot.rightRearWheel.getPosition();
                 robot.dashboard.displayPrintf(2, "Enc:lf=%.0f,rf=%.0f", lfEnc, rfEnc);
                 robot.dashboard.displayPrintf(3, "Enc:lr=%.0f,rr=%.0f", lrEnc, rrEnc);
-                robot.dashboard.displayPrintf(4, "average=%f", (lfEnc + rfEnc + lrEnc + rrEnc) / 4.0);
+                robot.dashboard.displayPrintf(4, "average=%f", TrcUtil.average(lfEnc, rfEnc, lrEnc, rrEnc));
                 robot.dashboard.displayPrintf(5, "xPos=%.1f,yPos=%.1f,heading=%.1f", robot.driveBase.getXPosition(),
                     robot.driveBase.getYPosition(), robot.driveBase.getHeading());
                 timedDriveCommand.cmdPeriodic(elapsedTime);
@@ -293,8 +284,7 @@ public class FrcTest extends FrcTeleOp
             case Y_DISTANCE_DRIVE:
             case TURN_DEGREES:
                 robot.dashboard.displayPrintf(2, "xPos=%.1f,yPos=%.1f,heading=%.1f, lf=%.2f,rf=%.2f,lr=%.2f,rr=%.2f",
-                    robot.driveBase.getXPosition(), robot.driveBase.getYPosition(),
-                    robot.driveBase.getHeading(),
+                    robot.driveBase.getXPosition(), robot.driveBase.getYPosition(), robot.driveBase.getHeading(),
                     robot.leftFrontWheel.getPosition(), robot.rightFrontWheel.getPosition(),
                     robot.leftRearWheel.getPosition(), robot.rightRearWheel.getPosition());
                 robot.encoderXPidCtrl.displayPidInfo(3);
@@ -314,14 +304,13 @@ public class FrcTest extends FrcTeleOp
             robot.gyroTurnPidCtrl.printPidInfo(robot.globalTracer, elapsedTime, robot.battery);
         }
 
-        if(robot.elevator.elevator.isActive())
+        if (robot.elevator.elevator.isActive())
         {
             robot.elevator.elevatorPidCtrl.printPidInfo(robot.globalTracer, elapsedTime, robot.battery);
         }
     } // runContinuous
 
-    @Override
-    public void operatorStickButtonEvent(int button, boolean pressed)
+    @Override public void operatorStickButtonEvent(int button, boolean pressed)
     {
         boolean processedInput = false;
 
@@ -393,8 +382,6 @@ public class FrcTest extends FrcTeleOp
             super.operatorStickButtonEvent(button, pressed);
         }
     }   //operatorStickButtonEvent
-    
-    
 
     /**
      * This method reads all sensors and prints out their values. This is a very
@@ -408,17 +395,18 @@ public class FrcTest extends FrcTeleOp
         double rfPos = robot.rightFrontWheel.getPosition();
         double lrPos = robot.leftRearWheel.getPosition();
         double rrPos = robot.rightRearWheel.getPosition();
-        double driveBaseAverage = (lfPos + rfPos + lrPos + rrPos)/4.0;
-        robot.dashboard.displayPrintf(1, "Sensors Test (Batt=%.1f/%.1f):",
-            robot.battery.getVoltage(), robot.battery.getLowestVoltage());
-        robot.dashboard.displayPrintf(2, "DriveBase: lf=%.0f,rf=%.0f,lr=%.0f,rr=%.0f,avg=%.0f",
-            lfPos, rfPos, lrPos, rrPos, driveBaseAverage);
-        robot.dashboard.displayPrintf(3, "DriveBase: X=%.1f,Y=%.1f,Heading=%.1f,GyroRate=%.3f",
-            robot.driveBase.getXPosition(), robot.driveBase.getYPosition(), robot.driveBase.getHeading(),
-            robot.gyro.getZRotationRate().value);
-        robot.dashboard.displayPrintf(4, "Sensors: pressure=%.1f,lSonar=%.1f,rSonar=%.1f,lidar=%.1f",
-            robot.getPressure(), robot.getLeftSonarDistance(), robot.getRightSonarDistance(),
-            robot.getLidarDistane());
+        double driveBaseAverage = (lfPos + rfPos + lrPos + rrPos) / 4.0;
+        robot.dashboard.displayPrintf(1, "Sensors Test (Batt=%.1f/%.1f):", robot.battery.getVoltage(),
+            robot.battery.getLowestVoltage());
+        robot.dashboard
+            .displayPrintf(2, "DriveBase: lf=%.0f,rf=%.0f,lr=%.0f,rr=%.0f,avg=%.0f", lfPos, rfPos, lrPos, rrPos,
+                driveBaseAverage);
+        robot.dashboard
+            .displayPrintf(3, "DriveBase: X=%.1f,Y=%.1f,Heading=%.1f,GyroRate=%.3f", robot.driveBase.getXPosition(),
+                robot.driveBase.getYPosition(), robot.driveBase.getHeading(), robot.gyro.getZRotationRate().value);
+        robot.dashboard
+            .displayPrintf(4, "Sensors: pressure=%.1f,lSonar=%.1f,rSonar=%.1f,lidar=%.1f", robot.getPressure(),
+                robot.getLeftSonarDistance(), robot.getRightSonarDistance(), robot.getLidarDistane());
         robot.dashboard.displayPrintf(5, "CubePickup: proximity=%b,current=%.1f Exchange: openSpace=%b",
             robot.cubePickup.cubeInProximity(), robot.cubePickup.getPickupCurrent(),
             robot.cmdExchangeAlign.isOpenSpace());
@@ -429,19 +417,21 @@ public class FrcTest extends FrcTeleOp
         }
         else
         {
-            robot.dashboard.displayPrintf(6, "Pixy: x=%.1f,y=%.1f,angle=%.1f",
-                targetInfo.xDistance, targetInfo.yDistance, targetInfo.angle);
+            robot.dashboard
+                .displayPrintf(6, "Pixy: x=%.1f,y=%.1f,angle=%.1f", targetInfo.xDistance, targetInfo.yDistance,
+                    targetInfo.angle);
         }
-        robot.dashboard.displayPrintf(7, "Elevator: pos=%.1f,limitSwitches=%b,%b",
-            robot.elevator.getPosition(), robot.elevator.elevatorMotor.isLowerLimitSwitchActive(),
+        robot.dashboard.displayPrintf(7, "Elevator: pos=%.1f,limitSwitches=%b,%b", robot.elevator.getPosition(),
+            robot.elevator.elevatorMotor.isLowerLimitSwitchActive(),
             robot.elevator.elevatorMotor.isUpperLimitSwitchActive());
         double lfSpeed = robot.leftFrontWheel.getSpeed();
         double rfSpeed = robot.rightFrontWheel.getSpeed();
         double lrSpeed = robot.leftRearWheel.getSpeed();
         double rrSpeed = robot.rightRearWheel.getSpeed();
         double avgSpeed = (lfSpeed + rfSpeed + lrSpeed + rrSpeed) / 4.0;
-        robot.dashboard.displayPrintf(8,"DriveSpeed: lf=%.0f,rf=%.0f,lr=%.0f,rr=%.0f,avg=%.0f",
-            lfSpeed, rfSpeed, lrSpeed, rrSpeed, avgSpeed);
+        robot.dashboard
+            .displayPrintf(8, "DriveSpeed: lf=%.0f,rf=%.0f,lr=%.0f,rr=%.0f,avg=%.0f", lfSpeed, rfSpeed, lrSpeed,
+                rrSpeed, avgSpeed);
     } // doSensorsTest
 
     /**

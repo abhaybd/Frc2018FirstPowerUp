@@ -36,9 +36,7 @@ public class CmdTimedDrive implements TrcRobot.RobotCommand
 {
     private static enum State
     {
-        DO_DELAY,
-        DRIVE_BY_TIME,
-        DONE
+        DO_DELAY, DRIVE_BY_TIME, DONE
     }   //enum State
 
     private static final String moduleName = "CmdTimedDrive";
@@ -49,6 +47,7 @@ public class CmdTimedDrive implements TrcRobot.RobotCommand
     private double xDrivePower;
     private double yDrivePower;
     private double turnPower;
+    private Double startTime = null;
 
     private TrcEvent event;
     private TrcTimer timer;
@@ -57,15 +56,15 @@ public class CmdTimedDrive implements TrcRobot.RobotCommand
     /**
      * Constructor: Create an instance of the object.
      *
-     * @param robot specifies the robot object for providing access to various global objects.
-     * @param delay specifies delay in seconds before timed drive starts. 0 means no delay.
-     * @param driveTime specifies the amount of drive time in seconds.
+     * @param robot       specifies the robot object for providing access to various global objects.
+     * @param delay       specifies delay in seconds before timed drive starts. 0 means no delay.
+     * @param driveTime   specifies the amount of drive time in seconds.
      * @param xDrivePower specifies the motor power in the X direction.
      * @param yDrivePower specifies the motor power in the Y direction.
-     * @param turnPower specifies the motor power for turning.
+     * @param turnPower   specifies the motor power for turning.
      */
-    public CmdTimedDrive(
-        Robot robot, double delay, double driveTime, double xDrivePower, double yDrivePower, double turnPower)
+    public CmdTimedDrive(Robot robot, double delay, double driveTime, double xDrivePower, double yDrivePower,
+        double turnPower)
     {
         this.robot = robot;
         this.delay = delay;
@@ -78,9 +77,9 @@ public class CmdTimedDrive implements TrcRobot.RobotCommand
         sm = new TrcStateMachine<>(moduleName);
         sm.start(State.DO_DELAY);
 
-        robot.globalTracer.traceInfo(
-            moduleName, "delay=%.3f, time=%.1f, xPower=%.1f, yPower=%.1f, turnPower=%.1f",
-            delay, driveTime, xDrivePower, yDrivePower, turnPower);
+        robot.globalTracer
+            .traceInfo(moduleName, "delay=%.3f, time=%.1f, xPower=%.1f, yPower=%.1f, turnPower=%.1f", delay, driveTime,
+                xDrivePower, yDrivePower, turnPower);
     }   //CmdTimedDrive
 
     //
@@ -93,19 +92,23 @@ public class CmdTimedDrive implements TrcRobot.RobotCommand
      * @param elapsedTime specifies the elapsed time in seconds since the start of the robot mode.
      * @return true if the command sequence is completed, false otherwise.
      */
-    @Override
-    public boolean cmdPeriodic(double elapsedTime)
+    @Override public boolean cmdPeriodic(double elapsedTime)
     {
         boolean done = !sm.isEnabled();
 
-        if (done) return true;
+        if (startTime == null)
+            startTime = elapsedTime;
+
+        if (done)
+            return true;
 
         State state = sm.checkReadyAndGetState();
 
         //
         // Print debug info.
         //
-        robot.dashboard.displayPrintf(1, "State: %s", state == null? "NotReady": state);
+        robot.dashboard
+            .displayPrintf(1, "State: %s [%.3f]", state == null ? "NotReady" : state, elapsedTime - startTime);
 
         if (state != null)
         {

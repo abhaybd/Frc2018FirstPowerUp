@@ -16,10 +16,10 @@ import java.util.Date;
 
 public class MotionProfileTest implements TrcRobot.RobotCommand
 {
-    private static final double kP = 0.5651851839;
+    private static final double kP = 2.24889;
     private static final double kI = 0.0;
-    private static final double kD = 0.1695555552;
-    private static final double kF = 1.131266385; // TODO: Calculate this according to Phoenix docs
+    private static final double kD = 0.22489;
+    private static final double kF = 0.8525; // TODO: Calculate this according to Phoenix docs
 
     private static final boolean WRITE_CSV = true;
 
