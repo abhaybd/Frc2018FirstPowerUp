@@ -32,6 +32,8 @@ deploy {
 // Defining my dependencies. In this case, WPILib (+ friends)
 dependencies {
     compile wpilib()
+    compile ctre()
+    compile navx()
     compile pathfinder()
 }
 
