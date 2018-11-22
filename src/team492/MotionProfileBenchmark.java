@@ -13,10 +13,11 @@ import trclib.TrcUtil;
 
 public class MotionProfileBenchmark implements TrcRobot.RobotCommand
 {
-    private static final double kP = 2.24889;
+    // TODO: Retune these
+    private static final double kP = 1.275;
     private static final double kI = 0.0;
-    private static final double kD = 0.22489;
-    private static final double kF = 0.8525; // TODO: Calculate this according to Phoenix docs
+    private static final double kD = 0.0956;
+    private static final double kF = 0.8525; // calculated according to phoenix docs
 
     private String instanceName;
     private FrcTankMotionProfileFollower follower;
