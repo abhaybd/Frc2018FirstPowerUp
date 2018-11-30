@@ -216,7 +216,7 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
         double updatePeriod = minDuration / 2.0; // 2x as fast as trajectory duration
         notifier = new Notifier(this::processPointBuffer);
         notifier.startPeriodic(updatePeriod);
-
+        
         leftMaster.resetPosition(true);
         rightMaster.resetPosition(true);
 
@@ -264,13 +264,10 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
     @Override
     public void cancel()
     {
-        if (isActive())
-        {
-            cancelled = true;
-            if (onFinishedEvent != null)
-                onFinishedEvent.cancel();
-            stop();
-        }
+        cancelled = true;
+        if (onFinishedEvent != null)
+            onFinishedEvent.cancel();
+        stop();
     }
 
     /**
@@ -414,8 +411,7 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
 
     private void stop()
     {
-        if (notifier != null)
-            notifier.stop();
+        if(notifier != null) notifier.stop();
         sm.stop();
         setTaskEnabled(false);
         setTalonValue(SetValueMotionProfile.Disable);
@@ -487,8 +483,8 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
 
     private boolean isDone()
     {
-        return (leftStatus.activePointValid && leftStatus.isLast) && (rightStatus.activePointValid
-            && rightStatus.isLast);
+        return (leftStatus.activePointValid && leftStatus.isLast) &&
+            (rightStatus.activePointValid && rightStatus.isLast);
     }
 
     private void setTalonValue(SetValueMotionProfile value)
@@ -509,8 +505,8 @@ public class FrcTankMotionProfileFollower extends TrcTankMotionProfileFollower
 
     private boolean hasEnoughPoints()
     {
-        return leftStatus.btmBufferCnt >= requiredTrajectoryPoints
-            && rightStatus.btmBufferCnt >= requiredTrajectoryPoints;
+        return leftStatus.btmBufferCnt >= requiredTrajectoryPoints &&
+            rightStatus.btmBufferCnt >= requiredTrajectoryPoints;
     }
 
     private void processPointBuffer()
