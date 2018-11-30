@@ -53,6 +53,26 @@ public class TrcPidController
         public double kD = 0.0;
         public double kF = 0.0;
 
+        public int iZone;
+
+        /**
+         * Constructor: Create an instance of the object.
+         *
+         * @param kP    specifies the Proportional constant.
+         * @param kI    specifies the Integral constant.
+         * @param kD    specifies the Differential constant.
+         * @param kF    specifies the Feed forward constant.
+         * @param iZone specifies the Integral Zone constant.
+         */
+        public PidCoefficients(double kP, double kI, double kD, double kF, int iZone)
+        {
+            this.kP = Math.abs(kP);
+            this.kI = Math.abs(kI);
+            this.kD = Math.abs(kD);
+            this.kF = Math.abs(kF);
+            this.iZone = Math.abs(iZone);
+        }
+
         /**
          * Constructor: Create an instance of the object.
          *
@@ -63,10 +83,7 @@ public class TrcPidController
          */
         public PidCoefficients(double kP, double kI, double kD, double kF)
         {
-            this.kP = Math.abs(kP);
-            this.kI = Math.abs(kI);
-            this.kD = Math.abs(kD);
-            this.kF = Math.abs(kF);
+            this(kP, kI, kD, kF, 0);
         }   //PidCoefficients
 
         /**
@@ -140,23 +157,19 @@ public class TrcPidController
     /**
      * Constructor: Create an instance of the object.
      *
-     * @param instanceName specifies the instance name.
+     * @param instanceName    specifies the instance name.
      * @param pidCoefficients specifies the PID constants.
-     * @param tolerance specifies the target tolerance.
-     * @param settlingTime specifies the minimum on target settling time.
-     * @param pidInput specifies the input provider.
+     * @param tolerance       specifies the target tolerance.
+     * @param settlingTime    specifies the minimum on target settling time.
+     * @param pidInput        specifies the input provider.
      */
-    public TrcPidController(
-            final String instanceName,
-            PidCoefficients pidCoefficients,
-            double tolerance,
-            double settlingTime,
-            Supplier<Double> pidInput)
+    public TrcPidController(final String instanceName, PidCoefficients pidCoefficients, double tolerance,
+        double settlingTime, Supplier<Double> pidInput)
     {
         if (debugEnabled)
         {
-            dbgTrace = useGlobalTracer?
-                TrcDbgTrace.getGlobalTracer():
+            dbgTrace = useGlobalTracer ?
+                TrcDbgTrace.getGlobalTracer() :
                 new TrcDbgTrace(moduleName + "." + instanceName, tracingEnabled, traceLevel, msgLevel);
         }
 
@@ -174,16 +187,13 @@ public class TrcPidController
      * constructor (Java won't allow it). Instead, we provide another protected method setPidInput so it can
      * set the PidInput outside of the super() call.
      *
-     * @param instanceName specifies the instance name.
+     * @param instanceName    specifies the instance name.
      * @param pidCoefficients specifies the PID constants.
-     * @param tolerance specifies the target tolerance.
-     * @param pidInput specifies the input provider.
+     * @param tolerance       specifies the target tolerance.
+     * @param pidInput        specifies the input provider.
      */
-    public TrcPidController(
-            final String instanceName,
-            PidCoefficients pidCoefficients,
-            double tolerance,
-            Supplier<Double> pidInput)
+    public TrcPidController(final String instanceName, PidCoefficients pidCoefficients, double tolerance,
+        Supplier<Double> pidInput)
     {
         this(instanceName, pidCoefficients, tolerance, DEF_SETTLING_TIME, pidInput);
     }   //TrcPidController
@@ -206,19 +216,18 @@ public class TrcPidController
      */
     public void displayPidInfo(int lineNum)
     {
-        dashboard.displayPrintf(
-                lineNum, "%s:Target=%.1f,Input=%.1f,Error=%.1f", instanceName, setPoint, input, currError);
-        dashboard.displayPrintf(
-                lineNum + 1, "minOutput=%.1f,Output=%.1f,maxOutput=%.1f", minOutput, output, maxOutput);
+        dashboard
+            .displayPrintf(lineNum, "%s:Target=%.1f,Input=%.1f,Error=%.1f", instanceName, setPoint, input, currError);
+        dashboard.displayPrintf(lineNum + 1, "minOutput=%.1f,Output=%.1f,maxOutput=%.1f", minOutput, output, maxOutput);
     }   //displayPidInfo
 
     /**
      * This method prints the PID information to the tracer console. If no tracer is provided, it will attempt to
      * use the debug tracer in this module but if the debug tracer is not enabled, no output will be produced.
      *
-     * @param tracer specifies the tracer object to print the PID info to.
+     * @param tracer    specifies the tracer object to print the PID info to.
      * @param timestamp specifies the timestamp to be printed.
-     * @param battery specifies the battery object to get battery info, can be null if not provided.
+     * @param battery   specifies the battery object to get battery info, can be null if not provided.
      */
     public void printPidInfo(TrcDbgTrace tracer, double timestamp, TrcRobotBattery battery)
     {
@@ -231,13 +240,11 @@ public class TrcPidController
 
         if (tracer != null)
         {
-            String msg = timestamp != 0.0? String.format("[%.3f] ", timestamp): "";
+            String msg = timestamp != 0.0 ? String.format("[%.3f] ", timestamp) : "";
 
-            msg += String.format(
-                "%s: Target=%6.1f, Input=%6.1f, Error=%6.1f, " +
-                "PIDTerms=%6.3f/%6.3f/%6.3f/%6.3f, Output=%6.3f(%6.3f/%5.3f)",
-                instanceName, setPoint, input, currError,
-                pTerm, iTerm, dTerm, fTerm, output, minOutput, maxOutput);
+            msg += String.format("%s: Target=%6.1f, Input=%6.1f, Error=%6.1f, "
+                    + "PIDTerms=%6.3f/%6.3f/%6.3f/%6.3f, Output=%6.3f(%6.3f/%5.3f)", instanceName, setPoint, input,
+                currError, pTerm, iTerm, dTerm, fTerm, output, minOutput, maxOutput);
 
             if (battery != null)
             {
@@ -252,7 +259,7 @@ public class TrcPidController
      * This method prints the PID information to the tracer console. If no tracer is provided, it will attempt to
      * use the debug tracer in this module but if the debug tracer is not enabled, no output will be produced.
      *
-     * @param tracer specifies the tracer object to print the PID info to.
+     * @param tracer    specifies the tracer object to print the PID info to.
      * @param timestamp specifies the timestamp to be printed.
      */
     public void printPidInfo(TrcDbgTrace tracer, double timestamp)
@@ -283,12 +290,12 @@ public class TrcPidController
      * This method allows the caller to dynamically enable/disable debug tracing of the output calculation. It is
      * very useful for debugging or tuning PID control.
      *
-     * @param tracer specifies the tracer to be used for debug tracing.
+     * @param tracer  specifies the tracer to be used for debug tracing.
      * @param enabled specifies true to enable the debug tracer, false to disable.
      */
     public void setDebugTraceEnabled(TrcDbgTrace tracer, boolean enabled)
     {
-        debugTracer = enabled? tracer: null;
+        debugTracer = enabled ? tracer : null;
     }   //setDebugTraceEnabled
 
     /**
@@ -385,8 +392,8 @@ public class TrcPidController
         if (debugEnabled)
         {
             dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API);
-            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API,
-                    "=(%f,%f,%f,%f)", pidCoefficients.kP, pidCoefficients.kI, pidCoefficients.kD, pidCoefficients.kF);
+            dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API, "=(%f,%f,%f,%f)", pidCoefficients.kP,
+                pidCoefficients.kI, pidCoefficients.kD, pidCoefficients.kF);
         }
 
         return pidCoefficients;
@@ -403,9 +410,8 @@ public class TrcPidController
 
         if (debugEnabled)
         {
-            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API,
-                    "Kp=%f,Ki=%f,Kd=%f,Kf=%f",
-                    pidCoefficients.kP, pidCoefficients.kI, pidCoefficients.kD, pidCoefficients.kF);
+            dbgTrace.traceEnter(funcName, TrcDbgTrace.TraceLevel.API, "Kp=%f,Ki=%f,Kd=%f,Kf=%f", pidCoefficients.kP,
+                pidCoefficients.kI, pidCoefficients.kD, pidCoefficients.kF);
             dbgTrace.traceExit(funcName, TrcDbgTrace.TraceLevel.API);
         }
 
@@ -597,7 +603,7 @@ public class TrcPidController
     /**
      * This methods sets the target set point.
      *
-     * @param target specifies the target set point.
+     * @param target    specifies the target set point.
      * @param warpSpace specifies the warp space object if the target is in one, null if not.
      */
     public void setTarget(double target, TrcWarpSpace warpSpace)
@@ -734,7 +740,7 @@ public class TrcPidController
             //
             // Don't allow oscillation, so if we are within tolerance or we pass target, just quit.
             //
-            if (currError*setPointSign <= tolerance)
+            if (currError * setPointSign <= tolerance)
             {
                 onTarget = true;
             }
@@ -802,10 +808,10 @@ public class TrcPidController
             }
         }
 
-        pTerm = pidCoefficients.kP*currError;
-        iTerm = pidCoefficients.kI*totalError;
-        dTerm = deltaTime > 0.0? pidCoefficients.kD*(currError - prevError)/deltaTime: 0.0;
-        fTerm = pidCoefficients.kF*setPoint;
+        pTerm = pidCoefficients.kP * currError;
+        iTerm = pidCoefficients.kI * totalError;
+        dTerm = deltaTime > 0.0 ? pidCoefficients.kD * (currError - prevError) / deltaTime : 0.0;
+        fTerm = pidCoefficients.kF * setPoint;
         output = pTerm + iTerm + dTerm + fTerm;
 
         if (output > maxOutput)
