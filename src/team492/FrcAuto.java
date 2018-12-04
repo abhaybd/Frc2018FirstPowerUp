@@ -38,6 +38,7 @@ public class FrcAuto implements TrcRobot.RobotMode
     public static enum AutoStrategy
     {
         // Different choices for autonomous
+        MOTION_MAGIC_TEST,
         MOTION_PROFILE_TEST,
         AUTO_SIDE,
         AUTO_SWITCH,
@@ -95,6 +96,7 @@ public class FrcAuto implements TrcRobot.RobotMode
 
     private TrcRobot.RobotCommand autoCommand;
     private MotionProfileTest mpTest;
+    private MotionMagicTest magicTest;
 
     public FrcAuto(Robot robot)
     {
@@ -113,7 +115,8 @@ public class FrcAuto implements TrcRobot.RobotMode
         //
         // Populate Autonomous Mode menus.
         //
-        autoStrategyMenu.addChoice("Motion Profile", AutoStrategy.MOTION_PROFILE_TEST, true, false);
+        autoStrategyMenu.addChoice("Motion Magic", AutoStrategy.MOTION_MAGIC_TEST, true, false);
+        autoStrategyMenu.addChoice("Motion Profile", AutoStrategy.MOTION_PROFILE_TEST, false, false);
         autoStrategyMenu.addChoice("Auto Side", AutoStrategy.AUTO_SIDE, false, false);
         autoStrategyMenu.addChoice("Auto Switch", AutoStrategy.AUTO_SWITCH, false, false);
         autoStrategyMenu.addChoice("Auto Scale", AutoStrategy.AUTO_SCALE, false, false);
@@ -125,6 +128,7 @@ public class FrcAuto implements TrcRobot.RobotMode
         autoStrategyMenu.addChoice("Do Nothing", AutoStrategy.DO_NOTHING, false, true);
 
         mpTest = new MotionProfileTest("MPTest", robot);
+        magicTest = new MotionMagicTest(robot);
 
         startPositionMenu.addChoice("Left Side Start", RobotInfo.Position.LEFT_POS, false, false);
         startPositionMenu.addChoice("Middle Start", RobotInfo.Position.MID_POS, true, false);
@@ -203,6 +207,11 @@ public class FrcAuto implements TrcRobot.RobotMode
 
         switch (autoStrategy)
         {
+            case MOTION_MAGIC_TEST:
+                magicTest.start(forwardDriveDistance);
+                autoCommand = magicTest;
+                break;
+
             case MOTION_PROFILE_TEST:
                 mpTest.start();
                 autoCommand = mpTest;
@@ -293,6 +302,10 @@ public class FrcAuto implements TrcRobot.RobotMode
             case MOTION_PROFILE_TEST:
                 mpTest.stop();
                 break;
+
+            case MOTION_MAGIC_TEST:
+                magicTest.stop();
+                break;
                 
             default:
                 break;
@@ -336,5 +349,4 @@ public class FrcAuto implements TrcRobot.RobotMode
             }
         }
     } // runContinuous
-
 } // class FrcAuto

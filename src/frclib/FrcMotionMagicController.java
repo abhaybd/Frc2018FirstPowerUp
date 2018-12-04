@@ -119,9 +119,9 @@ public class FrcMotionMagicController
      *
      * @param targetPos The target position in world units to move to.
      */
-    public void start(double targetPos)
+    public void drive(double targetPos)
     {
-        start(targetPos, null);
+        drive(targetPos, null);
     }
 
     /**
@@ -130,7 +130,7 @@ public class FrcMotionMagicController
      * @param targetPos       The target position in world units to move to.
      * @param onFinishedEvent The event to signal when done.
      */
-    public void start(double targetPos, TrcEvent onFinishedEvent)
+    public void drive(double targetPos, TrcEvent onFinishedEvent)
     {
         if (leftMaster == null || rightMaster == null)
         {
@@ -286,7 +286,7 @@ public class FrcMotionMagicController
 
     private double getRawError()
     {
-        return TrcUtil.average(leftMaster.motor.getClosedLoopError(), rightMaster.motor.getClosedLoopError());
+        return TrcUtil.average(leftMaster.motor.getClosedLoopError(0), rightMaster.motor.getClosedLoopError(0));
     }
 
     private boolean isDone()
