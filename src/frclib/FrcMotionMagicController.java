@@ -315,14 +315,14 @@ public class FrcMotionMagicController
 
     private void configureTalon(FrcCANTalon talon)
     {
-        talon.motor.config_kP(pidSlot, pidCoefficients.kP, 10);
-        talon.motor.config_kI(pidSlot, pidCoefficients.kI, 10);
-        talon.motor.config_kD(pidSlot, pidCoefficients.kD, 10);
-        talon.motor.config_kF(pidSlot, pidCoefficients.kF, 10);
-        talon.motor.config_IntegralZone(pidSlot, pidCoefficients.iZone, 10);
+        talon.motor.config_kP(pidSlot, pidCoefficients.kP, 0);
+        talon.motor.config_kI(pidSlot, pidCoefficients.kI, 0);
+        talon.motor.config_kD(pidSlot, pidCoefficients.kD, 0);
+        talon.motor.config_kF(pidSlot, pidCoefficients.kF, 0);
+        talon.motor.config_IntegralZone(pidSlot, pidCoefficients.iZone, 0);
 
-        talon.motor.configMotionCruiseVelocity(maxVelocity, 10);
-        talon.motor.configMotionAcceleration(maxAcceleration, 10);
+        talon.motor.configMotionCruiseVelocity(maxVelocity, 0);
+        talon.motor.configMotionAcceleration(maxAcceleration, 0);
 
         talon.motor.setSelectedSensorPosition(0, 0, 10);
     }
@@ -350,6 +350,5 @@ public class FrcMotionMagicController
             }
             stop();
         }
-        TrcDbgTrace.getGlobalTracer().traceInfo("MotionMagicController.task", "Running...");
     }
 }
