@@ -10,7 +10,7 @@ import trclib.TrcDbgTrace;
 public class Lidar
 {
     private static final String moduleName = "Lidar";
-    private static final boolean debugEnabled = true;
+    private static final boolean debugEnabled = false;
     private static final boolean tracingEnabled = false;
     private static final boolean useGlobalTracer = true;
     private static final TrcDbgTrace.TraceLevel traceLevel = TrcDbgTrace.TraceLevel.API;

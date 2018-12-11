@@ -23,6 +23,8 @@
 package frclib;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+
+import trclib.TrcDbgTrace;
 import trclib.TrcEvent;
 import trclib.TrcPidController;
 import trclib.TrcRobot;
@@ -149,6 +151,8 @@ public class FrcMotionMagicController
 
         configureTalon(leftMaster);
         configureTalon(rightMaster);
+
+        TrcDbgTrace.getGlobalTracer().traceInfo("MotionMagicController.drive", "driveDist: %.2f", targetPos);
 
         leftMaster.motor.set(ControlMode.MotionMagic, targetPos);
         rightMaster.motor.set(ControlMode.MotionMagic, targetPos);
@@ -286,7 +290,11 @@ public class FrcMotionMagicController
 
     private double getRawError()
     {
-        return TrcUtil.average(leftMaster.motor.getClosedLoopError(0), rightMaster.motor.getClosedLoopError(0));
+        double leftError = targetPos - leftMaster.motor.getSelectedSensorPosition(pidSlot);
+        double rightError = targetPos - rightMaster.motor.getSelectedSensorPosition(pidSlot);
+        TrcDbgTrace.getGlobalTracer()
+            .traceInfo("FrcMotionMagicController.getRawError", "lError: %.2f, rError: %.2f", leftError, rightError);
+        return TrcUtil.average(leftError, rightError);
     }
 
     private boolean isDone()
@@ -307,14 +315,14 @@ public class FrcMotionMagicController
 
     private void configureTalon(FrcCANTalon talon)
     {
-        talon.motor.config_kP(pidSlot, pidCoefficients.kP, 0);
-        talon.motor.config_kI(pidSlot, pidCoefficients.kI, 0);
-        talon.motor.config_kD(pidSlot, pidCoefficients.kD, 0);
-        talon.motor.config_kF(pidSlot, pidCoefficients.kF, 0);
-        talon.motor.config_IntegralZone(pidSlot, pidCoefficients.iZone, 0);
+        talon.motor.config_kP(pidSlot, pidCoefficients.kP, 10);
+        talon.motor.config_kI(pidSlot, pidCoefficients.kI, 10);
+        talon.motor.config_kD(pidSlot, pidCoefficients.kD, 10);
+        talon.motor.config_kF(pidSlot, pidCoefficients.kF, 10);
+        talon.motor.config_IntegralZone(pidSlot, pidCoefficients.iZone, 10);
 
-        talon.motor.configMotionCruiseVelocity(maxVelocity, 0);
-        talon.motor.configMotionAcceleration(maxAcceleration, 0);
+        talon.motor.configMotionCruiseVelocity(maxVelocity, 10);
+        talon.motor.configMotionAcceleration(maxAcceleration, 10);
 
         talon.motor.setSelectedSensorPosition(0, 0, 10);
     }
@@ -335,11 +343,13 @@ public class FrcMotionMagicController
     {
         if (isDone())
         {
+            TrcDbgTrace.getGlobalTracer().traceInfo("MotionMagicController.task", "Done!");
             if (onFinishedEvent != null)
             {
                 onFinishedEvent.set(true);
             }
             stop();
         }
+        TrcDbgTrace.getGlobalTracer().traceInfo("MotionMagicController.task", "Running...");
     }
 }

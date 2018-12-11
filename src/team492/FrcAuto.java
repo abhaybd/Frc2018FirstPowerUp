@@ -38,38 +38,23 @@ public class FrcAuto implements TrcRobot.RobotMode
     public static enum AutoStrategy
     {
         // Different choices for autonomous
-        MOTION_MAGIC_TEST,
-        MOTION_PROFILE_TEST,
-        AUTO_SIDE,
-        AUTO_SWITCH,
-        AUTO_SCALE,
-        X_TIMED_DRIVE,
-        Y_TIMED_DRIVE,
-        X_DISTANCE_DRIVE,
-        Y_DISTANCE_DRIVE,
-        TURN_DEGREES,
-        DO_NOTHING
+        MOTION_MAGIC_TEST, MOTION_PROFILE_TEST, AUTO_SIDE, AUTO_SWITCH, AUTO_SCALE, X_TIMED_DRIVE, Y_TIMED_DRIVE, X_DISTANCE_DRIVE, Y_DISTANCE_DRIVE, TURN_DEGREES, DO_NOTHING
     } // enum AutoStrategy
 
     public static enum YesOrNo
     {
-        YES,
-        NO
+        YES, NO
     } // enum YesOrNo
 
     public static enum Lane
     {
         // Different choices for crossing lanes
-        LANE1,
-        LANE2,
-        LANE3,
-        CUSTOM
+        LANE1, LANE2, LANE3, CUSTOM
     } // enum Lane
-    
+
     public static enum ScaleOrSwitch
     {
-        SCALE,
-        SWITCH
+        SCALE, SWITCH
     }
 
     private Robot robot;
@@ -91,7 +76,7 @@ public class FrcAuto implements TrcRobot.RobotMode
     private boolean getSecondCube;
     private Lane lane;
     private double delay;
-    
+
     private double forwardDriveDistance;
 
     private TrcRobot.RobotCommand autoCommand;
@@ -144,10 +129,10 @@ public class FrcAuto implements TrcRobot.RobotMode
         laneMenu.addChoice("Lane 2", Lane.LANE2, true, false);
         laneMenu.addChoice("Lane 3", Lane.LANE3, false, false);
         laneMenu.addChoice("Custom Distance", Lane.CUSTOM, false, true);
-        
+
         preferenceMenu.addChoice("Switch", ScaleOrSwitch.SWITCH, true, false);
         preferenceMenu.addChoice("Scale", ScaleOrSwitch.SCALE, false, true);
-        
+
         useSonarMenu.addChoice("Yes", YesOrNo.YES, true, false);
         useSonarMenu.addChoice("No", YesOrNo.NO, false, true);
     } // FrcAuto
@@ -162,9 +147,10 @@ public class FrcAuto implements TrcRobot.RobotMode
         final String funcName = moduleName + ".startMode";
 
         robot.getGameInfo();
-        robot.globalTracer.traceInfo(funcName, "%s_%s%03d (%s%d) [FMSConnected=%b] msg=%s",
-            robot.eventName, robot.matchType, robot.matchNumber, robot.alliance.toString(), robot.location,
-            robot.ds.isFMSAttached(), robot.gameSpecificMessage);
+        robot.globalTracer
+            .traceInfo(funcName, "%s_%s%03d (%s%d) [FMSConnected=%b] msg=%s", robot.eventName, robot.matchType,
+                robot.matchNumber, robot.alliance.toString(), robot.location, robot.ds.isFMSAttached(),
+                robot.gameSpecificMessage);
 
         robot.encoderYPidCtrl.setOutputLimit(0.6);  //CodeReview: can we use RobotInfo.DRIVE_MAX_YPID_POWER?
         robot.encoderXPidCtrl.setOutputLimit(RobotInfo.DRIVE_MAX_XPID_POWER);
@@ -208,7 +194,7 @@ public class FrcAuto implements TrcRobot.RobotMode
         switch (autoStrategy)
         {
             case MOTION_MAGIC_TEST:
-                magicTest.start(forwardDriveDistance);
+                magicTest.start(HalDashboard.getNumber("Auto/FwdDistance", 0.0));
                 autoCommand = magicTest;
                 break;
 
@@ -227,14 +213,15 @@ public class FrcAuto implements TrcRobot.RobotMode
 
                     if (startRight == scaleRight && scaleRight == switchRight)
                     {
-                        switch(preference)
+                        switch (preference)
                         {
                             case SWITCH:
                                 autoCommand = new CmdAutoSideSwitch(robot, delay, getSecondCube, useSonar);
                                 break;
 
                             case SCALE:
-                                autoCommand = new CmdAutoScale(robot, delay, startPosition, forwardDriveDistance, useSonar);
+                                autoCommand = new CmdAutoScale(robot, delay, startPosition, forwardDriveDistance,
+                                    useSonar);
                                 break;
                         }
                     }
@@ -254,8 +241,8 @@ public class FrcAuto implements TrcRobot.RobotMode
                 }
 
             case AUTO_SWITCH:
-                autoCommand = new CmdAutoSwitch(
-                    robot, delay, forwardDriveDistance, startPosition, fastDelivery, getSecondCube);
+                autoCommand = new CmdAutoSwitch(robot, delay, forwardDriveDistance, startPosition, fastDelivery,
+                    getSecondCube);
                 break;
 
             case AUTO_SCALE:
@@ -271,21 +258,18 @@ public class FrcAuto implements TrcRobot.RobotMode
                 break;
 
             case X_DISTANCE_DRIVE:
-                autoCommand = new CmdPidDrive(
-                    robot, robot.pidDrive, robot.encoderXPidCtrl, robot.encoderYPidCtrl, robot.gyroTurnPidCtrl,
-                    delay, robot.driveDistance, 0.0, 0.0, robot.drivePowerLimit, false);
+                autoCommand = new CmdPidDrive(robot, robot.pidDrive, robot.encoderXPidCtrl, robot.encoderYPidCtrl,
+                    robot.gyroTurnPidCtrl, delay, robot.driveDistance, 0.0, 0.0, robot.drivePowerLimit, false);
                 break;
 
             case Y_DISTANCE_DRIVE:
-                autoCommand = new CmdPidDrive(
-                    robot, robot.pidDrive, robot.encoderXPidCtrl, robot.encoderYPidCtrl, robot.gyroTurnPidCtrl,
-                    delay, 0.0, robot.driveDistance, 0.0, robot.drivePowerLimit, false);
+                autoCommand = new CmdPidDrive(robot, robot.pidDrive, robot.encoderXPidCtrl, robot.encoderYPidCtrl,
+                    robot.gyroTurnPidCtrl, delay, 0.0, robot.driveDistance, 0.0, robot.drivePowerLimit, false);
                 break;
 
             case TURN_DEGREES:
-                autoCommand = new CmdPidDrive(
-                    robot, robot.pidDrive, robot.encoderXPidCtrl, robot.encoderYPidCtrl, robot.gyroTurnPidCtrl,
-                    delay, 0.0, 0.0, robot.turnDegrees, robot.drivePowerLimit, false);
+                autoCommand = new CmdPidDrive(robot, robot.pidDrive, robot.encoderXPidCtrl, robot.encoderYPidCtrl,
+                    robot.gyroTurnPidCtrl, delay, 0.0, 0.0, robot.turnDegrees, robot.drivePowerLimit, false);
                 break;
 
             case DO_NOTHING:
@@ -297,8 +281,8 @@ public class FrcAuto implements TrcRobot.RobotMode
     @Override
     public void stopMode(RunMode nextMode)
     {
-    	switch(autoStrategy)
-    	{
+        switch (autoStrategy)
+        {
             case MOTION_PROFILE_TEST:
                 mpTest.stop();
                 break;
@@ -306,10 +290,10 @@ public class FrcAuto implements TrcRobot.RobotMode
             case MOTION_MAGIC_TEST:
                 magicTest.stop();
                 break;
-                
+
             default:
                 break;
-    	}
+        }
         TrcTaskMgr.getInstance().printTaskPerformanceMetrics(robot.globalTracer);
     } // stopMode
 
