@@ -41,7 +41,7 @@ import trclib.TrcUtil;
 
 public class FrcMotionMagicController
 {
-    private TrcPidController.PidCoefficients pidCoefficients;
+    private TrcPidController.PidCoefficients leftCoefficients = null, rightCoefficients = null;
     private FrcCANTalon leftMaster, rightMaster;
     private int pidSlot;
     private double worldUnitsPerTick;
@@ -70,7 +70,6 @@ public class FrcMotionMagicController
      * Creates a motion magic controller with a default pid slot of 0.
      *
      * @param instanceName      The name of this instance.
-     * @param pidCoefficients   The PID coefficients for the TalonSRX to use for closed loop control.
      * @param worldUnitsPerTick The number of world units per encoder tick. This can be inches/tick, cm/tick, etc.
      *                          Whatever is used, MAKE SURE TO BE CONSISTENT.
      * @param maxVelocity       The maximum speed the robot should go during a move operation.
@@ -80,17 +79,16 @@ public class FrcMotionMagicController
      * @param errorTolerance    The tolerance of error, in world units. If the closed loop error is less than or equal to
      *                          the tolerance, the move operation will be finished.
      */
-    public FrcMotionMagicController(String instanceName, TrcPidController.PidCoefficients pidCoefficients,
-        double worldUnitsPerTick, double maxVelocity, double maxAcceleration, double errorTolerance)
+    public FrcMotionMagicController(String instanceName, double worldUnitsPerTick, double maxVelocity,
+        double maxAcceleration, double errorTolerance)
     {
-        this(instanceName, pidCoefficients, worldUnitsPerTick, maxVelocity, maxAcceleration, errorTolerance, 0);
+        this(instanceName, worldUnitsPerTick, maxVelocity, maxAcceleration, errorTolerance, 0);
     }
 
     /**
      * Creates a motion magic controller with a default pid slot of 0.
      *
      * @param instanceName      The name of this instance.
-     * @param pidCoefficients   The PID coefficients for the TalonSRX to use for closed loop control.
      * @param worldUnitsPerTick The number of world units per encoder tick. This can be inches/tick, cm/tick, etc.
      *                          Whatever is used, MAKE SURE TO BE CONSISTENT.
      * @param maxVelocity       The maximum speed the robot should go during a move operation.
@@ -101,10 +99,9 @@ public class FrcMotionMagicController
      *                          the tolerance, the move operation will be finished.
      * @param pidSlot           The pid slot to use for the TalonSRX. 0 is the main pid controller, 0 is the auxiliary.
      */
-    public FrcMotionMagicController(String instanceName, TrcPidController.PidCoefficients pidCoefficients,
-        double worldUnitsPerTick, double maxVelocity, double maxAcceleration, double errorTolerance, int pidSlot)
+    public FrcMotionMagicController(String instanceName, double worldUnitsPerTick, double maxVelocity,
+        double maxAcceleration, double errorTolerance, int pidSlot)
     {
-        this.pidCoefficients = pidCoefficients;
         this.worldUnitsPerTick = worldUnitsPerTick;
         this.pidSlot = pidSlot;
         // Convert to encoder units
@@ -139,6 +136,11 @@ public class FrcMotionMagicController
             throw new IllegalStateException("Cannot start before setting both left and right motors!");
         }
 
+        if (leftCoefficients == null || rightCoefficients == null)
+        {
+            throw new IllegalStateException("Cannot start before setting the pid coefficients!");
+        }
+
         // Convert target to encoder units
         targetPos /= worldUnitsPerTick;
         this.targetPos = targetPos;
@@ -149,10 +151,10 @@ public class FrcMotionMagicController
         }
         this.onFinishedEvent = onFinishedEvent;
 
-        configureTalon(leftMaster);
-        configureTalon(rightMaster);
+        configureTalon(leftMaster, leftCoefficients);
+        configureTalon(rightMaster, rightCoefficients);
 
-        TrcDbgTrace.getGlobalTracer().traceInfo("MotionMagicController.drive", "driveDist: %.2f", targetPos);
+        TrcDbgTrace.getGlobalTracer().traceInfo("FrcMotionMagicController.drive", "driveDist: %.2f", targetPos);
 
         leftMaster.motor.set(ControlMode.MotionMagic, targetPos);
         rightMaster.motor.set(ControlMode.MotionMagic, targetPos);
@@ -237,7 +239,14 @@ public class FrcMotionMagicController
      */
     public void setPidCoefficients(TrcPidController.PidCoefficients pidCoefficients)
     {
-        this.pidCoefficients = pidCoefficients;
+        setPidCoefficients(pidCoefficients, pidCoefficients);
+    }
+
+    public void setPidCoefficients(TrcPidController.PidCoefficients leftCoefficients,
+        TrcPidController.PidCoefficients rightCoefficients)
+    {
+        this.leftCoefficients = leftCoefficients;
+        this.rightCoefficients = rightCoefficients;
     }
 
     /**
@@ -313,7 +322,7 @@ public class FrcMotionMagicController
         rightMaster.motor.neutralOutput();
     }
 
-    private void configureTalon(FrcCANTalon talon)
+    private void configureTalon(FrcCANTalon talon, TrcPidController.PidCoefficients pidCoefficients)
     {
         talon.motor.config_kP(pidSlot, pidCoefficients.kP, 0);
         talon.motor.config_kI(pidSlot, pidCoefficients.kI, 0);
@@ -343,7 +352,7 @@ public class FrcMotionMagicController
     {
         if (isDone())
         {
-            TrcDbgTrace.getGlobalTracer().traceInfo("MotionMagicController.task", "Done!");
+            TrcDbgTrace.getGlobalTracer().traceInfo("FrcMotionMagicController.task", "Done!");
             if (onFinishedEvent != null)
             {
                 onFinishedEvent.set(true);

@@ -38,8 +38,8 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
     {
         this.robot = robot;
         TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(kP, kI, kD, kF);
-        this.motionMagic = new FrcMotionMagicController("MotionMagic", pidCoefficients, WORLD_UNITS_PER_TICK, MAX_SPEED,
-            MAX_ACCEL, 1.0);
+        this.motionMagic = new FrcMotionMagicController("MotionMagic", WORLD_UNITS_PER_TICK, MAX_SPEED, MAX_ACCEL, 1.0);
+        motionMagic.setPidCoefficients(pidCoefficients);
         motionMagic.setLeftMotors(robot.leftFrontWheel, robot.leftRearWheel);
         motionMagic.setRightMotors(robot.rightFrontWheel, robot.rightRearWheel);
 
