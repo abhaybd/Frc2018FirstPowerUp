@@ -97,7 +97,7 @@ public class FrcMotionMagicController
      *                          The robot may not reach this acceleration. This should be in world units per second per second.
      * @param errorTolerance    The tolerance of error, in world units. If the closed loop error is less than or equal to
      *                          the tolerance, the move operation will be finished.
-     * @param pidSlot           The pid slot to use for the TalonSRX. 0 is the main pid controller, 0 is the auxiliary.
+     * @param pidSlot           The pid slot to use for the TalonSRX. 0 is the main pid controller, 1 is the auxiliary.
      */
     public FrcMotionMagicController(String instanceName, double worldUnitsPerTick, double maxVelocity,
         double maxAcceleration, double errorTolerance, int pidSlot)
@@ -108,7 +108,8 @@ public class FrcMotionMagicController
         this.errorTolerance = Math.abs(errorTolerance) / worldUnitsPerTick;
         // Scale velocity and acceleration to encoder units and time frame of 100ms
         this.maxVelocity = TrcUtil.round(0.1 * maxVelocity / worldUnitsPerTick);
-        this.maxAcceleration = TrcUtil.round(Math.pow(0.1, 2) * maxAcceleration / worldUnitsPerTick);
+        // For some reason CTRE is dumb, so acceleration is ticks/100ms/1sec. God I hate these people.
+        this.maxAcceleration = TrcUtil.round(0.1 * maxAcceleration / worldUnitsPerTick);
 
         this.motionMagicTaskObj = TrcTaskMgr.getInstance().createTask(instanceName, this::motionMagicTask);
     }

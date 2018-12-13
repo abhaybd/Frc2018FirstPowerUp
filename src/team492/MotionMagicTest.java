@@ -24,7 +24,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
     private static final double WORLD_UNITS_PER_TICK = RobotInfo.ENCODER_Y_INCHES_PER_COUNT;
 
     private static final double MAX_SPEED = 300;
-    private static final double MAX_ACCEL = 300;
+    private static final double MAX_ACCEL = 40;
 
     private static final boolean WRITE_CSV = true;
 
@@ -90,10 +90,11 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
         double elapsedTime = TrcUtil.getCurrentTime() - startTime;
         if (event.isSignaled())
         {
-            robot.dashboard.displayPrintf(1, "Motion Magic time: %.2f", elapsedTime);
+            double error = motionMagic.getError();
+            robot.dashboard.displayPrintf(1, "Motion Magic time: %.3f, Error: %.2f", elapsedTime, error);
             if (robot.globalTracer != null)
             {
-                robot.globalTracer.traceInfo("cmdPeriodic", "Motion Magic time: %.2f", elapsedTime);
+                robot.globalTracer.traceInfo("cmdPeriodic", "Motion Magic time: %.3f, Error:%.2f", elapsedTime, error);
             }
             event.clear();
             return true;
@@ -102,8 +103,10 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
         if (motionMagic.isRunning())
         {
             fileOut.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", elapsedTime, motionMagic.getError(),
-                robot.leftFrontWheel.getPosition(), robot.rightFrontWheel.getPosition(),
-                robot.leftFrontWheel.getSpeed(), robot.rightFrontWheel.getSpeed());
+                robot.leftFrontWheel.motor.getSelectedSensorPosition(0) * WORLD_UNITS_PER_TICK,
+                robot.rightFrontWheel.motor.getSelectedSensorPosition(0) * WORLD_UNITS_PER_TICK,
+                robot.leftFrontWheel.getSpeed() * WORLD_UNITS_PER_TICK,
+                robot.rightFrontWheel.getSpeed() * WORLD_UNITS_PER_TICK);
         }
         return false;
     }
