@@ -31,6 +31,7 @@ import frclib.FrcJoystick;
 import hallib.HalDashboard;
 import team492.PixyVision.TargetInfo;
 import trclib.TrcEvent;
+import trclib.TrcPidController;
 import trclib.TrcRevBlinkin.LEDPattern;
 import trclib.TrcRobot.RunMode;
 import trclib.TrcStateMachine;
@@ -110,6 +111,25 @@ public class FrcTest extends FrcTeleOp
     // Overriding TrcRobot.RobotMode.
     //
 
+    private void enableVelocityControl()
+    {
+        TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(0.0, 0.0, 0.0,
+            1.131266385);
+        double maxSpeed = 1023.0 / 1.131266385;
+        robot.leftFrontWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+        robot.rightFrontWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+        robot.leftRearWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+        robot.rightRearWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+    }
+
+    private void disableVelocityControl()
+    {
+        robot.leftFrontWheel.disableVelocityMode();
+        robot.rightFrontWheel.disableVelocityMode();
+        robot.leftRearWheel.disableVelocityMode();
+        robot.rightRearWheel.disableVelocityMode();
+    }
+
     @Override
     public void startMode(RunMode prevMode)
     {
@@ -117,6 +137,8 @@ public class FrcTest extends FrcTeleOp
         // Call TeleOp startMode.
         //
         super.startMode(prevMode);
+
+        enableVelocityControl();
 
         //
         // Retrieve menu choice values.
@@ -212,6 +234,7 @@ public class FrcTest extends FrcTeleOp
         //
         super.stopMode(nextMode);
         running = false;
+        disableVelocityControl();
 
         switch (test)
         {
@@ -317,7 +340,7 @@ public class FrcTest extends FrcTeleOp
                 robot.encoderXPidCtrl.displayPidInfo(3);
                 robot.encoderYPidCtrl.displayPidInfo(5);
                 robot.gyroTurnPidCtrl.displayPidInfo(7);
-                if(pidDriveCommand.cmdPeriodic(elapsedTime) && running)
+                if (pidDriveCommand.cmdPeriodic(elapsedTime) && running)
                 {
                     running = false;
                     robot.dashboard.displayPrintf(9, "Elapsed time=%.3f", TrcUtil.getCurrentTime() - startTime);

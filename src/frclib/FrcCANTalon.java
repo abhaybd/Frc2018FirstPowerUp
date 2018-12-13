@@ -206,10 +206,10 @@ public class FrcCANTalon extends TrcMotor
 
         if(pidCoefficients != null)
         {
-            this.motor.config_kP(0, pidCoefficients.kP);
-            this.motor.config_kI(0, pidCoefficients.kI);
-            this.motor.config_kD(0, pidCoefficients.kD);
-            this.motor.config_kF(0, pidCoefficients.kF);
+            this.motor.config_kP(0, pidCoefficients.kP, 0);
+            this.motor.config_kI(0, pidCoefficients.kI, 0);
+            this.motor.config_kD(0, pidCoefficients.kD, 0);
+            this.motor.config_kF(0, pidCoefficients.kF, 0);
         }
     }   //enableVelocityMode
 

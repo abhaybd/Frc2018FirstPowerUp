@@ -218,6 +218,11 @@ public class RobotInfo
     public static final double GYRO_TURN_KF                     = 0.0;
     public static final double GYRO_TURN_TOLERANCE              = 2.0;
 
+    public static final double VELOCITY_CONTROL_KP              = 0.0;
+    public static final double VELOCITY_CONTROL_KI              = 0.0;
+    public static final double VELOCITY_CONTROL_KD              = 0.0;
+    public static final double VELOCITY_CONTROL_KF              = 1.131266385;
+
     //
     // Elevator subsystem.
     //

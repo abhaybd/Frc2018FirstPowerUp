@@ -788,6 +788,25 @@ public class Robot extends FrcRobotBase
         return value;
     }
 
+    public void enableVelocityControl()
+    {
+        PidCoefficients pidCoefficients = new PidCoefficients(RobotInfo.VELOCITY_CONTROL_KP,
+            RobotInfo.VELOCITY_CONTROL_KI, RobotInfo.VELOCITY_CONTROL_KD, RobotInfo.VELOCITY_CONTROL_KF);
+        double maxSpeed = 1023.0 / pidCoefficients.kF;
+        leftFrontWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+        rightFrontWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+        leftRearWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+        rightRearWheel.enableVelocityMode(maxSpeed, pidCoefficients);
+    }
+
+    public void disableVelocityControl()
+    {
+        leftFrontWheel.disableVelocityMode();
+        rightFrontWheel.disableVelocityMode();
+        leftRearWheel.disableVelocityMode();
+        rightRearWheel.disableVelocityMode();
+    }
+
     public Double getPixyTargetAngle()
     {
         final String funcName = "getPixyTargetAngle";
