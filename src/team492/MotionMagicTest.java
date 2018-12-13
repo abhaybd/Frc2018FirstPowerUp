@@ -23,8 +23,8 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
 
     private static final double WORLD_UNITS_PER_TICK = RobotInfo.ENCODER_Y_INCHES_PER_COUNT;
 
-    private static final double MAX_SPEED = 300;
-    private static final double MAX_ACCEL = 40;
+    private static final double MAX_SPEED = 300; // in/sec
+    private static final double MAX_ACCEL = 40; // in/sec^2
 
     private static final boolean WRITE_CSV = true;
 
@@ -56,7 +56,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
     public void start(double distance)
     {
         startTime = TrcUtil.getCurrentTime();
-        robot.globalTracer.traceInfo("MotionMagicTest.start", "Started! Time: %.2f", startTime);
+        robot.globalTracer.traceInfo("MotionMagicTest.start", "Started! Time: %.3f", startTime);
         motionMagic.drive(distance, event);
 
         if (WRITE_CSV)
@@ -102,7 +102,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
 
         if (motionMagic.isRunning())
         {
-            fileOut.printf("%.2f,%.2f,%.2f,%.2f,%.2f,%.2f\n", elapsedTime, motionMagic.getError(),
+            fileOut.printf("%.3f,%.2f,%.2f,%.2f,%.2f,%.2f\n", elapsedTime, motionMagic.getError(),
                 robot.leftFrontWheel.motor.getSelectedSensorPosition(0) * WORLD_UNITS_PER_TICK,
                 robot.rightFrontWheel.motor.getSelectedSensorPosition(0) * WORLD_UNITS_PER_TICK,
                 robot.leftFrontWheel.getSpeed() * WORLD_UNITS_PER_TICK,
