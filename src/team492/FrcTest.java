@@ -35,6 +35,7 @@ import trclib.TrcRevBlinkin.LEDPattern;
 import trclib.TrcRobot.RunMode;
 import trclib.TrcStateMachine;
 import trclib.TrcTimer;
+import trclib.TrcUtil;
 
 public class FrcTest extends FrcTeleOp
 {
@@ -69,6 +70,8 @@ public class FrcTest extends FrcTeleOp
 
     private int motorIndex = 0;
     private boolean pickupOverride = false;
+    private double startTime;
+    private boolean running = true;
 
     public FrcTest(Robot robot)
     {
@@ -119,6 +122,8 @@ public class FrcTest extends FrcTeleOp
         // Retrieve menu choice values.
         //
         test = testMenu.getCurrentChoiceObject();
+        running = true;
+        startTime = TrcUtil.getCurrentTime();
 
         robot.gyroTurnPidCtrl.setNoOscillation(false);
         robot.gyroTurnPidCtrl.setTargetTolerance(RobotInfo.GYRO_TURN_TOLERANCE);
@@ -206,6 +211,7 @@ public class FrcTest extends FrcTeleOp
         // Call TeleOp stopMode.
         //
         super.stopMode(nextMode);
+        running = false;
 
         switch (test)
         {
@@ -304,14 +310,18 @@ public class FrcTest extends FrcTeleOp
             case X_DISTANCE_DRIVE:
             case Y_DISTANCE_DRIVE:
             case TURN_DEGREES:
-                robot.dashboard.displayPrintf(2, "xPos=%.1f,yPos=%.1f,heading=%.1f, lf=%.2f,rf=%.2f,lr=%.2f,rr=%.2f",
+                robot.dashboard.displayPrintf(2, "xPos=%.2f,yPos=%.2f,heading=%.2f, lf=%.2f,rf=%.2f,lr=%.2f,rr=%.2f",
                     robot.driveBase.getXPosition(), robot.driveBase.getYPosition(), robot.driveBase.getHeading(),
                     robot.leftFrontWheel.getPosition(), robot.rightFrontWheel.getPosition(),
                     robot.leftRearWheel.getPosition(), robot.rightRearWheel.getPosition());
                 robot.encoderXPidCtrl.displayPidInfo(3);
                 robot.encoderYPidCtrl.displayPidInfo(5);
                 robot.gyroTurnPidCtrl.displayPidInfo(7);
-                pidDriveCommand.cmdPeriodic(elapsedTime);
+                if(pidDriveCommand.cmdPeriodic(elapsedTime) && running)
+                {
+                    running = false;
+                    robot.dashboard.displayPrintf(9, "Elapsed time=%.3f", TrcUtil.getCurrentTime() - startTime);
+                }
                 break;
 
             default:
