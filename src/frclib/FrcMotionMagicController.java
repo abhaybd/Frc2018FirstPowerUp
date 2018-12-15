@@ -24,6 +24,11 @@ package frclib;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
+import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.FollowerType;
+import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
+import com.ctre.phoenix.motorcontrol.SensorTerm;
 import trclib.TrcDbgTrace;
 import trclib.TrcEvent;
 import trclib.TrcPidController;
@@ -41,9 +46,9 @@ import trclib.TrcUtil;
 
 public class FrcMotionMagicController
 {
-    private TrcPidController.PidCoefficients leftCoefficients = null, rightCoefficients = null;
+    private TrcPidController.PidCoefficients pidCoefficients;
+    private TrcPidController.PidCoefficients turnPidCoefficients = new TrcPidController.PidCoefficients(0);
     private FrcCANTalon leftMaster, rightMaster;
-    private int pidSlot;
     private double worldUnitsPerTick;
     private TrcEvent onFinishedEvent;
     private TrcTaskMgr.TaskObject motionMagicTaskObj;
@@ -72,6 +77,7 @@ public class FrcMotionMagicController
      * @param instanceName      The name of this instance.
      * @param worldUnitsPerTick The number of world units per encoder tick. This can be inches/tick, cm/tick, etc.
      *                          Whatever is used, MAKE SURE TO BE CONSISTENT.
+     * @param pidCoefficients   The PIDF coefficients to use for the drivetrain.
      * @param maxVelocity       The maximum speed the robot should go during a move operation.
      *                          The robot may not reach this speed. This should be in world units per second.
      * @param maxAcceleration   The maximum acceleration of the robot during a move operation.
@@ -79,31 +85,12 @@ public class FrcMotionMagicController
      * @param errorTolerance    The tolerance of error, in world units. If the closed loop error is less than or equal to
      *                          the tolerance, the move operation will be finished.
      */
-    public FrcMotionMagicController(String instanceName, double worldUnitsPerTick, double maxVelocity,
-        double maxAcceleration, double errorTolerance)
-    {
-        this(instanceName, worldUnitsPerTick, maxVelocity, maxAcceleration, errorTolerance, 0);
-    }
-
-    /**
-     * Creates a motion magic controller with a default pid slot of 0.
-     *
-     * @param instanceName      The name of this instance.
-     * @param worldUnitsPerTick The number of world units per encoder tick. This can be inches/tick, cm/tick, etc.
-     *                          Whatever is used, MAKE SURE TO BE CONSISTENT.
-     * @param maxVelocity       The maximum speed the robot should go during a move operation.
-     *                          The robot may not reach this speed. This should be in world units per second.
-     * @param maxAcceleration   The maximum acceleration of the robot during a move operation.
-     *                          The robot may not reach this acceleration. This should be in world units per second per second.
-     * @param errorTolerance    The tolerance of error, in world units. If the closed loop error is less than or equal to
-     *                          the tolerance, the move operation will be finished.
-     * @param pidSlot           The pid slot to use for the TalonSRX. 0 is the main pid controller, 1 is the auxiliary.
-     */
-    public FrcMotionMagicController(String instanceName, double worldUnitsPerTick, double maxVelocity,
-        double maxAcceleration, double errorTolerance, int pidSlot)
+    public FrcMotionMagicController(String instanceName, double worldUnitsPerTick,
+        TrcPidController.PidCoefficients pidCoefficients, double maxVelocity, double maxAcceleration,
+        double errorTolerance)
     {
         this.worldUnitsPerTick = worldUnitsPerTick;
-        this.pidSlot = pidSlot;
+        this.pidCoefficients = pidCoefficients;
         // Convert to encoder units
         this.errorTolerance = Math.abs(errorTolerance) / worldUnitsPerTick;
         // Scale velocity and acceleration to encoder units and time frame of 100ms
@@ -137,11 +124,6 @@ public class FrcMotionMagicController
             throw new IllegalStateException("Cannot start before setting both left and right motors!");
         }
 
-        if (leftCoefficients == null || rightCoefficients == null)
-        {
-            throw new IllegalStateException("Cannot start before setting the pid coefficients!");
-        }
-
         // Convert target to encoder units
         targetPos /= worldUnitsPerTick;
         this.targetPos = targetPos;
@@ -152,13 +134,12 @@ public class FrcMotionMagicController
         }
         this.onFinishedEvent = onFinishedEvent;
 
-        configureTalon(leftMaster, leftCoefficients);
-        configureTalon(rightMaster, rightCoefficients);
+        talonInit();
 
-        TrcDbgTrace.getGlobalTracer().traceInfo("FrcMotionMagicController.drive", "driveDist: %.2f", targetPos);
-
-        leftMaster.motor.set(ControlMode.MotionMagic, targetPos);
-        rightMaster.motor.set(ControlMode.MotionMagic, targetPos);
+        // Set the target pos to the required position and the target angle to 0
+        // This target angle is NOT absolute heading. The motors were just zeroed, so it should maintain a current heading.
+        leftMaster.motor.set(ControlMode.MotionMagic, targetPos, DemandType.AuxPID, 0.0);
+        rightMaster.motor.follow(rightMaster.motor, FollowerType.AuxOutput1);
 
         running = true;
         cancelled = false;
@@ -240,14 +221,19 @@ public class FrcMotionMagicController
      */
     public void setPidCoefficients(TrcPidController.PidCoefficients pidCoefficients)
     {
-        setPidCoefficients(pidCoefficients, pidCoefficients);
+        this.pidCoefficients = pidCoefficients;
     }
 
-    public void setPidCoefficients(TrcPidController.PidCoefficients leftCoefficients,
-        TrcPidController.PidCoefficients rightCoefficients)
+    /**
+     * Set the PIDF coefficients for the turn correction. This will only apply for the next time start() is called.
+     * It will NOT affect a run already in progress. The turn correction controller will apply adjustments to make the
+     * robot drive straight.
+     *
+     * @param turnPidCoefficients The PID coefficients to set for the turn correction controller.
+     */
+    public void setTurnPidCoefficients(TrcPidController.PidCoefficients turnPidCoefficients)
     {
-        this.leftCoefficients = leftCoefficients;
-        this.rightCoefficients = rightCoefficients;
+        this.turnPidCoefficients = turnPidCoefficients;
     }
 
     /**
@@ -300,10 +286,8 @@ public class FrcMotionMagicController
 
     private double getRawError()
     {
-        double leftError = targetPos - leftMaster.motor.getSelectedSensorPosition(pidSlot);
-        double rightError = targetPos - rightMaster.motor.getSelectedSensorPosition(pidSlot);
-        TrcDbgTrace.getGlobalTracer()
-            .traceInfo("FrcMotionMagicController.getRawError", "lError: %.2f, rError: %.2f", leftError, rightError);
+        double leftError = targetPos - leftMaster.motor.getSelectedSensorPosition(0);
+        double rightError = targetPos - rightMaster.motor.getSelectedSensorPosition(0);
         return TrcUtil.average(leftError, rightError);
     }
 
@@ -318,23 +302,63 @@ public class FrcMotionMagicController
         onFinishedEvent = null;
         running = false;
         targetPos = 0.0;
+        // Reset the selected feedback device to the cached value
+        rightMaster.motor.configSelectedFeedbackSensor(rightMaster.getFeedbackDevice());
         // Stop the motors
         leftMaster.motor.neutralOutput();
         rightMaster.motor.neutralOutput();
     }
 
-    private void configureTalon(FrcCANTalon talon, TrcPidController.PidCoefficients pidCoefficients)
+    private void talonInit()
+    {
+        // Set the pid coefficients for the primary and auxiliary controllers
+        configureCoefficients(rightMaster, pidCoefficients, 0);
+        configureCoefficients(rightMaster, turnPidCoefficients, 1);
+
+        leftMaster.motor.configAllowableClosedloopError(0, TrcUtil.round(errorTolerance), 0);
+
+        // Set the motion magic velocity and acceleration constraints
+        rightMaster.motor.configMotionCruiseVelocity(maxVelocity, 0);
+        rightMaster.motor.configMotionAcceleration(maxAcceleration, 0);
+
+        // Add the left encoder as a remote sensor to the right controller
+        rightMaster.motor
+            .configRemoteFeedbackFilter(leftMaster.motor.getDeviceID(), RemoteSensorSource.TalonSRX_SelectedSensor, 0,
+                0);
+
+        // Configure the remote sensor and local sensor to be summed
+        rightMaster.motor.configSensorTerm(SensorTerm.Sum0, FeedbackDevice.RemoteSensor0, 0);
+        rightMaster.motor.configSensorTerm(SensorTerm.Sum1, rightMaster.getFeedbackDevice(), 0);
+
+        // Configure the remote sensor and local sensor to be subtracted
+        // We operate in clockwise rotation so it's inverted polarity
+        rightMaster.motor.configSensorTerm(SensorTerm.Diff0, FeedbackDevice.RemoteSensor0, 0);
+        rightMaster.motor.configSensorTerm(SensorTerm.Diff1, rightMaster.getFeedbackDevice(), 0);
+
+        // Multiply the sum by 0.5. (basically average the sensor readings) Use the average in slot 0
+        rightMaster.motor.configSelectedFeedbackSensor(FeedbackDevice.SensorSum, 0, 0);
+        rightMaster.motor.configSelectedFeedbackCoefficient(0.5, 0, 0);
+
+        // TODO: Maybe have to scale it by some amount so it fits into integers? (Possibly set a feedback coefficient)
+        // Use the differences in sensor readings in slot 1
+        // The old feedback sensor is restored after the motion magic finishes
+        rightMaster.motor.configSelectedFeedbackSensor(FeedbackDevice.SensorDifference, 1, 0);
+
+        // Configure the polarity of the controllers. Since we use clockwise rotation, we use inverted polarity.
+        rightMaster.motor.configAuxPIDPolarity(true, 0);
+
+        // Zero the encoders
+        leftMaster.motor.setSelectedSensorPosition(0, 0, 0);
+        rightMaster.motor.setSelectedSensorPosition(0, 0, 0);
+    }
+
+    private void configureCoefficients(FrcCANTalon talon, TrcPidController.PidCoefficients pidCoefficients, int pidSlot)
     {
         talon.motor.config_kP(pidSlot, pidCoefficients.kP, 0);
         talon.motor.config_kI(pidSlot, pidCoefficients.kI, 0);
         talon.motor.config_kD(pidSlot, pidCoefficients.kD, 0);
         talon.motor.config_kF(pidSlot, pidCoefficients.kF, 0);
-        talon.motor.config_IntegralZone(pidSlot, pidCoefficients.iZone, 0);
-
-        talon.motor.configMotionCruiseVelocity(maxVelocity, 0);
-        talon.motor.configMotionAcceleration(maxAcceleration, 0);
-
-        talon.motor.setSelectedSensorPosition(0, 0, 10);
+        talon.motor.config_IntegralZone(0, pidCoefficients.iZone, 0);
     }
 
     private void setTaskEnabled(boolean enabled)
