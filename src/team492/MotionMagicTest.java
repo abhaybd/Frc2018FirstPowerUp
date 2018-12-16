@@ -21,6 +21,8 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
     private static final double kD = 0.1695555552;
     private static final double kF = 1.131266385; // TODO: Calculate this according to Phoenix docs
 
+    private static final double TURN_CORRECTION_KP = 0.0;
+
     private static final double WORLD_UNITS_PER_TICK = RobotInfo.ENCODER_Y_INCHES_PER_COUNT;
 
     private static final double MAX_SPEED = 300; // in/sec
@@ -33,6 +35,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
     private TrcEvent event;
     private double startTime;
     private PrintStream fileOut;
+    private double driveDistance;
 
     public MotionMagicTest(Robot robot)
     {
@@ -40,6 +43,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
         TrcPidController.PidCoefficients pidCoefficients = new TrcPidController.PidCoefficients(kP, kI, kD, kF);
         this.motionMagic = new FrcMotionMagicController("MotionMagic", WORLD_UNITS_PER_TICK, pidCoefficients, MAX_SPEED,
             MAX_ACCEL, 1.0);
+        motionMagic.setTurnPidCoefficients(new TrcPidController.PidCoefficients(TURN_CORRECTION_KP));
         motionMagic.setLeftMotors(robot.leftFrontWheel, robot.leftRearWheel);
         motionMagic.setRightMotors(robot.rightFrontWheel, robot.rightRearWheel);
 
@@ -55,6 +59,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
 
     public void start(double distance)
     {
+        driveDistance = distance;
         startTime = TrcUtil.getCurrentTime();
         robot.globalTracer.traceInfo("MotionMagicTest.start", "Started! Time: %.3f", startTime);
         motionMagic.drive(distance, event);
@@ -88,9 +93,9 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
     public boolean cmdPeriodic(double e)
     {
         double elapsedTime = TrcUtil.getCurrentTime() - startTime;
-        if (event.isSignaled())
+        if (event.isSignaled() || event.isCanceled())
         {
-            double error = motionMagic.getError();
+            double error = driveDistance - robot.driveBase.getYPosition();
             robot.dashboard.displayPrintf(1, "Motion Magic time: %.3f, Error: %.2f", elapsedTime, error);
             if (robot.globalTracer != null)
             {
