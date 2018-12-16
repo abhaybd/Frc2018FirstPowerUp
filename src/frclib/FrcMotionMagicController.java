@@ -54,6 +54,7 @@ public class FrcMotionMagicController
     private TrcTaskMgr.TaskObject motionMagicTaskObj;
     private boolean running = false;
     private boolean cancelled = false;
+    private double timeoutTime;
     /**
      * Sensor units.
      */
@@ -67,7 +68,7 @@ public class FrcMotionMagicController
      */
     private int maxVelocity;
     /**
-     * Sensor units per 100ms^2
+     * Sensor units per 100ms per second. Yeah I know it's gross.
      */
     private int maxAcceleration;
 
@@ -108,7 +109,7 @@ public class FrcMotionMagicController
      */
     public void drive(double targetPos)
     {
-        drive(targetPos, null);
+        drive(targetPos, null, Double.POSITIVE_INFINITY);
     }
 
     /**
@@ -119,10 +120,24 @@ public class FrcMotionMagicController
      */
     public void drive(double targetPos, TrcEvent onFinishedEvent)
     {
+        drive(targetPos, onFinishedEvent, Double.POSITIVE_INFINITY);
+    }
+
+    /**
+     * Start motion magic move operation.
+     *
+     * @param targetPos       The target position in world units to move to.
+     * @param onFinishedEvent The event to signal when done.
+     * @param timeout         Number of seconds after which to cancel the movement.
+     */
+    public void drive(double targetPos, TrcEvent onFinishedEvent, double timeout)
+    {
         if (leftMaster == null || rightMaster == null)
         {
             throw new IllegalStateException("Cannot start before setting both left and right motors!");
         }
+
+        this.timeoutTime = TrcUtil.getCurrentTime() + timeout;
 
         // Convert target to encoder units
         targetPos /= worldUnitsPerTick;
@@ -360,7 +375,7 @@ public class FrcMotionMagicController
         talon.motor.config_kI(pidSlot, pidCoefficients.kI, 0);
         talon.motor.config_kD(pidSlot, pidCoefficients.kD, 0);
         talon.motor.config_kF(pidSlot, pidCoefficients.kF, 0);
-        talon.motor.config_IntegralZone(0, pidCoefficients.iZone, 0);
+        talon.motor.config_IntegralZone(pidSlot, pidCoefficients.iZone, 0);
     }
 
     private void setTaskEnabled(boolean enabled)
@@ -385,6 +400,10 @@ public class FrcMotionMagicController
                 onFinishedEvent.set(true);
             }
             stop();
+        }
+        else if (TrcUtil.getCurrentTime() >= timeoutTime)
+        {
+            cancel();
         }
     }
 }
