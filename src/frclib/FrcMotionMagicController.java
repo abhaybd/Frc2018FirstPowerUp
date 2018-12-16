@@ -55,6 +55,7 @@ public class FrcMotionMagicController
     private boolean running = false;
     private boolean cancelled = false;
     private double timeoutTime;
+    private boolean autoTimeout;
     /**
      * Sensor units.
      */
@@ -109,7 +110,7 @@ public class FrcMotionMagicController
      */
     public void drive(double targetPos)
     {
-        drive(targetPos, null, Double.POSITIVE_INFINITY);
+        drive(targetPos, null);
     }
 
     /**
@@ -120,7 +121,13 @@ public class FrcMotionMagicController
      */
     public void drive(double targetPos, TrcEvent onFinishedEvent)
     {
-        drive(targetPos, onFinishedEvent, Double.POSITIVE_INFINITY);
+        double timeout = Double.POSITIVE_INFINITY;
+        if (autoTimeout)
+        {
+            double speed = maxVelocity * worldUnitsPerTick / 0.1; // Get max speed in world units per sec
+            timeout = targetPos / speed; // Calculate required time to move targetPos distance with max velocity.
+        }
+        drive(targetPos, onFinishedEvent, timeout);
     }
 
     /**
@@ -159,6 +166,17 @@ public class FrcMotionMagicController
         running = true;
         cancelled = false;
         setTaskEnabled(true);
+    }
+
+    /**
+     * Configure auto timeout to be enabled or not. If enabled, unless otherwise specified, automatically compute an
+     * upper bound of time required to calculate a timeout value.
+     *
+     * @param enabled If true, enable auto timeout. Otherwise, disable it.
+     */
+    public void setAutoTimeoutEnabled(boolean enabled)
+    {
+        autoTimeout = enabled;
     }
 
     /**
@@ -332,7 +350,7 @@ public class FrcMotionMagicController
         configureCoefficients(rightMaster, pidCoefficients, 0);
         configureCoefficients(rightMaster, turnPidCoefficients, 1);
 
-        leftMaster.motor.configAllowableClosedloopError(0, TrcUtil.round(errorTolerance), 0);
+        rightMaster.motor.configAllowableClosedloopError(0, TrcUtil.round(errorTolerance), 0);
 
         // Set the motion magic velocity and acceleration constraints
         rightMaster.motor.configMotionCruiseVelocity(maxVelocity, 0);

@@ -44,6 +44,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
         this.motionMagic = new FrcMotionMagicController("MotionMagic", WORLD_UNITS_PER_TICK, pidCoefficients, MAX_SPEED,
             MAX_ACCEL, 1.0);
         motionMagic.setTurnPidCoefficients(new TrcPidController.PidCoefficients(TURN_CORRECTION_KP));
+        motionMagic.setAutoTimeoutEnabled(true);
         motionMagic.setLeftMotors(robot.leftFrontWheel, robot.leftRearWheel);
         motionMagic.setRightMotors(robot.rightFrontWheel, robot.rightRearWheel);
 
@@ -99,7 +100,16 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
             robot.dashboard.displayPrintf(1, "Motion Magic time: %.3f, Error: %.2f", elapsedTime, error);
             if (robot.globalTracer != null)
             {
-                robot.globalTracer.traceInfo("cmdPeriodic", "Motion Magic time: %.3f, Error:%.2f", elapsedTime, error);
+                if (event.isCanceled())
+                {
+                    robot.globalTracer
+                        .traceInfo("cmdPeriodic", "Motion magic timed out! Time: %.3f, Error:%.2f", elapsedTime, error);
+                }
+                else
+                {
+                    robot.globalTracer
+                        .traceInfo("cmdPeriodic", "Motion Magic completed! Time: %.3f, Error:%.2f", elapsedTime, error);
+                }
             }
             event.clear();
             return true;
