@@ -160,8 +160,8 @@ public class FrcMotionMagicController
 
         // Set the target pos to the required position and the target angle to 0
         // This target angle is NOT absolute heading. The motors were just zeroed, so it should maintain a current heading.
-        leftMaster.motor.set(ControlMode.MotionMagic, targetPos, DemandType.AuxPID, 0.0);
-        rightMaster.motor.follow(rightMaster.motor, FollowerType.AuxOutput1);
+        rightMaster.motor.set(ControlMode.MotionMagic, targetPos, DemandType.AuxPID, 0.0);
+        leftMaster.motor.follow(rightMaster.motor, FollowerType.AuxOutput1);
 
         running = true;
         cancelled = false;
