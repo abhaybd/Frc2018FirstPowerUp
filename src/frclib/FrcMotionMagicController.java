@@ -55,7 +55,8 @@ public class FrcMotionMagicController
     private boolean running = false;
     private boolean cancelled = false;
     private double timeoutTime;
-    private boolean autoTimeout;
+    private boolean autoTimeout = false;
+    private double fudgeFactor = 1.0;
     /**
      * Sensor units.
      */
@@ -121,12 +122,7 @@ public class FrcMotionMagicController
      */
     public void drive(double targetPos, TrcEvent onFinishedEvent)
     {
-        double timeout = Double.POSITIVE_INFINITY;
-        if (autoTimeout)
-        {
-            double speed = maxVelocity * worldUnitsPerTick / 0.1; // Get max speed in world units per sec
-            timeout = targetPos / speed; // Calculate required time to move targetPos distance with max velocity.
-        }
+        double timeout = autoTimeout ? estimatePathDuration(targetPos) : Double.POSITIVE_INFINITY;
         drive(targetPos, onFinishedEvent, timeout);
     }
 
@@ -170,13 +166,26 @@ public class FrcMotionMagicController
 
     /**
      * Configure auto timeout to be enabled or not. If enabled, unless otherwise specified, automatically compute an
-     * upper bound of time required to calculate a timeout value.
+     * upper bound of time required to calculate a timeout value. Fudge factor of 1.1.
      *
      * @param enabled If true, enable auto timeout. Otherwise, disable it.
      */
     public void setAutoTimeoutEnabled(boolean enabled)
     {
+        setAutoTimeoutEnabled(enabled, 1.1);
+    }
+
+    /**
+     * Configure auto timeout to be enabled or not. If enabled, unless otherwise specified, automatically compute an
+     * upper bound of time required to calculate a timeout value.
+     *
+     * @param enabled     If true, enable auto timeout. Otherwise, disable it.
+     * @param fudgeFactor Arbitrary value to multiply estimate by to get closer to "real world".
+     */
+    public void setAutoTimeoutEnabled(boolean enabled, double fudgeFactor)
+    {
         autoTimeout = enabled;
+        this.fudgeFactor = fudgeFactor;
     }
 
     /**
@@ -200,7 +209,9 @@ public class FrcMotionMagicController
             cancelled = true;
             if (onFinishedEvent != null)
             {
-                onFinishedEvent.cancel();
+                // Ideally, this should be cancelled instead of signalled, but nobody else ever actually checks the
+                // cancelled flag. Whatever.
+                onFinishedEvent.set(true);
             }
             stop();
         }
@@ -262,11 +273,13 @@ public class FrcMotionMagicController
      * It will NOT affect a run already in progress. The turn correction controller will apply adjustments to make the
      * robot drive straight.
      *
-     * @param turnPidCoefficients The PID coefficients to set for the turn correction controller.
+     * @param turnPidCoefficients The PID coefficients to set for the turn correction controller. If null, disable the
+     *                            turn pid loop.
      */
     public void setTurnPidCoefficients(TrcPidController.PidCoefficients turnPidCoefficients)
     {
-        this.turnPidCoefficients = turnPidCoefficients;
+        this.turnPidCoefficients =
+            turnPidCoefficients != null ? turnPidCoefficients : new TrcPidController.PidCoefficients(0.0);
     }
 
     /**
@@ -385,6 +398,38 @@ public class FrcMotionMagicController
         // Zero the encoders
         leftMaster.motor.setSelectedSensorPosition(0, 0, 0);
         rightMaster.motor.setSelectedSensorPosition(0, 0, 0);
+    }
+
+    /**
+     * Estimates the duration of the path in seconds. Uses a trapezoidal velocity profile with the provided constraints.
+     *
+     * @param distance The distance moved in by the path.
+     * @return The estimated number of seconds required to move this path. This *should* be an upper bound.
+     */
+    private double estimatePathDuration(double distance)
+    {
+        // For convenience, these calculations will be done in world units.
+        double maxVelocity = this.maxVelocity * worldUnitsPerTick * 10; // convert to world units per second
+        double maxAcceleration = this.maxAcceleration * worldUnitsPerTick * 10; // convert to world units per second
+
+        // v/t = a
+        // vt/2 = d
+        // v = max vel, a = max acc, t = time, d = distance
+        double rampUpDistance = Math.pow(maxVelocity, 2) / (2.0 * maxAcceleration);
+        double estimate;
+        if (rampUpDistance * 2 <= distance)
+        {
+            double cruiseDistance = distance - (rampUpDistance * 2.0);
+            double cruiseTime = cruiseDistance / maxVelocity;
+            double rampUpTime = maxVelocity / maxAcceleration;
+            estimate = rampUpTime * 2 + cruiseTime;
+        }
+        else
+        {
+            double halfTime = Math.sqrt(distance / maxAcceleration);
+            estimate = 2 * halfTime;
+        }
+        return estimate * fudgeFactor;
     }
 
     private void configureCoefficients(FrcCANTalon talon, TrcPidController.PidCoefficients pidCoefficients, int pidSlot)

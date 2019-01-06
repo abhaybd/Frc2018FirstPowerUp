@@ -44,7 +44,7 @@ public class MotionMagicTest implements TrcRobot.RobotCommand
         this.motionMagic = new FrcMotionMagicController("MotionMagic", WORLD_UNITS_PER_TICK, pidCoefficients, MAX_SPEED,
             MAX_ACCEL, 1.0);
         motionMagic.setTurnPidCoefficients(new TrcPidController.PidCoefficients(TURN_CORRECTION_KP));
-        motionMagic.setAutoTimeoutEnabled(true);
+        motionMagic.setAutoTimeoutEnabled(true, 1.5);
         motionMagic.setLeftMotors(robot.leftFrontWheel, robot.leftRearWheel);
         motionMagic.setRightMotors(robot.rightFrontWheel, robot.rightRearWheel);
 
