@@ -21,10 +21,10 @@ public class RemoteSwerve
 
         gyro = new MockGyro("Gyro");
 
-        MockMotorController lfMotor = new MockMotorController(720);
-        MockMotorController rfMotor = new MockMotorController(720);
-        MockMotorController lrMotor = new MockMotorController(720);
-        MockMotorController rrMotor = new MockMotorController(720);
+        MockMotorController lfMotor = new MockMotorController(53);
+        MockMotorController rfMotor = new MockMotorController(53);
+        MockMotorController lrMotor = new MockMotorController(53);
+        MockMotorController rrMotor = new MockMotorController(53);
 
         TrcPidController lfCtrl = new TrcPidController("LFPID", pidCoefficients, turnTolerance, lfMotor::getPosition);
         TrcPidController rfCtrl = new TrcPidController("RFPID", pidCoefficients, turnTolerance, rfMotor::getPosition);
