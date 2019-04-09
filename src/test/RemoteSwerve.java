@@ -21,10 +21,10 @@ public class RemoteSwerve
 
         gyro = new MockGyro("Gyro");
 
-        MockMotorController lfMotor = new MockMotorController(53);
-        MockMotorController rfMotor = new MockMotorController(53);
-        MockMotorController lrMotor = new MockMotorController(53);
-        MockMotorController rrMotor = new MockMotorController(53);
+        MockMotorController lfMotor = new MockMotorController(360);
+        MockMotorController rfMotor = new MockMotorController(360);
+        MockMotorController lrMotor = new MockMotorController(360);
+        MockMotorController rrMotor = new MockMotorController(360);
 
         TrcPidController lfCtrl = new TrcPidController("LFPID", pidCoefficients, turnTolerance, lfMotor::getPosition);
         TrcPidController rfCtrl = new TrcPidController("RFPID", pidCoefficients, turnTolerance, rfMotor::getPosition);
@@ -68,10 +68,10 @@ public class RemoteSwerve
         status.lrPower = (float) lrModule.getPower();
         status.rrPower = (float) rrModule.getPower();
 
-        status.lfAngle = (float) lfModule.getSteerAngle();
-        status.rfAngle = (float) rfModule.getSteerAngle();
-        status.lrAngle = (float) lrModule.getSteerAngle();
-        status.rrAngle = (float) rrModule.getSteerAngle();
+        status.lfAngle = (float) lfModule.getTargetSteerAngle();
+        status.rfAngle = (float) rfModule.getTargetSteerAngle();
+        status.lrAngle = (float) lrModule.getTargetSteerAngle();
+        status.rrAngle = (float) rrModule.getTargetSteerAngle();
 
         taskMgr.executeTaskType(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK, TrcRobot.RunMode.TELEOP_MODE);
 

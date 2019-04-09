@@ -7,8 +7,8 @@ import trclib.TrcUtil;
 
 public class MockMotorController extends TrcMotor
 {
-    final private TrcSensor.SensorData<Double> position;
-    private double power;
+    private final TrcSensor.SensorData<Double> position;
+    private volatile double power;
     private Thread monitorThread;
     private double speed;
 
@@ -25,14 +25,14 @@ public class MockMotorController extends TrcMotor
         monitorThread = new Thread(() -> {
             while(!Thread.interrupted())
             {
-                double currTime = TrcUtil.getCurrentTime();
-                double positionTime = position.timestamp;
-                if(currTime == positionTime) continue;
-                speed = power * topSpeed;
-                double positionChange = speed * (currTime - positionTime);
-                double newPosition = position.value + positionChange;
                 synchronized (position)
                 {
+                    double currTime = TrcUtil.getCurrentTime();
+                    double positionTime = position.timestamp;
+                    if(currTime == positionTime) continue;
+                    speed = power * topSpeed;
+                    double positionChange = speed * (currTime - positionTime);
+                    double newPosition = position.value + positionChange;
                     position.timestamp = currTime;
                     position.value = newPosition;
                 }

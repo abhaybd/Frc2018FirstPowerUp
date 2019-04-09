@@ -157,6 +157,11 @@ public class TrcSwerveModule implements TrcMotorController
         setSteerAngle(angle, true, true);
     }   //setSteerAngle
 
+    public double getTargetSteerAngle()
+    {
+        return prevSteerAngle;
+    }
+
     /**
      * The current angle of the turn motor. This is not necessarily the target angle.
      *
