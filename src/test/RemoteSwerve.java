@@ -1,5 +1,6 @@
 package test;
 
+import com.coolioasjulio.rpc.RPC;
 import trclib.TrcDigitalInput;
 import trclib.TrcGyro;
 import trclib.TrcPidActuator;
@@ -10,8 +11,26 @@ import trclib.TrcSwerveModule;
 import trclib.TrcTaskMgr;
 import trclib.TrcUtil;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 public class RemoteSwerve
 {
+    public static void main(String[] args)
+    {
+        try {
+            ServerSocket serverSocket = new ServerSocket(4444);
+            System.out.println("Waiting for connection...");
+            Socket socket = serverSocket.accept();
+            System.out.println("Received connection from " + socket.getInetAddress().toString());
+
+            RPC.getInstance().createRPCSession(socket.getInputStream(), socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private final TrcGyro gyro;
     private final TrcSwerveModule lfModule;
     private final TrcSwerveModule rfModule;
