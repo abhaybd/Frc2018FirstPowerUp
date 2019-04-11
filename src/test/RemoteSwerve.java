@@ -1,6 +1,14 @@
 package test;
 
-import trclib.*;
+import trclib.TrcDigitalInput;
+import trclib.TrcGyro;
+import trclib.TrcPidActuator;
+import trclib.TrcPidController;
+import trclib.TrcRobot;
+import trclib.TrcSwerveDriveBase;
+import trclib.TrcSwerveModule;
+import trclib.TrcTaskMgr;
+import trclib.TrcUtil;
 
 public class RemoteSwerve
 {
@@ -11,6 +19,9 @@ public class RemoteSwerve
     private final TrcSwerveModule rrModule;
     private final TrcSwerveDriveBase driveBase;
     private final TrcTaskMgr taskMgr;
+    private final SwerveModel model;
+    private double xPos, yPos, heading;
+    private Double lastTime;
 
     public RemoteSwerve(double width, double length)
     {
@@ -20,6 +31,12 @@ public class RemoteSwerve
         double turnTolerance = 1;
 
         gyro = new MockGyro("Gyro");
+        model = new SwerveModel(length, width);
+
+        lastTime = null;
+        xPos = 0.0;
+        yPos = 0.0;
+        heading = 0.0;
 
         MockMotorController lfMotor = new MockMotorController(360);
         MockMotorController rfMotor = new MockMotorController(360);
@@ -40,7 +57,6 @@ public class RemoteSwerve
             }
         };
 
-
         TrcPidActuator lfActuator = new TrcPidActuator("LF_ACT", lfMotor, in, lfCtrl, 0.1);
         TrcPidActuator rfActuator = new TrcPidActuator("RF_ACT", rfMotor, in, rfCtrl, 0.1);
         TrcPidActuator lrActuator = new TrcPidActuator("LR_ACT", lrMotor, in, lrCtrl, 0.1);
@@ -56,7 +72,8 @@ public class RemoteSwerve
         taskMgr = TrcTaskMgr.getInstance();
     }
 
-    public SwerveStatus getStatus(double x, double y, double turn, double gyroAngle)
+    public SwerveStatus getStatus(double x, double y, double turn, double gyroAngle, double lfSpeed, double rfSpeed,
+        double lrSpeed, double rrSpeed)
     {
         taskMgr.executeTaskType(TrcTaskMgr.TaskType.PRECONTINUOUS_TASK, TrcRobot.RunMode.TELEOP_MODE);
 
@@ -68,10 +85,27 @@ public class RemoteSwerve
         status.lrPower = (float) lrModule.getPower();
         status.rrPower = (float) rrModule.getPower();
 
-        status.lfAngle = (float) lfModule.getTargetSteerAngle();
-        status.rfAngle = (float) rfModule.getTargetSteerAngle();
-        status.lrAngle = (float) lrModule.getTargetSteerAngle();
-        status.rrAngle = (float) rrModule.getTargetSteerAngle();
+        status.lfAngle = (float) lfModule.getSteerAngle();
+        status.rfAngle = (float) rfModule.getSteerAngle();
+        status.lrAngle = (float) lrModule.getSteerAngle();
+        status.rrAngle = (float) rrModule.getSteerAngle();
+
+        if (lastTime != null)
+        {
+            double[] robotVelocity = model
+                .getRobotVelocity(status.lfAngle, status.rfAngle, status.lrAngle, status.rrAngle, lfSpeed, rfSpeed, lrSpeed,
+                    rrSpeed);
+
+            double deltaTime = TrcUtil.getCurrentTime() - lastTime;
+            double gyroRadians = Math.toRadians(gyroAngle);
+            yPos += (robotVelocity[1] * Math.cos(gyroRadians) + robotVelocity[0] * Math.sin(gyroRadians)) * deltaTime;
+            xPos += (-robotVelocity[1] * Math.sin(gyroRadians) + robotVelocity[0] * Math.cos(gyroRadians)) * deltaTime;
+            heading += Math.toDegrees(robotVelocity[2]) * deltaTime;
+            status.x = (float) xPos;
+            status.y = (float) yPos;
+            status.heading = (float) heading;
+        }
+        lastTime = TrcUtil.getCurrentTime();
 
         taskMgr.executeTaskType(TrcTaskMgr.TaskType.POSTCONTINUOUS_TASK, TrcRobot.RunMode.TELEOP_MODE);
 
@@ -84,5 +118,6 @@ public class RemoteSwerve
         public float rfPower, rfAngle;
         public float lrPower, lrAngle;
         public float rrPower, rrAngle;
+        public float x, y, heading;
     }
 }
